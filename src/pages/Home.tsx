@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalStats } from "../api";
 import { useAuth } from "../hooks/useAuth";
 import { RARITY_COLORS, RARITY_POINTS, RARITY_ORDER } from "../types";
+import { getBadgeImage } from "../badgeImages";
 
 export default function Home() {
   const { isAuthenticated, login } = useAuth();
@@ -107,37 +108,37 @@ export default function Home() {
       {/* Rarity showcase */}
       <section className="space-y-8">
         <h2 className="text-2xl font-bold text-center">Raretes</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {RARITY_ORDER.map((r) => {
-            const color = RARITY_COLORS[r];
-            const pts = RARITY_POINTS[r];
-            const imgMap: Record<string, string> = {
-              COMMON:    "/badge-common.png",
-              RARE:      "/badge-rare.png",
-              EPIC:      "/badge-epic.png",
-              LEGENDARY: "/badge-legendary.gif",
-              UNIQUE:    "/badge-unique.gif",
-            };
-            return (
-              <div
-                key={r}
-                className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-700 transition-colors"
-              >
-                <img
-                  src={imgMap[r]}
-                  alt={r}
-                  className="w-16 h-16 object-contain drop-shadow-lg"
-                />
-                <span className="text-sm font-bold" style={{ color }}>
-                  {r}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {pts} point{pts > 1 ? "s" : ""}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        {["saison2", "saison1"].map((season) => (
+          <div key={season} className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest text-center">
+              {season === "saison2" ? "Saison 2 (actuelle)" : "Saison 1"}
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {RARITY_ORDER.map((r) => {
+                const color = RARITY_COLORS[r];
+                const pts = RARITY_POINTS[r];
+                return (
+                  <div
+                    key={r}
+                    className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-700 transition-colors"
+                  >
+                    <img
+                      src={getBadgeImage(r, season)}
+                      alt={r}
+                      className="w-16 h-16 object-contain drop-shadow-lg"
+                    />
+                    <span className="text-sm font-bold" style={{ color }}>
+                      {r}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {pts} point{pts > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </section>
     </div>
   );

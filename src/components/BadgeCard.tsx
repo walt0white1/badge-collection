@@ -1,25 +1,19 @@
 import { RARITY_COLORS, RARITY_POINTS } from "../types";
-
-const BADGE_IMAGES: Record<string, string> = {
-  COMMON:    "/badge-common.png",
-  RARE:      "/badge-rare.png",
-  EPIC:      "/badge-epic.png",
-  LEGENDARY: "/badge-legendary.gif",
-  UNIQUE:    "/badge-unique.gif",
-};
+import { getBadgeImage } from "../badgeImages";
 
 interface Props {
   rarity: string;
   count: number;
+  season?: string;
   onClick?: () => void;
   selected?: boolean;
 }
 
-export default function BadgeCard({ rarity, count, onClick, selected }: Props) {
+export default function BadgeCard({ rarity, count, season = "saison2", onClick, selected }: Props) {
   const r = rarity.toUpperCase();
   const color = RARITY_COLORS[r] || RARITY_COLORS.COMMON;
   const pts = RARITY_POINTS[r] || 0;
-  const img = BADGE_IMAGES[r];
+  const img = getBadgeImage(r, season);
 
   return (
     <button
@@ -34,22 +28,12 @@ export default function BadgeCard({ rarity, count, onClick, selected }: Props) {
     >
       {/* Badge image */}
       <div className="relative w-16 h-16 flex items-center justify-center">
-        {img ? (
-          <img
-            src={img}
-            alt={r}
-            className="w-16 h-16 object-contain drop-shadow-lg"
-            style={{ filter: count === 0 ? "grayscale(1) opacity(0.3)" : "none" }}
-          />
-        ) : (
-          <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-black"
-            style={{ backgroundColor: color + "18", color }}
-          >
-            {r[0]}
-          </div>
-        )}
-        {/* Count badge */}
+        <img
+          src={img}
+          alt={r}
+          className="w-16 h-16 object-contain drop-shadow-lg"
+          style={{ filter: count === 0 ? "grayscale(1) opacity(0.3)" : "none" }}
+        />
         {count > 0 && (
           <span
             className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-[11px] font-bold flex items-center justify-center text-white shadow"
