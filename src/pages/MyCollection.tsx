@@ -1,7 +1,5 @@
 import { useAuth } from "../hooks/useAuth";
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import SeasonTabs from "../components/SeasonTabs";
 import BadgeGrid from "../components/BadgeGrid";
 import { RARITY_ORDER } from "../types";
 
@@ -19,13 +17,7 @@ export default function MyCollection() {
   const { user } = useAuth();
   if (!user) return null;
 
-  const seasons = Object.keys(user.badges).sort();
-  const [activeSeason, setActiveSeason] = useState(
-    seasons[seasons.length - 1] || "",
-  );
-
-  const currentList = user.badges[activeSeason] || [];
-  const counts = countBadges(currentList);
+  const seasons = Object.keys(user.badges).sort().reverse();
 
   const totalBadges = Object.values(user.badges).reduce(
     (sum, list) => sum + (Array.isArray(list) ? list.length : 0),
@@ -33,7 +25,7 @@ export default function MyCollection() {
   );
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-8">
+    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-5 items-start">
         <img
@@ -56,21 +48,29 @@ export default function MyCollection() {
         </Link>
       </div>
 
-      {/* Season tabs */}
-      {seasons.length > 1 && (
-        <SeasonTabs
-          seasons={seasons}
-          active={activeSeason}
-          onChange={setActiveSeason}
-        />
-      )}
+      {/* All seasons */}
+      {seasons.map((season) => {
+        const currentList = user.badges[season] || [];
+        const counts = countBadges(currentList);
+        const label = season.replace("saison", "Saison ");
 
-      {/* Badge grid */}
-      <BadgeGrid counts={counts} season={activeSeason} />
+        return (
+          <div key={season} className="space-y-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold text-white">{label}</h2>
+              <span className="text-sm text-gray-500">
+                {currentList.length} badge{currentList.length > 1 ? "s" : ""}
+              </span>
+              <div className="flex-1 h-px bg-white/[0.06]" />
+            </div>
+            <BadgeGrid counts={counts} season={season} />
+          </div>
+        );
+      })}
 
-      {currentList.length === 0 && (
+      {seasons.length === 0 && (
         <p className="text-center text-gray-500 py-10">
-          Aucun badge pour cette saison.
+          Aucun badge.
         </p>
       )}
     </div>

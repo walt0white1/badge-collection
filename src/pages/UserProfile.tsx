@@ -1,8 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../api";
-import { useState } from "react";
-import SeasonTabs from "../components/SeasonTabs";
 import BadgeGrid from "../components/BadgeGrid";
 import { useAuth } from "../hooks/useAuth";
 
@@ -15,11 +13,7 @@ export default function UserProfile() {
     enabled: !!username,
   });
 
-  const seasons = data ? Object.keys(data.badges).sort() : [];
-  const [activeSeason, setActiveSeason] = useState("");
-
-  const currentSeason = activeSeason || seasons[seasons.length - 1] || "";
-  const counts = data?.badges[currentSeason] || {};
+  const seasons = data ? Object.keys(data.badges).sort().reverse() : [];
 
   const isOwnProfile =
     isAuthenticated && me?.twitch_login.toLowerCase() === username?.toLowerCase();
@@ -41,7 +35,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-8">
+    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{data.username}</h1>
@@ -60,15 +54,31 @@ export default function UserProfile() {
         )}
       </div>
 
-      {seasons.length > 1 && (
-        <SeasonTabs
-          seasons={seasons}
-          active={currentSeason}
-          onChange={setActiveSeason}
-        />
-      )}
+      {/* All seasons */}
+      {seasons.map((season) => {
+        const counts = data.badges[season] || {};
+        const totalInSeason = Object.values(counts).reduce((sum, n) => sum + (n as number), 0);
+        const label = season.replace("saison", "Saison ");
 
-      <BadgeGrid counts={counts} season={currentSeason} />
+        return (
+          <div key={season} className="space-y-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold text-white">{label}</h2>
+              <span className="text-sm text-gray-500">
+                {totalInSeason} badge{totalInSeason > 1 ? "s" : ""}
+              </span>
+              <div className="flex-1 h-px bg-white/[0.06]" />
+            </div>
+            <BadgeGrid counts={counts} season={season} />
+          </div>
+        );
+      })}
+
+      {seasons.length === 0 && (
+        <p className="text-center text-gray-500 py-10">
+          Aucun badge.
+        </p>
+      )}
     </div>
   );
 }
