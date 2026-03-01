@@ -120,14 +120,31 @@ export default function Leaderboard() {
                       {/* Icon */}
                       <span className="text-2xl leading-none">{cfg.icon}</span>
 
-                      {/* Badge image */}
-                      {entry.top_rarity !== "NONE" && (
+                      {/* Avatar */}
+                      {entry.avatar_url ? (
                         <img
-                          src={getBadgeImage(entry.top_rarity, "saison2")}
-                          alt={entry.top_rarity}
-                          className="object-contain drop-shadow-lg"
-                          style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44 }}
+                          src={entry.avatar_url}
+                          alt={entry.username}
+                          className="rounded-full object-cover ring-2"
+                          style={{
+                            width: isFirst ? 56 : 44,
+                            height: isFirst ? 56 : 44,
+                            ringColor: cfg.accent,
+                            border: `2px solid ${cfg.accent}66`,
+                          }}
                         />
+                      ) : (
+                        <div
+                          className="rounded-full flex items-center justify-center font-black text-black"
+                          style={{
+                            width: isFirst ? 56 : 44,
+                            height: isFirst ? 56 : 44,
+                            background: cfg.accent,
+                            fontSize: isFirst ? "1.2rem" : "1rem",
+                          }}
+                        >
+                          {entry.username[0].toUpperCase()}
+                        </div>
                       )}
 
                       {/* Username */}
@@ -135,7 +152,7 @@ export default function Leaderboard() {
                         className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate text-center"
                         style={{ fontSize: isFirst ? "0.95rem" : "0.8rem" }}
                       >
-                        {entry.username}
+                        {entry.display_name || entry.username}
                       </span>
 
                       {/* Points */}
@@ -211,21 +228,36 @@ export default function Leaderboard() {
                       {entry.rank}
                     </span>
 
-                    {/* Top rarity badge */}
-                    {entry.top_rarity !== "NONE" ? (
+                    {/* Avatar */}
+                    {entry.avatar_url ? (
                       <img
-                        src={getBadgeImage(entry.top_rarity, "saison2")}
-                        alt={entry.top_rarity}
-                        className="w-7 h-7 object-contain shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+                        src={entry.avatar_url}
+                        alt={entry.username}
+                        className="w-8 h-8 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+                        style={{ border: `1.5px solid ${rColor}55` }}
                       />
                     ) : (
-                      <div className="w-7 h-7 shrink-0" />
+                      <div
+                        className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-black text-black"
+                        style={{ background: rColor + "cc" }}
+                      >
+                        {entry.username[0].toUpperCase()}
+                      </div>
                     )}
 
                     {/* Username */}
                     <span className="flex-1 text-sm font-semibold text-gray-300 group-hover:text-white transition-colors truncate">
-                      {entry.username}
+                      {entry.display_name || entry.username}
                     </span>
+
+                    {/* Top rarity badge (small) */}
+                    {entry.top_rarity !== "NONE" && (
+                      <img
+                        src={getBadgeImage(entry.top_rarity, "saison2")}
+                        alt={entry.top_rarity}
+                        className="w-6 h-6 object-contain shrink-0 opacity-60 group-hover:opacity-90 transition-opacity"
+                      />
+                    )}
 
                     {/* Badge count */}
                     <span className="hidden sm:block text-xs text-gray-700 tabular-nums shrink-0 font-medium">

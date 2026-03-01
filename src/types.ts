@@ -16,6 +16,8 @@ export interface PublicUser {
 export interface LeaderboardEntry {
   rank: number;
   username: string;
+  display_name: string;
+  avatar_url: string | null;
   total_pts: number;
   badge_count: number;
   top_rarity: string;
