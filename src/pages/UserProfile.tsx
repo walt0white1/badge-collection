@@ -34,14 +34,14 @@ export default function UserProfile() {
 
   if (error || !data) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-20 text-center">
         <h1 className="text-2xl font-bold text-gray-400">Utilisateur introuvable</h1>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
+    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{data.username}</h1>

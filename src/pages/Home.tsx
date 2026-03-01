@@ -10,14 +10,14 @@ export default function Home() {
   const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: fetchGlobalStats });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12 space-y-20">
+    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-12 space-y-20">
       {/* Hero */}
       <section className="text-center space-y-6">
         <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight">
           Collecte, echange,{" "}
           <span className="text-gradient">montre tes badges</span>
         </h1>
-        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-400 max-w-3xl mx-auto">
           Sub sur la chaine <strong className="text-white">el_matte0</strong> pour
           gagner des badges aleatoires. Plus la rarete est haute, plus tu gagnes de
           points. Echange avec les autres pour completer ta collection !

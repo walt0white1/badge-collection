@@ -10,7 +10,7 @@ interface Props {
 
 export default function BadgeGrid({ counts, season = "saison2", onSelect, selectedRarity }: Props) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
       {RARITY_ORDER.map((r) => (
         <BadgeCard
           key={r}

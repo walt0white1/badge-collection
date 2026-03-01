@@ -20,18 +20,18 @@ export default function BadgeCard({ rarity, count, season = "saison2", onClick, 
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      className={`relative group flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
+      className={`relative group flex flex-col items-center gap-3 p-5 rounded-xl border transition-all ${
         selected
           ? "border-twitch bg-twitch/10 ring-2 ring-twitch/40"
           : "border-gray-800 bg-gray-900/60 hover:border-gray-700 hover:bg-gray-900"
       } ${onClick ? "cursor-pointer" : "cursor-default"}`}
     >
       {/* Badge image */}
-      <div className="relative w-16 h-16 flex items-center justify-center">
+      <div className="relative w-20 h-20 flex items-center justify-center">
         <img
           src={img}
           alt={r}
-          className="w-16 h-16 object-contain drop-shadow-lg"
+          className="w-20 h-20 object-contain drop-shadow-lg"
           style={{ filter: count === 0 ? "grayscale(1) opacity(0.3)" : "none" }}
         />
         {count > 0 && (
@@ -44,10 +44,10 @@ export default function BadgeCard({ rarity, count, season = "saison2", onClick, 
         )}
       </div>
 
-      <span className="text-xs font-semibold tracking-wider" style={{ color }}>
+      <span className="text-sm font-semibold tracking-wider" style={{ color }}>
         {r}
       </span>
-      <span className="text-[10px] text-gray-500">{pts} pt{pts > 1 ? "s" : ""} / badge</span>
+      <span className="text-xs text-gray-500">{pts} pt{pts > 1 ? "s" : ""} / badge</span>
     </button>
   );
 }

@@ -43,7 +43,7 @@ export default function Leaderboard() {
       style={{ fontFamily: "'Outfit', sans-serif" }}
       className="min-h-screen"
     >
-      <div className="max-w-3xl mx-auto px-4 pt-10 pb-20">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 pt-10 pb-20">
 
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
@@ -87,10 +87,10 @@ export default function Leaderboard() {
 
             {/* ── PODIUM TOP 3 ── */}
             {showPodium && top3.length > 0 && (
-              <div className="flex items-end justify-center gap-3 pt-4 pb-2">
+              <div className="flex items-end justify-center gap-5 pt-4 pb-2">
                 {/* Order: 2nd · 1st · 3rd */}
                 {[top3[1], top3[0], top3[2]].map((entry, podiumSlot) => {
-                  if (!entry) return <div key={`empty-${podiumSlot}`} className="w-36 shrink-0" />;
+                  if (!entry) return <div key={`empty-${podiumSlot}`} className="w-48 shrink-0" />;
                   const rankIdx = entry.rank - 1;
                   const cfg = PODIUM_CFG[rankIdx];
                   const isFirst = entry.rank === 1;
@@ -99,10 +99,10 @@ export default function Leaderboard() {
                     <Link
                       key={entry.username}
                       to={`/user/${entry.username}`}
-                      className="relative flex flex-col items-center gap-3 rounded-2xl p-5 border transition-all duration-300 group shrink-0 hover:scale-[1.03]"
+                      className="relative flex flex-col items-center gap-4 rounded-2xl p-6 border transition-all duration-300 group shrink-0 hover:scale-[1.03]"
                       style={{
-                        width: isFirst ? "176px" : "148px",
-                        transform: isFirst ? "translateY(-20px)" : undefined,
+                        width: isFirst ? "220px" : "180px",
+                        transform: isFirst ? "translateY(-24px)" : undefined,
                         background: `linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%)`,
                         borderColor: cfg.accent + "55",
                         boxShadow: `0 0 40px ${cfg.shadow}, 0 0 1px ${cfg.accent}33, inset 0 1px 0 rgba(255,255,255,0.06)`,
@@ -111,7 +111,7 @@ export default function Leaderboard() {
                     >
                       {/* Rank badge */}
                       <div
-                        className="absolute -top-3.5 -right-3.5 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-lg"
+                        className="absolute -top-3.5 -right-3.5 w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shadow-lg"
                         style={{ background: cfg.accent, color: entry.rank === 1 ? "#000" : "#fff" }}
                       >
                         {entry.rank}
@@ -126,8 +126,8 @@ export default function Leaderboard() {
                         alt={entry.username}
                         className="rounded-full object-cover"
                         style={{
-                          width: isFirst ? 56 : 44,
-                          height: isFirst ? 56 : 44,
+                          width: isFirst ? 72 : 56,
+                          height: isFirst ? 72 : 56,
                           border: `2px solid ${cfg.accent}66`,
                         }}
                         onError={(e) => {
@@ -141,8 +141,8 @@ export default function Leaderboard() {
                         className="rounded-full items-center justify-center font-black text-black"
                         style={{
                           display: "none",
-                          width: isFirst ? 56 : 44,
-                          height: isFirst ? 56 : 44,
+                          width: isFirst ? 72 : 56,
+                          height: isFirst ? 72 : 56,
                           background: cfg.accent,
                           fontSize: isFirst ? "1.2rem" : "1rem",
                         }}
@@ -152,8 +152,8 @@ export default function Leaderboard() {
 
                       {/* Username */}
                       <span
-                        className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate text-center"
-                        style={{ fontSize: isFirst ? "0.95rem" : "0.8rem" }}
+                        className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate"
+                        style={{ fontSize: isFirst ? "1.05rem" : "0.9rem" }}
                       >
                         {entry.display_name || entry.username}
                       </span>
@@ -162,15 +162,15 @@ export default function Leaderboard() {
                       <div className="text-center">
                         <span
                           className="font-black tabular-nums leading-none"
-                          style={{ color: cfg.accent, fontSize: isFirst ? "1.4rem" : "1.1rem" }}
+                          style={{ color: cfg.accent, fontSize: isFirst ? "1.6rem" : "1.25rem" }}
                         >
                           {entry.total_pts.toLocaleString()}
                         </span>
-                        <span className="text-[10px] text-gray-500 ml-1">pts</span>
+                        <span className="text-[11px] text-gray-500 ml-1">pts</span>
                       </div>
 
                       {/* Badge count */}
-                      <span className="text-[10px] text-gray-600 font-medium tracking-wide">
+                      <span className="text-[11px] text-gray-600 font-medium tracking-wide">
                         {entry.badge_count} BADGE{entry.badge_count > 1 ? "S" : ""}
                       </span>
 
@@ -209,7 +209,7 @@ export default function Leaderboard() {
                   <Link
                     key={entry.username}
                     to={`/user/${entry.username}`}
-                    className="relative flex items-center gap-4 px-4 py-3 rounded-xl overflow-hidden group transition-all duration-200 hover:bg-white/[0.035]"
+                    className="relative flex items-center gap-5 px-5 py-3.5 rounded-xl overflow-hidden group transition-all duration-200 hover:bg-white/[0.035]"
                   >
                     {/* Progress bar bg */}
                     <div
@@ -227,7 +227,7 @@ export default function Leaderboard() {
                     />
 
                     {/* Rank */}
-                    <span className="w-8 text-right text-xs font-bold text-gray-600 tabular-nums shrink-0">
+                    <span className="w-10 text-right text-sm font-bold text-gray-600 tabular-nums shrink-0">
                       {entry.rank}
                     </span>
 
@@ -235,8 +235,8 @@ export default function Leaderboard() {
                     <img
                       src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
                       alt={entry.username}
-                      className="w-8 h-8 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
-                      style={{ border: `1.5px solid ${rColor}55` }}
+                      className="w-10 h-10 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+                      style={{ border: `2px solid ${rColor}55` }}
                       onError={(e) => {
                         const el = e.currentTarget as HTMLImageElement;
                         el.style.display = "none";
@@ -245,37 +245,37 @@ export default function Leaderboard() {
                       }}
                     />
                     <div
-                      className="w-8 h-8 rounded-full shrink-0 items-center justify-center text-xs font-black text-black"
+                      className="w-10 h-10 rounded-full shrink-0 items-center justify-center text-sm font-black text-black"
                       style={{ display: "none", background: rColor + "cc" }}
                     >
                       {entry.username[0].toUpperCase()}
                     </div>
 
                     {/* Username */}
-                    <span className="flex-1 text-sm font-semibold text-gray-300 group-hover:text-white transition-colors truncate">
+                    <span className="flex-1 text-base font-semibold text-gray-300 group-hover:text-white transition-colors truncate">
                       {entry.display_name || entry.username}
                     </span>
 
-                    {/* Top rarity badge (small) */}
+                    {/* Top rarity badge */}
                     {entry.top_rarity !== "NONE" && (
                       <img
                         src={getBadgeImage(entry.top_rarity, "saison2")}
                         alt={entry.top_rarity}
-                        className="w-6 h-6 object-contain shrink-0 opacity-60 group-hover:opacity-90 transition-opacity"
+                        className="w-7 h-7 object-contain shrink-0 opacity-60 group-hover:opacity-90 transition-opacity"
                       />
                     )}
 
                     {/* Badge count */}
-                    <span className="hidden sm:block text-xs text-gray-700 tabular-nums shrink-0 font-medium">
+                    <span className="hidden sm:block text-sm text-gray-600 tabular-nums shrink-0 font-medium min-w-[80px] text-right">
                       {entry.badge_count} badges
                     </span>
 
                     {/* Points */}
-                    <div className="shrink-0 text-right">
-                      <span className="text-sm font-bold text-white tabular-nums">
+                    <div className="shrink-0 text-right min-w-[70px]">
+                      <span className="text-base font-bold text-white tabular-nums">
                         {entry.total_pts.toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-gray-600 ml-1">pts</span>
+                      <span className="text-[11px] text-gray-600 ml-1">pts</span>
                     </div>
                   </Link>
                 );
