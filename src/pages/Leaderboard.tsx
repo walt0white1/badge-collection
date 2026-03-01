@@ -121,31 +121,34 @@ export default function Leaderboard() {
                       <span className="text-2xl leading-none">{cfg.icon}</span>
 
                       {/* Avatar */}
-                      {entry.avatar_url ? (
-                        <img
-                          src={entry.avatar_url}
-                          alt={entry.username}
-                          className="rounded-full object-cover ring-2"
-                          style={{
-                            width: isFirst ? 56 : 44,
-                            height: isFirst ? 56 : 44,
-                            ringColor: cfg.accent,
-                            border: `2px solid ${cfg.accent}66`,
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className="rounded-full flex items-center justify-center font-black text-black"
-                          style={{
-                            width: isFirst ? 56 : 44,
-                            height: isFirst ? 56 : 44,
-                            background: cfg.accent,
-                            fontSize: isFirst ? "1.2rem" : "1rem",
-                          }}
-                        >
-                          {entry.username[0].toUpperCase()}
-                        </div>
-                      )}
+                      <img
+                        src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                        alt={entry.username}
+                        className="rounded-full object-cover"
+                        style={{
+                          width: isFirst ? 56 : 44,
+                          height: isFirst ? 56 : 44,
+                          border: `2px solid ${cfg.accent}66`,
+                        }}
+                        onError={(e) => {
+                          const el = e.currentTarget as HTMLImageElement;
+                          el.style.display = "none";
+                          const fallback = el.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = "flex";
+                        }}
+                      />
+                      <div
+                        className="rounded-full items-center justify-center font-black text-black"
+                        style={{
+                          display: "none",
+                          width: isFirst ? 56 : 44,
+                          height: isFirst ? 56 : 44,
+                          background: cfg.accent,
+                          fontSize: isFirst ? "1.2rem" : "1rem",
+                        }}
+                      >
+                        {entry.username[0].toUpperCase()}
+                      </div>
 
                       {/* Username */}
                       <span
@@ -229,21 +232,24 @@ export default function Leaderboard() {
                     </span>
 
                     {/* Avatar */}
-                    {entry.avatar_url ? (
-                      <img
-                        src={entry.avatar_url}
-                        alt={entry.username}
-                        className="w-8 h-8 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
-                        style={{ border: `1.5px solid ${rColor}55` }}
-                      />
-                    ) : (
-                      <div
-                        className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-black text-black"
-                        style={{ background: rColor + "cc" }}
-                      >
-                        {entry.username[0].toUpperCase()}
-                      </div>
-                    )}
+                    <img
+                      src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                      alt={entry.username}
+                      className="w-8 h-8 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+                      style={{ border: `1.5px solid ${rColor}55` }}
+                      onError={(e) => {
+                        const el = e.currentTarget as HTMLImageElement;
+                        el.style.display = "none";
+                        const fallback = el.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = "flex";
+                      }}
+                    />
+                    <div
+                      className="w-8 h-8 rounded-full shrink-0 items-center justify-center text-xs font-black text-black"
+                      style={{ display: "none", background: rColor + "cc" }}
+                    >
+                      {entry.username[0].toUpperCase()}
+                    </div>
 
                     {/* Username */}
                     <span className="flex-1 text-sm font-semibold text-gray-300 group-hover:text-white transition-colors truncate">
