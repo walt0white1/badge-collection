@@ -111,20 +111,23 @@ export default function Home() {
           {RARITY_ORDER.map((r) => {
             const color = RARITY_COLORS[r];
             const pts = RARITY_POINTS[r];
+            const imgMap: Record<string, string> = {
+              COMMON:    "/badge-common.png",
+              RARE:      "/badge-rare.png",
+              EPIC:      "/badge-epic.png",
+              LEGENDARY: "/badge-legendary.gif",
+              UNIQUE:    "/badge-unique.gif",
+            };
             return (
               <div
                 key={r}
-                className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-800 bg-gray-900/60"
+                className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-700 transition-colors"
               >
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ backgroundColor: color + "18" }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg"
-                    style={{ backgroundColor: color }}
-                  />
-                </div>
+                <img
+                  src={imgMap[r]}
+                  alt={r}
+                  className="w-16 h-16 object-contain drop-shadow-lg"
+                />
                 <span className="text-sm font-bold" style={{ color }}>
                   {r}
                 </span>
