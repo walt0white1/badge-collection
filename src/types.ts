@@ -43,7 +43,7 @@ export interface Stats {
   total_users: number;
 }
 
-export const RARITY_ORDER = ["UNIQUE", "LEGENDARY", "EPIC", "RARE", "COMMON"] as const;
+export const RARITY_ORDER = ["COMMON", "RARE", "EPIC", "LEGENDARY", "UNIQUE"] as const;
 
 export const RARITY_POINTS: Record<string, number> = {
   COMMON: 1,
