@@ -68,7 +68,7 @@ export default function UserProfile() {
         />
       )}
 
-      <BadgeGrid counts={counts} />
+      <BadgeGrid counts={counts} season={currentSeason} />
     </div>
   );
 }

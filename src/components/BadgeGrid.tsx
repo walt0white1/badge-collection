@@ -3,11 +3,12 @@ import { RARITY_ORDER } from "../types";
 
 interface Props {
   counts: Record<string, number>;
+  season?: string;
   onSelect?: (rarity: string) => void;
   selectedRarity?: string;
 }
 
-export default function BadgeGrid({ counts, onSelect, selectedRarity }: Props) {
+export default function BadgeGrid({ counts, season = "saison2", onSelect, selectedRarity }: Props) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
       {RARITY_ORDER.map((r) => (
@@ -15,6 +16,7 @@ export default function BadgeGrid({ counts, onSelect, selectedRarity }: Props) {
           key={r}
           rarity={r}
           count={counts[r.toLowerCase()] ?? counts[r] ?? 0}
+          season={season}
           onClick={onSelect ? () => onSelect(r) : undefined}
           selected={selectedRarity === r}
         />

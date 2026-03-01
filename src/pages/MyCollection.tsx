@@ -66,7 +66,7 @@ export default function MyCollection() {
       )}
 
       {/* Badge grid */}
-      <BadgeGrid counts={counts} />
+      <BadgeGrid counts={counts} season={activeSeason} />
 
       {currentList.length === 0 && (
         <p className="text-center text-gray-500 py-10">
