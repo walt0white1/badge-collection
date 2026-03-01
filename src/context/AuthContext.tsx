@@ -35,6 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Ensure profile exists (creates or links on first login)
+      const { data: ensured } = await supabase.rpc("ensure_profile");
+
       // Get profile
       const { data: profile } = await supabase
         .from("profiles")
