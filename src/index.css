@@ -83,7 +83,7 @@ body {
   inset: 0;
   display: grid;
   place-items: start center;
-  padding-top: 30vh;
+  padding-top: 14vh;
   pointer-events: none;
   z-index: 5;
 }
@@ -187,16 +187,13 @@ body {
   15%, 75% { opacity: 1; }
 }
 
-/* ── Badge wrapper – fixed in lower portion of viewport (below title text) ── */
+/* ── Badge wrapper – fixed center viewport ── */
 .badge-wrapper {
   position: fixed;
-  top: 36vh;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   margin: auto;
   width: min(92vw, 1100px);
-  height: 52vh;
+  height: 50vh;
   container-type: size;
   display: grid;
   place-content: center;
@@ -249,7 +246,7 @@ body {
   }
 }
 
-.badge-item:nth-child(1) { --i: 1; }
+.badge-item:nth-child(1) { --i: 1; animation-name: badge-item-first-focus; }
 .badge-item:nth-child(2) { --i: 2; }
 .badge-item:nth-child(3) { --i: 3; }
 .badge-item:nth-child(4) { --i: 4; }
@@ -264,6 +261,14 @@ body {
 }
 
 /* ── Keyframes ── */
+
+/* Badge 1 starts already focused at scroll=0, like the hero badge */
+@keyframes badge-item-first-focus {
+  0%   { --focus: 1; }
+  70%  { --focus: 1; }
+  100% { --focus: 0; }
+}
+
 @keyframes badge-item-focus {
   0%   { --focus: 0; }
   30%  { --focus: 1; }
