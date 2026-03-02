@@ -232,7 +232,7 @@ body {
 
   scale: calc(0.55 + var(--focus) * 0.65);
   z-index: calc(1 + var(--focus) * 100);
-  translate: var(--item-x) 0;
+  translate: var(--item-x) calc((1 - var(--focus)) * 18vh);
   filter: brightness(calc(0.5 + var(--focus) * 0.5)) saturate(calc(0.4 + var(--focus) * 0.6));
 
   animation: badge-item-focus 1ms both;
