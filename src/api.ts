@@ -83,3 +83,20 @@ export const cancelTrade = async (id: string): Promise<void> => {
   const { error } = await supabase.rpc("cancel_trade", { p_trade_id: id });
   if (error) throw new Error(error.message);
 };
+
+// ---------- Share card ----------
+
+export const uploadShareCard = async (
+  username: string,
+  blob: Blob,
+): Promise<string> => {
+  const path = `cards/${username}.png`;
+
+  const { error } = await supabase.storage
+    .from("share-cards")
+    .upload(path, blob, { contentType: "image/png", upsert: true });
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from("share-cards").getPublicUrl(path);
+  return data.publicUrl;
+};

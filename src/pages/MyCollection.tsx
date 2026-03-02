@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
 import BadgeGrid from "../components/BadgeGrid";
+import ShareCardModal from "../components/ShareCardModal";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 
 function countBadges(list: string[]): Record<string, number> {
@@ -15,6 +17,7 @@ function countBadges(list: string[]): Record<string, number> {
 
 export default function MyCollection() {
   const { user } = useAuth();
+  const [showShareCard, setShowShareCard] = useState(false);
   if (!user) return null;
 
   const seasons = Object.keys(user.badges).sort().reverse();
@@ -86,12 +89,23 @@ export default function MyCollection() {
             </div>
           </div>
 
-          <Link
-            to="/trades"
-            className="px-5 py-2.5 bg-twitch hover:bg-twitch-dark text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
-          >
-            Mes echanges
-          </Link>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => setShowShareCard(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="hidden sm:inline">Partager</span>
+            </button>
+            <Link
+              to="/trades"
+              className="flex items-center gap-2 px-4 py-2.5 bg-twitch hover:bg-twitch-dark text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              Mes echanges
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -129,6 +143,10 @@ export default function MyCollection() {
         <p className="text-center text-gray-500 py-10">
           Aucun badge.
         </p>
+      )}
+
+      {showShareCard && (
+        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} />
       )}
     </div>
   );
