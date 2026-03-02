@@ -58,15 +58,23 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Rarity names + info — giant text fading in/out per scroll position */}
-        <div className="rarity-names">
+        {/* Rarity titles — above the badge */}
+        <div className="rarity-titles">
+          {RARITY_ORDER.map((r) => (
+            <div key={r} className="rarity-title-slide">
+              <h2>{r}</h2>
+            </div>
+          ))}
+        </div>
+
+        {/* Rarity info — below the badge */}
+        <div className="rarity-infos">
           {RARITY_ORDER.map((r) => {
             const info = BADGE_INFO[r];
             const color = RARITY_COLORS[r];
             const pts = RARITY_POINTS[r];
             return (
-              <div key={r} className="rarity-slide">
-                <h2>{r}</h2>
+              <div key={r} className="rarity-info-slide">
                 <div className="rarity-info">
                   <span className="rarity-pts" style={{ color }}>{pts} PTS</span>
                   <span className="rarity-sep">·</span>
@@ -109,9 +117,7 @@ export default function Home() {
       </div>
 
       {/* ═══ AFTER SHOWCASE — STATS + CTA ═══ */}
-      <section className="relative z-20 bg-[#050508]">
-        {/* Smooth gradient transition from showcase */}
-        <div className="absolute inset-x-0 -top-32 h-32 bg-gradient-to-b from-transparent to-[#050508] pointer-events-none z-10" />
+      <section className="relative z-20">
         <div className="max-w-[1100px] mx-auto px-6 sm:px-8 py-20 space-y-16">
           {/* Stats */}
           {stats && (

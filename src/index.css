@@ -77,24 +77,20 @@ body {
   filter: drop-shadow(0 0 60px rgba(145, 70, 255, 0.2));
 }
 
-/* ── Rarity names – giant text fading per scroll ── */
-.rarity-names {
+/* ── Rarity titles – above the badge ── */
+.rarity-titles {
   position: fixed;
   inset: 0;
-  top: 20vh;
   display: grid;
-  place-content: center;
+  place-items: start center;
+  padding-top: 14vh;
   pointer-events: none;
   z-index: 5;
 }
 
-.rarity-slide {
+.rarity-title-slide {
   grid-area: 1 / 1;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
   opacity: 0;
   --total: 5;
   --item-slot: calc(100% / var(--total));
@@ -105,13 +101,54 @@ body {
   animation-range: var(--item-entry) var(--item-exit);
 }
 
-.rarity-slide h2 {
+.rarity-title-slide h2 {
   font-size: clamp(3.5rem, 15vw, 14rem);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.03em;
   line-height: 1;
 }
+
+.rarity-title-slide:nth-child(1) { --i: 1; }
+.rarity-title-slide:nth-child(1) h2 { color: #d9d9d9; text-shadow: 0 0 80px rgba(217, 217, 217, 0.12); }
+.rarity-title-slide:nth-child(2) { --i: 2; }
+.rarity-title-slide:nth-child(2) h2 { color: #4da6ff; text-shadow: 0 0 80px rgba(77, 166, 255, 0.18); }
+.rarity-title-slide:nth-child(3) { --i: 3; }
+.rarity-title-slide:nth-child(3) h2 { color: #b266ff; text-shadow: 0 0 80px rgba(178, 102, 255, 0.22); }
+.rarity-title-slide:nth-child(4) { --i: 4; }
+.rarity-title-slide:nth-child(4) h2 { color: #ffd633; text-shadow: 0 0 80px rgba(255, 214, 51, 0.25); }
+.rarity-title-slide:nth-child(5) { --i: 5; }
+.rarity-title-slide:nth-child(5) h2 { color: #ff66cc; text-shadow: 0 0 80px rgba(255, 102, 204, 0.25); }
+
+/* ── Rarity info – below the badge ── */
+.rarity-infos {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 8vh;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.rarity-info-slide {
+  grid-area: 1 / 1;
+  text-align: center;
+  opacity: 0;
+  --total: 5;
+  --item-slot: calc(100% / var(--total));
+  --item-entry: calc((var(--i) - 1) * var(--item-slot));
+  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  animation: badge-name-fade 1ms 0.2ms both;
+  animation-timeline: scroll();
+  animation-range: var(--item-entry) var(--item-exit);
+}
+
+.rarity-info-slide:nth-child(1) { --i: 1; }
+.rarity-info-slide:nth-child(2) { --i: 2; }
+.rarity-info-slide:nth-child(3) { --i: 3; }
+.rarity-info-slide:nth-child(4) { --i: 4; }
+.rarity-info-slide:nth-child(5) { --i: 5; }
 
 .rarity-info {
   display: flex;
@@ -145,30 +182,18 @@ body {
   line-height: 1.4;
 }
 
-.rarity-slide:nth-child(1) { --i: 1; }
-.rarity-slide:nth-child(1) h2 { color: #d9d9d9; text-shadow: 0 0 80px rgba(217, 217, 217, 0.12); }
-.rarity-slide:nth-child(2) { --i: 2; }
-.rarity-slide:nth-child(2) h2 { color: #4da6ff; text-shadow: 0 0 80px rgba(77, 166, 255, 0.18); }
-.rarity-slide:nth-child(3) { --i: 3; }
-.rarity-slide:nth-child(3) h2 { color: #b266ff; text-shadow: 0 0 80px rgba(178, 102, 255, 0.22); }
-.rarity-slide:nth-child(4) { --i: 4; }
-.rarity-slide:nth-child(4) h2 { color: #ffd633; text-shadow: 0 0 80px rgba(255, 214, 51, 0.25); }
-.rarity-slide:nth-child(5) { --i: 5; }
-.rarity-slide:nth-child(5) h2 { color: #ff66cc; text-shadow: 0 0 80px rgba(255, 102, 204, 0.25); }
-
 @keyframes badge-name-fade {
   0%, 100% { opacity: 0; }
-  15%, 75% { opacity: 1; translate: 0 -10vh; }
+  15%, 75% { opacity: 1; }
 }
 
 /* ── Badge wrapper – fixed center viewport ── */
 .badge-wrapper {
   position: fixed;
   inset: 0;
-  bottom: 15vh;
   margin: auto;
   width: min(90vw, 1000px);
-  height: 55vh;
+  height: 50vh;
   container-type: size;
   display: grid;
   place-content: center;
@@ -248,6 +273,15 @@ body {
   to   { opacity: 0; }
 }
 
+/* Hide all fixed showcase elements near end of scroll */
+.rarity-titles,
+.rarity-infos,
+.badge-wrapper {
+  animation: showcase-hide 1ms linear both;
+  animation-timeline: scroll();
+  animation-range: 88% 94%;
+}
+
 /* ── Scroll indicator ── */
 .scroll-indicator {
   position: fixed;
@@ -301,7 +335,8 @@ body {
     min-height: 100vh;
     padding: 2rem 0 4rem;
   }
-  .rarity-names {
+  .rarity-titles,
+  .rarity-infos {
     display: none;
   }
   .badge-wrapper {
