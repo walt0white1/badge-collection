@@ -57,16 +57,16 @@ body {
 
 /* ── Logo at top ── */
 .showcase-logo {
-  width: min(85vw, 700px);
+  width: min(80vw, 600px);
   margin: 0 auto;
-  padding-top: 11vh;
+  padding-top: 8vh;
   text-align: center;
   position: relative;
   z-index: 2;
 }
 
 .showcase-logo h1 {
-  font-size: clamp(4.5rem, 11vw, 9rem);
+  font-size: clamp(3rem, 8vw + 0.5rem, 6rem);
   font-weight: 900;
   line-height: 0.88;
   letter-spacing: -0.04em;
@@ -192,7 +192,7 @@ body {
   position: fixed;
   inset: 0;
   margin: auto;
-  width: min(92vw, 1100px);
+  width: min(90vw, 1000px);
   height: 50vh;
   container-type: size;
   display: grid;
@@ -230,10 +230,10 @@ body {
     z-index 300ms ease-in-out,
     filter 500ms ease-in-out;
 
-  scale: calc(0.48 + var(--focus) * 0.72);
+  scale: calc(0.35 + var(--focus) * 0.85);
   z-index: calc(1 + var(--focus) * 100);
   translate: var(--item-x) 0;
-  filter: brightness(calc(0.38 + var(--focus) * 0.62)) saturate(calc(0.25 + var(--focus) * 0.75));
+  filter: brightness(calc(0.25 + var(--focus) * 0.75)) saturate(calc(0.15 + var(--focus) * 0.85));
 
   animation: badge-item-focus 1ms both;
   animation-timeline: scroll();
@@ -246,7 +246,7 @@ body {
   }
 }
 
-.badge-item:nth-child(1) { --i: 1; animation-name: badge-item-first-focus; }
+.badge-item:nth-child(1) { --i: 1; }
 .badge-item:nth-child(2) { --i: 2; }
 .badge-item:nth-child(3) { --i: 3; }
 .badge-item:nth-child(4) { --i: 4; }
@@ -254,21 +254,13 @@ body {
 
 .badge-item > img {
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 40px rgba(145, 70, 255, 0.35));
+  filter: drop-shadow(0 0 30px rgba(145, 70, 255, 0.3));
 }
 
 /* ── Keyframes ── */
-
-/* Badge 1 starts already focused at scroll=0, like the hero badge */
-@keyframes badge-item-first-focus {
-  0%   { --focus: 1; }
-  70%  { --focus: 1; }
-  100% { --focus: 0; }
-}
-
 @keyframes badge-item-focus {
   0%   { --focus: 0; }
   30%  { --focus: 1; }
