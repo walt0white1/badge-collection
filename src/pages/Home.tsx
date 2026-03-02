@@ -109,7 +109,9 @@ export default function Home() {
       </div>
 
       {/* ═══ AFTER SHOWCASE — STATS + CTA ═══ */}
-      <section className="relative z-20 bg-[#050508] border-t border-white/[0.04]">
+      <section className="relative z-20 bg-[#050508]">
+        {/* Smooth gradient transition from showcase */}
+        <div className="absolute inset-x-0 -top-32 h-32 bg-gradient-to-b from-transparent to-[#050508] pointer-events-none z-10" />
         <div className="max-w-[1100px] mx-auto px-6 sm:px-8 py-20 space-y-16">
           {/* Stats */}
           {stats && (

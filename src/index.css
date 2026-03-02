@@ -81,7 +81,7 @@ body {
 .rarity-names {
   position: fixed;
   inset: 0;
-  top: 4rem;
+  top: 20vh;
   display: grid;
   place-content: center;
   pointer-events: none;
@@ -158,17 +158,17 @@ body {
 
 @keyframes badge-name-fade {
   0%, 100% { opacity: 0; }
-  15%, 75% { opacity: 1; translate: 0 -22vh; }
+  15%, 75% { opacity: 1; translate: 0 -10vh; }
 }
 
 /* ── Badge wrapper – fixed center viewport ── */
 .badge-wrapper {
   position: fixed;
   inset: 0;
-  top: 4rem;
+  bottom: 15vh;
   margin: auto;
-  width: min(85vw, 900px);
-  height: 45vh;
+  width: min(90vw, 1000px);
+  height: 55vh;
   container-type: size;
   display: grid;
   place-content: center;
@@ -176,19 +176,6 @@ body {
   z-index: 10;
 }
 
-/* Floor glow line */
-.badge-wrapper::after {
-  content: "";
-  position: absolute;
-  top: 90cqh;
-  left: 50%;
-  translate: -50% 0;
-  background: linear-gradient(90deg, transparent, rgba(145, 70, 255, 0.5), transparent);
-  height: 2px;
-  width: 90vw;
-  z-index: -1;
-  box-shadow: 0 0 30px 6px rgba(145, 70, 255, 0.08);
-}
 
 /* ── Individual badge items ── */
 .badge-item {
@@ -242,10 +229,10 @@ body {
 
 .badge-item > img {
   width: 100%;
-  max-width: 260px;
+  max-width: 380px;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 24px rgba(145, 70, 255, 0.25));
+  filter: drop-shadow(0 0 30px rgba(145, 70, 255, 0.3));
 }
 
 /* ── Keyframes ── */
