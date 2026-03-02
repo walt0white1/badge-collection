@@ -5,11 +5,22 @@ import { useAuth } from "../hooks/useAuth";
 import { RARITY_COLORS, RARITY_POINTS, RARITY_ORDER } from "../types";
 import { getBadgeImage } from "../badgeImages";
 
+const StepIcons = [
+  // Twitch sub icon
+  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" /></svg>,
+  // Wheel / spin
+  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5}><circle cx="12" cy="12" r="9" /><path d="M12 3v9l6.36 3.64" strokeLinecap="round" /><path d="M12 12L5.64 15.64" strokeLinecap="round" /></svg>,
+  // Diamond / collect
+  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20" /><path d="M10 9l2 12 2-12" /><path d="M6 3l4 6M18 3l-4 6" /></svg>,
+  // Arrows / trade
+  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M7 16l-4-4 4-4" /><path d="M3 12h14" /><path d="M17 8l4 4-4 4" /><path d="M21 12H7" /></svg>,
+];
+
 const STEPS = [
-  { icon: "🎬", title: "Sub", desc: "Abonne-toi sur la chaine" },
-  { icon: "🎰", title: "Spin", desc: "La roue tourne en live" },
-  { icon: "💎", title: "Collect", desc: "Decouvre ta rarete" },
-  { icon: "🔄", title: "Trade", desc: "Echange avec les viewers" },
+  { title: "Sub", desc: "Abonne-toi sur la chaine" },
+  { title: "Spin", desc: "La roue tourne en live" },
+  { title: "Collect", desc: "Decouvre ta rarete" },
+  { title: "Trade", desc: "Echange avec les viewers" },
 ];
 
 export default function Home() {
@@ -128,7 +139,9 @@ export default function Home() {
               <div className="absolute -top-1 right-4 sm:right-auto sm:-top-2 text-[40px] font-black text-white/[0.03] leading-none select-none">
                 {i + 1}
               </div>
-              <span className="text-3xl relative z-10">{step.icon}</span>
+              <div className="w-12 h-12 rounded-xl bg-twitch/10 border border-twitch/20 flex items-center justify-center text-twitch relative z-10">
+                {StepIcons[i]}
+              </div>
               <h3 className="text-base font-bold text-white">{step.title}</h3>
               <p className="text-sm text-gray-500 max-w-[160px]">{step.desc}</p>
               {/* Arrow between steps on desktop */}
