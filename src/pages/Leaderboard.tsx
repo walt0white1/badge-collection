@@ -53,7 +53,7 @@ export default function Leaderboard() {
             </p>
             <h1
               style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}
-              className="text-7xl leading-none text-white"
+              className="text-5xl sm:text-7xl leading-none text-white"
             >
               Classement
             </h1>
@@ -87,10 +87,10 @@ export default function Leaderboard() {
 
             {/* ── PODIUM TOP 3 ── */}
             {showPodium && top3.length > 0 && (
-              <div className="flex items-end justify-center gap-5 pt-4 pb-2">
+              <div className="flex items-end justify-center gap-3 sm:gap-5 pt-4 pb-2 px-2">
                 {/* Order: 2nd · 1st · 3rd */}
                 {[top3[1], top3[0], top3[2]].map((entry, podiumSlot) => {
-                  if (!entry) return <div key={`empty-${podiumSlot}`} className="w-48 shrink-0" />;
+                  if (!entry) return <div key={`empty-${podiumSlot}`} className="flex-1 max-w-[180px]" />;
                   const rankIdx = entry.rank - 1;
                   const cfg = PODIUM_CFG[rankIdx];
                   const isFirst = entry.rank === 1;
@@ -99,9 +99,9 @@ export default function Leaderboard() {
                     <Link
                       key={entry.username}
                       to={`/user/${entry.username}`}
-                      className="relative flex flex-col items-center gap-4 rounded-2xl p-6 border transition-all duration-300 group shrink-0 hover:scale-[1.03]"
+                      className="relative flex flex-col items-center gap-2 sm:gap-4 rounded-2xl p-3 sm:p-6 border transition-all duration-300 group flex-1 hover:scale-[1.03]"
                       style={{
-                        width: isFirst ? "220px" : "180px",
+                        maxWidth: isFirst ? "220px" : "180px",
                         transform: isFirst ? "translateY(-24px)" : undefined,
                         background: `linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%)`,
                         borderColor: cfg.accent + "55",

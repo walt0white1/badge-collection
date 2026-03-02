@@ -77,7 +77,7 @@ export default function BadgeCard({ rarity, count, season = "saison2", onClick, 
         <img
           src={img}
           alt={r}
-          className="w-24 h-24 object-contain relative z-10 transition-transform duration-300 group-hover:scale-110 drop-shadow-lg"
+          className="w-36 h-36 object-contain relative z-10 transition-transform duration-300 group-hover:scale-110 drop-shadow-lg"
           style={{
             filter: owned ? "none" : "grayscale(1) brightness(0.3)",
           }}
