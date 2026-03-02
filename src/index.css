@@ -11,3 +11,372 @@ body {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-twitch to-purple-400;
   }
 }
+
+/* ══════════════════════════════════════════════
+   SCROLL-DRIVEN BADGE SHOWCASE
+   Adapted from Star Trek character showcase
+   Uses animation-timeline: scroll()
+   ══════════════════════════════════════════════ */
+
+@property --focus {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --info-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ── Page wrapper ── */
+.showcase-page {
+  background: #050508;
+}
+
+.showcase-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(145, 70, 255, 0.12), transparent 55%),
+    radial-gradient(ellipse at 70% 60%, rgba(178, 102, 255, 0.08), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 102, 204, 0.04), transparent 60%);
+}
+
+/* ── Showcase scroll area ── */
+.badge-showcase {
+  height: 500vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Logo at top ── */
+.showcase-logo {
+  width: min(80vw, 600px);
+  margin: 0 auto;
+  padding-top: 8vh;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.showcase-logo h1 {
+  font-size: clamp(3rem, 8vw + 0.5rem, 6rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #9146ff 0%, #c084fc 40%, #ff66cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 60px rgba(145, 70, 255, 0.2));
+}
+
+/* ── Rarity names – giant text fading per scroll ── */
+.rarity-names {
+  position: fixed;
+  inset: 0;
+  top: 4rem;
+  display: grid;
+  place-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.rarity-names h2 {
+  grid-area: 1 / 1;
+  text-align: center;
+  font-size: clamp(3.5rem, 15vw, 14rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  opacity: 0;
+  --total: 5;
+  --item-slot: calc(100% / var(--total));
+  --item-entry: calc((var(--i) - 1) * var(--item-slot));
+  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  animation: badge-name-fade 1ms 0.2ms both;
+  animation-timeline: scroll();
+  animation-range: var(--item-entry) var(--item-exit);
+}
+
+.rarity-names h2:nth-child(1) { --i: 1; color: #d9d9d9; text-shadow: 0 0 80px rgba(217, 217, 217, 0.12); }
+.rarity-names h2:nth-child(2) { --i: 2; color: #4da6ff; text-shadow: 0 0 80px rgba(77, 166, 255, 0.18); }
+.rarity-names h2:nth-child(3) { --i: 3; color: #b266ff; text-shadow: 0 0 80px rgba(178, 102, 255, 0.22); }
+.rarity-names h2:nth-child(4) { --i: 4; color: #ffd633; text-shadow: 0 0 80px rgba(255, 214, 51, 0.25); }
+.rarity-names h2:nth-child(5) { --i: 5; color: #ff66cc; text-shadow: 0 0 80px rgba(255, 102, 204, 0.25); }
+
+@keyframes badge-name-fade {
+  0%, 100% { opacity: 0; }
+  15%, 75% { opacity: 1; translate: 0 -22vh; }
+}
+
+/* ── Badge wrapper – fixed center viewport ── */
+.badge-wrapper {
+  position: fixed;
+  inset: 0;
+  top: 4rem;
+  margin: auto;
+  width: min(85vw, 900px);
+  height: 45vh;
+  container-type: size;
+  display: grid;
+  place-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Floor glow line */
+.badge-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 90cqh;
+  left: 50%;
+  translate: -50% 0;
+  background: linear-gradient(90deg, transparent, rgba(145, 70, 255, 0.5), transparent);
+  height: 2px;
+  width: 90vw;
+  z-index: -1;
+  box-shadow: 0 0 30px 6px rgba(145, 70, 255, 0.08);
+}
+
+/* ── Individual badge items ── */
+.badge-item {
+  --total: 5;
+  --item-slot: calc(100% / var(--total));
+  --item-entry: calc((var(--i) - 1) * var(--item-slot));
+  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  --focus: 0;
+  --info-scale: 0;
+  --item-x: calc(
+    (var(--i) - (var(--total) + 1) / 2)
+    * (100cqw / var(--total))
+    * (1 - var(--focus))
+  );
+
+  grid-area: 1 / 1;
+  place-self: center;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  position: relative;
+
+  transition:
+    scale 300ms ease-in-out,
+    translate 300ms ease-in-out,
+    z-index 300ms ease-in-out,
+    filter 500ms ease-in-out;
+
+  scale: calc(0.35 + var(--focus) * 0.85);
+  z-index: calc(1 + var(--focus) * 100);
+  translate: var(--item-x) 0;
+  filter: brightness(calc(0.25 + var(--focus) * 0.75)) saturate(calc(0.15 + var(--focus) * 0.85));
+
+  animation: badge-item-focus 1ms both;
+  animation-timeline: scroll();
+  animation-range: var(--item-entry) var(--item-exit);
+}
+
+@starting-style {
+  .badge-item {
+    filter: brightness(0) blur(40px);
+  }
+}
+
+.badge-item:nth-child(1) { --i: 1; }
+.badge-item:nth-child(2) { --i: 2; }
+.badge-item:nth-child(3) { --i: 3; }
+.badge-item:nth-child(4) { --i: 4; }
+.badge-item:nth-child(5) { --i: 5; }
+
+.badge-item > img {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(145, 70, 255, 0.25));
+}
+
+/* ── Data card (info panel per badge) ── */
+.badge-data {
+  position: absolute;
+  inset: auto 5% 5%;
+  transition: scale 150ms ease-in-out;
+  scale: var(--info-scale) 1;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  background: rgba(8, 8, 18, 0.92);
+  backdrop-filter: blur(24px);
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  color: white;
+  pointer-events: auto;
+}
+
+@container (width > 550px) {
+  .badge-data {
+    inset: auto -15% 10%;
+    padding: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "title title"
+      "info  notes";
+    gap: 0.75rem 2rem;
+  }
+  .badge-data h3 { grid-area: title; }
+  .badge-data-grid { grid-area: info; }
+  .badge-notes { grid-area: notes; place-self: center; }
+}
+
+.badge-data h3 {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.badge-data-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.75rem;
+  align-items: baseline;
+}
+
+.badge-data-grid label {
+  font-size: 0.7rem;
+  opacity: 0.4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.badge-data-grid p {
+  font-size: 0.85rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.badge-notes {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  line-height: 1.5;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* ── Keyframes ── */
+@keyframes badge-item-focus {
+  0%   { --focus: 0; --info-scale: 0; }
+  20%  { --info-scale: 0; }
+  30%  { --focus: 1; --info-scale: 1; }
+  70%  { --focus: 1; --info-scale: 1; }
+  80%  { --info-scale: 0; }
+  100% { --focus: 0; --info-scale: 0; }
+}
+
+@keyframes showcase-hide {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Scroll indicator ── */
+.scroll-indicator {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.15);
+  z-index: 20;
+  display: none;
+  animation: scroll-bob 2s ease-in-out infinite, scroll-indicator-hide 1ms linear both;
+  animation-timeline: auto, scroll();
+  animation-range: normal, 0% 10%;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-indicator {
+    display: flex;
+  }
+}
+
+.scroll-indicator svg {
+  width: 20px;
+  height: 20px;
+}
+
+.scroll-indicator span {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+}
+
+@keyframes scroll-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(10px); }
+}
+
+@keyframes scroll-indicator-hide {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ── Fallback for browsers without scroll-driven animations ── */
+@supports not (animation-timeline: scroll()) {
+  .badge-showcase {
+    height: auto;
+    min-height: 100vh;
+    padding: 2rem 0 4rem;
+  }
+  .rarity-names {
+    display: none;
+  }
+  .badge-wrapper {
+    position: relative;
+    inset: unset;
+    height: auto;
+    width: 100%;
+    max-width: 1000px;
+    margin: 3rem auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem 1rem;
+    container-type: normal;
+  }
+  .badge-wrapper::after {
+    display: none;
+  }
+  .badge-item {
+    position: relative;
+    width: auto;
+    max-width: 160px;
+    scale: 1 !important;
+    translate: none !important;
+    filter: none !important;
+    --focus: 1;
+    --info-scale: 0;
+  }
+  .badge-item > img {
+    max-width: 140px;
+  }
+  .badge-data {
+    display: none;
+  }
+  .scroll-indicator {
+    display: none !important;
+  }
+}
