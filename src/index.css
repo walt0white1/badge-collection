@@ -273,13 +273,26 @@ body {
   to   { opacity: 0; }
 }
 
-/* Hide all fixed showcase elements near end of scroll */
+/* Hide rarity labels near end of scroll */
 .rarity-titles,
-.rarity-infos,
-.badge-wrapper {
+.rarity-infos {
   animation: showcase-hide 1ms linear both;
   animation-timeline: scroll();
   animation-range: 88% 94%;
+}
+
+/* Badge wrapper: hidden on arrival, fades in on first scroll, hides at end */
+.badge-wrapper {
+  animation: badge-wrapper-lifecycle 1ms linear both;
+  animation-timeline: scroll();
+  animation-range: 0% 100%;
+}
+
+@keyframes badge-wrapper-lifecycle {
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  88%  { opacity: 1; }
+  94%  { opacity: 0; }
 }
 
 /* ── Scroll indicator ── */
