@@ -57,16 +57,16 @@ body {
 
 /* ── Logo at top ── */
 .showcase-logo {
-  width: min(80vw, 600px);
+  width: min(85vw, 700px);
   margin: 0 auto;
-  padding-top: 8vh;
+  padding-top: 11vh;
   text-align: center;
   position: relative;
   z-index: 2;
 }
 
 .showcase-logo h1 {
-  font-size: clamp(3rem, 8vw + 0.5rem, 6rem);
+  font-size: clamp(4.5rem, 11vw, 9rem);
   font-weight: 900;
   line-height: 0.88;
   letter-spacing: -0.04em;
@@ -83,7 +83,7 @@ body {
   inset: 0;
   display: grid;
   place-items: start center;
-  padding-top: 14vh;
+  padding-top: 30vh;
   pointer-events: none;
   z-index: 5;
 }
@@ -187,13 +187,16 @@ body {
   15%, 75% { opacity: 1; }
 }
 
-/* ── Badge wrapper – fixed center viewport ── */
+/* ── Badge wrapper – fixed in lower portion of viewport (below title text) ── */
 .badge-wrapper {
   position: fixed;
-  inset: 0;
+  top: 36vh;
+  right: 0;
+  bottom: 0;
+  left: 0;
   margin: auto;
-  width: min(90vw, 1000px);
-  height: 50vh;
+  width: min(92vw, 1100px);
+  height: 52vh;
   container-type: size;
   display: grid;
   place-content: center;
@@ -230,10 +233,10 @@ body {
     z-index 300ms ease-in-out,
     filter 500ms ease-in-out;
 
-  scale: calc(0.35 + var(--focus) * 0.85);
+  scale: calc(0.48 + var(--focus) * 0.72);
   z-index: calc(1 + var(--focus) * 100);
   translate: var(--item-x) 0;
-  filter: brightness(calc(0.25 + var(--focus) * 0.75)) saturate(calc(0.15 + var(--focus) * 0.85));
+  filter: brightness(calc(0.38 + var(--focus) * 0.62)) saturate(calc(0.25 + var(--focus) * 0.75));
 
   animation: badge-item-focus 1ms both;
   animation-timeline: scroll();
@@ -254,10 +257,10 @@ body {
 
 .badge-item > img {
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 30px rgba(145, 70, 255, 0.3));
+  filter: drop-shadow(0 0 40px rgba(145, 70, 255, 0.35));
 }
 
 /* ── Keyframes ── */
