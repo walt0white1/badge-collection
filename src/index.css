@@ -230,10 +230,10 @@ body {
     z-index 300ms ease-in-out,
     filter 500ms ease-in-out;
 
-  scale: calc(0.35 + var(--focus) * 0.85);
+  scale: calc(0.55 + var(--focus) * 0.65);
   z-index: calc(1 + var(--focus) * 100);
   translate: var(--item-x) 0;
-  filter: brightness(calc(0.25 + var(--focus) * 0.75)) saturate(calc(0.15 + var(--focus) * 0.85));
+  filter: brightness(calc(0.5 + var(--focus) * 0.5)) saturate(calc(0.4 + var(--focus) * 0.6));
 
   animation: badge-item-focus 1ms both;
   animation-timeline: scroll();
@@ -273,26 +273,13 @@ body {
   to   { opacity: 0; }
 }
 
-/* Hide rarity labels near end of scroll */
+/* Hide all fixed showcase elements near end of scroll */
 .rarity-titles,
-.rarity-infos {
+.rarity-infos,
+.badge-wrapper {
   animation: showcase-hide 1ms linear both;
   animation-timeline: scroll();
   animation-range: 88% 94%;
-}
-
-/* Badge wrapper: hidden on arrival, fades in on first scroll, hides at end */
-.badge-wrapper {
-  animation: badge-wrapper-lifecycle 1ms linear both;
-  animation-timeline: scroll();
-  animation-range: 0% 100%;
-}
-
-@keyframes badge-wrapper-lifecycle {
-  0%   { opacity: 0; }
-  5%   { opacity: 1; }
-  88%  { opacity: 1; }
-  94%  { opacity: 0; }
 }
 
 /* ── Scroll indicator ── */
