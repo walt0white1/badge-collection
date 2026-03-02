@@ -58,48 +58,38 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Rarity names — giant text fading in/out per scroll position */}
+        {/* Rarity names + info — giant text fading in/out per scroll position */}
         <div className="rarity-names">
-          {RARITY_ORDER.map((r) => (
-            <h2 key={r}>{r}</h2>
-          ))}
-        </div>
-
-        {/* Badge wrapper — items animate based on scroll progress */}
-        <div className="badge-wrapper">
           {RARITY_ORDER.map((r) => {
             const info = BADGE_INFO[r];
             const color = RARITY_COLORS[r];
             const pts = RARITY_POINTS[r];
-
             return (
-              <div key={r} className="badge-item">
-                <img
-                  src={getBadgeImage(r, "saison2")}
-                  alt={info.name}
-                  draggable={false}
-                />
-                <div
-                  className="badge-data"
-                  style={{ borderColor: `${color}33`, border: `1px solid ${color}33` }}
-                >
-                  <h3 style={{ color }}>{info.name}</h3>
-                  <div className="badge-data-grid">
-                    <label>Points</label>
-                    <p>
-                      <span style={{ color, fontWeight: 800 }}>{pts}</span>{" "}
-                      <span className="opacity-50">PTS</span>
-                    </p>
-                    <label>Drop</label>
-                    <p>{info.drop}</p>
-                    <label>Saison</label>
-                    <p>Saison 2</p>
-                  </div>
-                  <p className="badge-notes">{info.desc}</p>
+              <div key={r} className="rarity-slide">
+                <h2>{r}</h2>
+                <div className="rarity-info">
+                  <span className="rarity-pts" style={{ color }}>{pts} PTS</span>
+                  <span className="rarity-sep">·</span>
+                  <span className="rarity-drop">Drop {info.drop}</span>
+                  <span className="rarity-sep">·</span>
+                  <span className="rarity-desc">{info.desc}</span>
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Badge wrapper — items animate based on scroll progress */}
+        <div className="badge-wrapper">
+          {RARITY_ORDER.map((r) => (
+            <div key={r} className="badge-item">
+              <img
+                src={getBadgeImage(r, "saison2")}
+                alt={BADGE_INFO[r].name}
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Scroll indicator */}

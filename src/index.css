@@ -88,13 +88,13 @@ body {
   z-index: 5;
 }
 
-.rarity-names h2 {
+.rarity-slide {
   grid-area: 1 / 1;
   text-align: center;
-  font-size: clamp(3.5rem, 15vw, 14rem);
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   opacity: 0;
   --total: 5;
   --item-slot: calc(100% / var(--total));
@@ -105,11 +105,56 @@ body {
   animation-range: var(--item-entry) var(--item-exit);
 }
 
-.rarity-names h2:nth-child(1) { --i: 1; color: #d9d9d9; text-shadow: 0 0 80px rgba(217, 217, 217, 0.12); }
-.rarity-names h2:nth-child(2) { --i: 2; color: #4da6ff; text-shadow: 0 0 80px rgba(77, 166, 255, 0.18); }
-.rarity-names h2:nth-child(3) { --i: 3; color: #b266ff; text-shadow: 0 0 80px rgba(178, 102, 255, 0.22); }
-.rarity-names h2:nth-child(4) { --i: 4; color: #ffd633; text-shadow: 0 0 80px rgba(255, 214, 51, 0.25); }
-.rarity-names h2:nth-child(5) { --i: 5; color: #ff66cc; text-shadow: 0 0 80px rgba(255, 102, 204, 0.25); }
+.rarity-slide h2 {
+  font-size: clamp(3.5rem, 15vw, 14rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.rarity-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 500px;
+  padding: 0 1rem;
+}
+
+.rarity-pts {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.rarity-sep {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem;
+}
+
+.rarity-drop {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.rarity-desc {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.4;
+}
+
+.rarity-slide:nth-child(1) { --i: 1; }
+.rarity-slide:nth-child(1) h2 { color: #d9d9d9; text-shadow: 0 0 80px rgba(217, 217, 217, 0.12); }
+.rarity-slide:nth-child(2) { --i: 2; }
+.rarity-slide:nth-child(2) h2 { color: #4da6ff; text-shadow: 0 0 80px rgba(77, 166, 255, 0.18); }
+.rarity-slide:nth-child(3) { --i: 3; }
+.rarity-slide:nth-child(3) h2 { color: #b266ff; text-shadow: 0 0 80px rgba(178, 102, 255, 0.22); }
+.rarity-slide:nth-child(4) { --i: 4; }
+.rarity-slide:nth-child(4) h2 { color: #ffd633; text-shadow: 0 0 80px rgba(255, 214, 51, 0.25); }
+.rarity-slide:nth-child(5) { --i: 5; }
+.rarity-slide:nth-child(5) h2 { color: #ff66cc; text-shadow: 0 0 80px rgba(255, 102, 204, 0.25); }
 
 @keyframes badge-name-fade {
   0%, 100% { opacity: 0; }
@@ -203,83 +248,12 @@ body {
   filter: drop-shadow(0 0 24px rgba(145, 70, 255, 0.25));
 }
 
-/* ── Data card (info panel per badge) ── */
-.badge-data {
-  position: absolute;
-  inset: auto 5% 5%;
-  transition: scale 150ms ease-in-out;
-  scale: var(--info-scale) 1;
-  backface-visibility: hidden;
-  border-radius: 14px;
-  background: rgba(8, 8, 18, 0.92);
-  backdrop-filter: blur(24px);
-  padding: 1.25rem;
-  display: grid;
-  gap: 0.5rem;
-  color: white;
-  pointer-events: auto;
-}
-
-@container (width > 550px) {
-  .badge-data {
-    inset: auto -15% 10%;
-    padding: 1.5rem;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "title title"
-      "info  notes";
-    gap: 0.75rem 2rem;
-  }
-  .badge-data h3 { grid-area: title; }
-  .badge-data-grid { grid-area: info; }
-  .badge-notes { grid-area: notes; place-self: center; }
-}
-
-.badge-data h3 {
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.badge-data-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.3rem 0.75rem;
-  align-items: baseline;
-}
-
-.badge-data-grid label {
-  font-size: 0.7rem;
-  opacity: 0.4;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
-}
-
-.badge-data-grid p {
-  font-size: 0.85rem;
-  margin: 0;
-  font-weight: 500;
-}
-
-.badge-notes {
-  font-size: 0.75rem;
-  opacity: 0.5;
-  line-height: 1.5;
-  margin: 0;
-  text-wrap: pretty;
-}
-
 /* ── Keyframes ── */
 @keyframes badge-item-focus {
-  0%   { --focus: 0; --info-scale: 0; }
-  20%  { --info-scale: 0; }
-  30%  { --focus: 1; --info-scale: 1; }
-  70%  { --focus: 1; --info-scale: 1; }
-  80%  { --info-scale: 0; }
-  100% { --focus: 0; --info-scale: 0; }
+  0%   { --focus: 0; }
+  30%  { --focus: 1; }
+  70%  { --focus: 1; }
+  100% { --focus: 0; }
 }
 
 @keyframes showcase-hide {
@@ -372,9 +346,6 @@ body {
   }
   .badge-item > img {
     max-width: 140px;
-  }
-  .badge-data {
-    display: none;
   }
   .scroll-indicator {
     display: none !important;
