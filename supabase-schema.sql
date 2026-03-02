@@ -518,6 +518,76 @@ begin
 end;
 $$;
 
+-- 6. Free Spin
+-- ------------
+
+create table free_spins (
+  id bigserial primary key,
+  username text not null references profiles(username) on delete cascade,
+  rarity text not null,
+  season text not null default 'saison2',
+  claimed_at timestamptz default now()
+);
+
+create index idx_free_spins_username on free_spins(username);
+
+alter table free_spins enable row level security;
+create policy "public_read_free_spins" on free_spins for select using (true);
+
+-- Check if user can spin today
+create or replace function can_free_spin()
+returns boolean language plpgsql stable security definer as $$
+declare
+  v_username text;
+  v_last_spin timestamptz;
+begin
+  select username into v_username from profiles where auth_id = auth.uid();
+  if v_username is null then return false; end if;
+
+  select max(claimed_at) into v_last_spin from free_spins where username = v_username;
+  return v_last_spin is null or v_last_spin::date < current_date;
+end;
+$$;
+
+-- Claim daily free spin (weighted random badge)
+create or replace function claim_free_spin()
+returns text language plpgsql security definer as $$
+declare
+  v_username text;
+  v_last_spin timestamptz;
+  v_rarity text;
+  v_roll float;
+begin
+  select username into v_username from profiles where auth_id = auth.uid();
+  if v_username is null then raise exception 'Not authenticated'; end if;
+
+  -- Check if already spun today
+  select max(claimed_at) into v_last_spin from free_spins where username = v_username;
+  if v_last_spin is not null and v_last_spin::date >= current_date then
+    raise exception 'Deja utilise aujourd''hui';
+  end if;
+
+  -- Weighted random: COMMON 50%, RARE 30%, EPIC 15%, LEGENDARY 4%, UNIQUE 1%
+  v_roll := random();
+  if v_roll < 0.01 then v_rarity := 'UNIQUE';
+  elsif v_roll < 0.05 then v_rarity := 'LEGENDARY';
+  elsif v_roll < 0.20 then v_rarity := 'EPIC';
+  elsif v_roll < 0.50 then v_rarity := 'RARE';
+  else v_rarity := 'COMMON';
+  end if;
+
+  -- Grant the badge (current season)
+  insert into badges (username, season, rarity)
+  values (v_username, 'saison2', v_rarity);
+
+  -- Record the spin
+  insert into free_spins (username, rarity, season)
+  values (v_username, v_rarity, 'saison2');
+
+  return v_rarity;
+end;
+$$;
+
 -- All usernames (for trade autocomplete)
 create or replace function get_all_usernames()
 returns text[] language sql stable security definer as $$

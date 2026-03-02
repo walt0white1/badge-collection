@@ -84,6 +84,20 @@ export const cancelTrade = async (id: string): Promise<void> => {
   if (error) throw new Error(error.message);
 };
 
+// ---------- Free Spin ----------
+
+export const canFreeSpin = async (): Promise<boolean> => {
+  const { data, error } = await supabase.rpc("can_free_spin");
+  if (error) return false;
+  return !!data;
+};
+
+export const claimFreeSpin = async (): Promise<string> => {
+  const { data, error } = await supabase.rpc("claim_free_spin");
+  if (error) throw new Error(error.message);
+  return data as string;
+};
+
 // ---------- Share card ----------
 
 export const uploadShareCard = async (

@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
 import BadgeGrid from "../components/BadgeGrid";
 import ShareCardModal from "../components/ShareCardModal";
+import SpinWheelModal from "../components/SpinWheelModal";
+import { canFreeSpin } from "../api";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 
 function countBadges(list: string[]): Record<string, number> {
@@ -16,8 +19,16 @@ function countBadges(list: string[]): Record<string, number> {
 }
 
 export default function MyCollection() {
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const [showShareCard, setShowShareCard] = useState(false);
+  const [showSpin, setShowSpin] = useState(false);
+
+  const { data: spinAvailable, refetch: refetchSpin } = useQuery({
+    queryKey: ["canFreeSpin"],
+    queryFn: canFreeSpin,
+    enabled: !!user,
+  });
+
   if (!user) return null;
 
   const seasons = Object.keys(user.badges).sort().reverse();
@@ -89,7 +100,19 @@ export default function MyCollection() {
             </div>
           </div>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            {spinAvailable && (
+              <button
+                onClick={() => setShowSpin(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 hover:from-yellow-500/30 hover:to-purple-500/30 border border-yellow-500/30 text-yellow-300 text-sm font-semibold rounded-xl transition-all animate-pulse"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="hidden sm:inline">Spin gratuit !</span>
+                <span className="sm:hidden">Spin !</span>
+              </button>
+            )}
             <button
               onClick={() => setShowShareCard(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white text-sm font-semibold rounded-xl transition-colors"
@@ -147,6 +170,16 @@ export default function MyCollection() {
 
       {showShareCard && (
         <ShareCardModal user={user} onClose={() => setShowShareCard(false)} />
+      )}
+
+      {showSpin && (
+        <SpinWheelModal
+          onClose={() => setShowSpin(false)}
+          onResult={() => {
+            refetchSpin();
+            refresh();
+          }}
+        />
       )}
     </div>
   );
