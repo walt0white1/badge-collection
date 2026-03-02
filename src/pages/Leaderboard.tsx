@@ -6,9 +6,9 @@ import { RARITY_COLORS } from "../types";
 import { getBadgeImage } from "../badgeImages";
 
 const PODIUM_CFG = [
-  { accent: "#fbbf24", glow: "rgba(251,191,36,0.3)",  shadow: "rgba(251,191,36,0.15)", icon: "👑", label: "OR"     },
-  { accent: "#94a3b8", glow: "rgba(148,163,184,0.2)", shadow: "rgba(148,163,184,0.08)", icon: "✦",  label: "ARGENT" },
-  { accent: "#b45309", glow: "rgba(180,83,9,0.2)",   shadow: "rgba(180,83,9,0.08)",   icon: "✧",  label: "BRONZE" },
+  { accent: "#fbbf24", glow: "rgba(251,191,36,0.3)",  shadow: "rgba(251,191,36,0.15)", icon: "👑", label: "OR",     podiumH: 120 },
+  { accent: "#94a3b8", glow: "rgba(148,163,184,0.2)", shadow: "rgba(148,163,184,0.08)", icon: "✦",  label: "ARGENT", podiumH: 80  },
+  { accent: "#b45309", glow: "rgba(180,83,9,0.2)",   shadow: "rgba(180,83,9,0.08)",   icon: "✧",  label: "BRONZE", podiumH: 50  },
 ];
 
 export default function Leaderboard() {
@@ -87,101 +87,158 @@ export default function Leaderboard() {
 
             {/* ── PODIUM TOP 3 ── */}
             {showPodium && top3.length > 0 && (
-              <div className="flex items-end justify-center gap-3 sm:gap-5 pt-4 pb-2 px-2">
-                {/* Order: 2nd · 1st · 3rd */}
-                {[top3[1], top3[0], top3[2]].map((entry, podiumSlot) => {
-                  if (!entry) return <div key={`empty-${podiumSlot}`} className="flex-1 max-w-[180px]" />;
-                  const rankIdx = entry.rank - 1;
-                  const cfg = PODIUM_CFG[rankIdx];
-                  const isFirst = entry.rank === 1;
+              <div className="relative py-8 sm:py-12">
+                {/* Ambient background glows */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-[0.04]"
+                    style={{ background: "radial-gradient(ellipse, #fbbf24, transparent 70%)" }} />
+                  <div className="absolute top-1/2 left-[20%] -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-[0.03]"
+                    style={{ background: "radial-gradient(ellipse, #94a3b8, transparent 70%)" }} />
+                  <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-[0.03]"
+                    style={{ background: "radial-gradient(ellipse, #b45309, transparent 70%)" }} />
+                </div>
 
-                  return (
-                    <Link
-                      key={entry.username}
-                      to={`/user/${entry.username}`}
-                      className="relative flex flex-col items-center gap-2 sm:gap-4 rounded-2xl p-3 sm:p-6 border transition-all duration-300 group flex-1 hover:scale-[1.03]"
-                      style={{
-                        maxWidth: isFirst ? "220px" : "180px",
-                        transform: isFirst ? "translateY(-24px)" : undefined,
-                        background: `linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%)`,
-                        borderColor: cfg.accent + "55",
-                        boxShadow: `0 0 40px ${cfg.shadow}, 0 0 1px ${cfg.accent}33, inset 0 1px 0 rgba(255,255,255,0.06)`,
-                        backdropFilter: "blur(12px)",
-                      }}
-                    >
-                      {/* Rank badge */}
-                      <div
-                        className="absolute -top-3.5 -right-3.5 w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shadow-lg"
-                        style={{ background: cfg.accent, color: entry.rank === 1 ? "#000" : "#fff" }}
-                      >
-                        {entry.rank}
-                      </div>
+                <div className="relative flex items-end justify-center gap-3 sm:gap-4 lg:gap-6 px-2">
+                  {/* Order: 2nd · 1st · 3rd */}
+                  {[top3[1], top3[0], top3[2]].map((entry, podiumSlot) => {
+                    if (!entry) return <div key={`empty-${podiumSlot}`} className="flex-1 max-w-[260px]" />;
+                    const rankIdx = entry.rank - 1;
+                    const cfg = PODIUM_CFG[rankIdx];
+                    const isFirst = entry.rank === 1;
+                    const avatarSize = isFirst ? 88 : 72;
 
-                      {/* Icon */}
-                      <span className="text-2xl leading-none">{cfg.icon}</span>
-
-                      {/* Avatar */}
-                      <img
-                        src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
-                        alt={entry.username}
-                        className="rounded-full object-cover"
-                        style={{
-                          width: isFirst ? 72 : 56,
-                          height: isFirst ? 72 : 56,
-                          border: `2px solid ${cfg.accent}66`,
-                        }}
-                        onError={(e) => {
-                          const el = e.currentTarget as HTMLImageElement;
-                          el.style.display = "none";
-                          const fallback = el.nextElementSibling as HTMLElement;
-                          if (fallback) fallback.style.display = "flex";
-                        }}
-                      />
-                      <div
-                        className="rounded-full items-center justify-center font-black text-black"
-                        style={{
-                          display: "none",
-                          width: isFirst ? 72 : 56,
-                          height: isFirst ? 72 : 56,
-                          background: cfg.accent,
-                          fontSize: isFirst ? "1.2rem" : "1rem",
-                        }}
-                      >
-                        {entry.username[0].toUpperCase()}
-                      </div>
-
-                      {/* Username */}
-                      <span
-                        className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate"
-                        style={{ fontSize: isFirst ? "1.05rem" : "0.9rem" }}
-                      >
-                        {entry.display_name || entry.username}
-                      </span>
-
-                      {/* Points */}
-                      <div className="text-center">
-                        <span
-                          className="font-black tabular-nums leading-none"
-                          style={{ color: cfg.accent, fontSize: isFirst ? "1.6rem" : "1.25rem" }}
+                    return (
+                      <div key={entry.username} className="flex flex-col items-center flex-1" style={{ maxWidth: isFirst ? "280px" : "240px" }}>
+                        {/* Player card */}
+                        <Link
+                          to={`/user/${entry.username}`}
+                          className="relative flex flex-col items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all duration-300 group w-full hover:scale-[1.02]"
+                          style={{
+                            background: `linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.015) 100%)`,
+                            borderColor: cfg.accent + "44",
+                            boxShadow: `0 0 60px ${cfg.shadow}, 0 0 1px ${cfg.accent}33, inset 0 1px 0 rgba(255,255,255,0.06)`,
+                            backdropFilter: "blur(12px)",
+                          }}
                         >
-                          {entry.total_pts.toLocaleString()}
-                        </span>
-                        <span className="text-[11px] text-gray-500 ml-1">pts</span>
+                          {/* Top shine line */}
+                          <div
+                            className="absolute top-0 left-[10%] right-[10%] h-px opacity-40"
+                            style={{ background: `linear-gradient(90deg, transparent, ${cfg.accent}, transparent)` }}
+                          />
+
+                          {/* Rank badge */}
+                          <div
+                            className="absolute -top-4 -right-4 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shadow-lg ring-4 ring-gray-950"
+                            style={{ background: cfg.accent, color: entry.rank === 1 ? "#000" : "#fff" }}
+                          >
+                            {entry.rank}
+                          </div>
+
+                          {/* Icon */}
+                          <span className={`leading-none ${isFirst ? "text-3xl" : "text-2xl"}`}>{cfg.icon}</span>
+
+                          {/* Avatar */}
+                          <div className="relative">
+                            <div
+                              className="absolute inset-0 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity"
+                              style={{ background: cfg.accent, transform: "scale(1.5)" }}
+                            />
+                            <img
+                              src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                              alt={entry.username}
+                              className="rounded-full object-cover relative z-10"
+                              style={{
+                                width: avatarSize,
+                                height: avatarSize,
+                                border: `3px solid ${cfg.accent}66`,
+                              }}
+                              onError={(e) => {
+                                const el = e.currentTarget as HTMLImageElement;
+                                el.style.display = "none";
+                                const fallback = el.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = "flex";
+                              }}
+                            />
+                            <div
+                              className="rounded-full items-center justify-center font-black text-black relative z-10"
+                              style={{
+                                display: "none",
+                                width: avatarSize,
+                                height: avatarSize,
+                                background: cfg.accent,
+                                fontSize: isFirst ? "1.4rem" : "1.1rem",
+                              }}
+                            >
+                              {entry.username[0].toUpperCase()}
+                            </div>
+                          </div>
+
+                          {/* Username */}
+                          <span
+                            className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate"
+                            style={{ fontSize: isFirst ? "1.1rem" : "0.95rem" }}
+                          >
+                            {entry.display_name || entry.username}
+                          </span>
+
+                          {/* Points */}
+                          <div className="text-center">
+                            <span
+                              className="font-black tabular-nums leading-none"
+                              style={{ color: cfg.accent, fontSize: isFirst ? "2rem" : "1.5rem" }}
+                            >
+                              {entry.total_pts.toLocaleString()}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">pts</span>
+                          </div>
+
+                          {/* Badge count + top rarity */}
+                          <div className="flex items-center gap-2">
+                            {entry.top_rarity !== "NONE" && (
+                              <img
+                                src={getBadgeImage(entry.top_rarity, "saison2")}
+                                alt={entry.top_rarity}
+                                className="w-5 h-5 object-contain opacity-70"
+                              />
+                            )}
+                            <span className="text-[11px] text-gray-500 font-medium tracking-wide">
+                              {entry.badge_count} BADGE{entry.badge_count > 1 ? "S" : ""}
+                            </span>
+                          </div>
+
+                          {/* Bottom glow line */}
+                          <div
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px rounded-full opacity-50"
+                            style={{ width: "60%", background: cfg.accent }}
+                          />
+                        </Link>
+
+                        {/* Podium block */}
+                        <div
+                          className="hidden sm:flex w-full items-center justify-center rounded-b-xl relative overflow-hidden"
+                          style={{
+                            height: cfg.podiumH,
+                            background: `linear-gradient(180deg, ${cfg.accent}15 0%, ${cfg.accent}08 100%)`,
+                            borderLeft: `1px solid ${cfg.accent}22`,
+                            borderRight: `1px solid ${cfg.accent}22`,
+                            borderBottom: `1px solid ${cfg.accent}22`,
+                          }}
+                        >
+                          <span
+                            className="text-4xl font-black opacity-[0.08] select-none"
+                            style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.1em" }}
+                          >
+                            {cfg.label}
+                          </span>
+                          {/* Horizontal lines decoration */}
+                          <div className="absolute inset-0 pointer-events-none" style={{
+                            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 11px, ${cfg.accent}08 11px, ${cfg.accent}08 12px)`,
+                          }} />
+                        </div>
                       </div>
-
-                      {/* Badge count */}
-                      <span className="text-[11px] text-gray-600 font-medium tracking-wide">
-                        {entry.badge_count} BADGE{entry.badge_count > 1 ? "S" : ""}
-                      </span>
-
-                      {/* Bottom glow line */}
-                      <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px rounded-full opacity-60"
-                        style={{ width: "60%", background: cfg.accent }}
-                      />
-                    </Link>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
