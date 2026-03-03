@@ -118,7 +118,7 @@ export default function Home() {
 
       {/* ═══ SEASON 1 BADGES ═══ */}
       <section className="relative z-20 py-20">
-        <div className="max-w-[1000px] mx-auto px-6 sm:px-8">
+        <div className="max-w-[1300px] mx-auto px-6 sm:px-10">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-gray-500 text-xs font-semibold tracking-wider mb-4">
               ARCHIVE
@@ -130,7 +130,7 @@ export default function Home() {
               Les badges de la premiere saison. Plus disponibles, mais toujours echangeables.
             </p>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-5 sm:gap-8">
             {RARITY_ORDER.map((r) => (
               <div key={`s1-${r}`} className="group text-center">
                 <div className="relative aspect-square rounded-2xl bg-white/[0.02] border border-white/[0.05] p-3 sm:p-4 flex items-center justify-center transition-all hover:bg-white/[0.04] hover:border-white/[0.08]">
