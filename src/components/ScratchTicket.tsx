@@ -11,8 +11,8 @@ interface Props {
 
 const CANVAS_W = 260;
 const CANVAS_H = 340;
-const SCRATCH_RADIUS = 22;
-const REVEAL_THRESHOLD = 0.45;
+const SCRATCH_RADIUS = 28;
+const REVEAL_THRESHOLD = 0.30;
 
 export default function ScratchTicket({ ticket, onScratched }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -20,8 +20,11 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
   const [rarity, setRarity] = useState<string | null>(ticket.rarity);
   const [scratching, setScratchingState] = useState(false);
   const [scratchPct, setScratchPct] = useState(0);
+  const [error, setError] = useState("");
   const isDrawing = useRef(false);
   const hasRevealed = useRef(ticket.scratched);
+  const lastPos = useRef<{ x: number; y: number } | null>(null);
+  const moveCount = useRef(0);
 
   // Initialize scratch overlay
   useEffect(() => {
@@ -84,9 +87,24 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(x, y, SCRATCH_RADIUS, 0, Math.PI * 2);
-    ctx.fill();
+
+    const prev = lastPos.current;
+    if (prev) {
+      // Draw a continuous line from last position
+      ctx.lineWidth = SCRATCH_RADIUS * 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    } else {
+      // First point — just a circle
+      ctx.beginPath();
+      ctx.arc(x, y, SCRATCH_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    lastPos.current = { x, y };
   }, []);
 
   const calcScratchPercent = useCallback(() => {
@@ -105,14 +123,16 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
   const doReveal = useCallback(async () => {
     if (hasRevealed.current) return;
     hasRevealed.current = true;
+    setError("");
 
     try {
       const result = await scratchTicket(ticket.id);
       setRarity(result);
       setRevealed(true);
       onScratched(result);
-    } catch {
+    } catch (err: any) {
       hasRevealed.current = false;
+      setError(err.message || "Erreur lors du grattage");
     }
   }, [ticket.id, onScratched]);
 
@@ -123,9 +143,14 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
       const pos = getPos(e);
       if (!pos) return;
       scratch(pos.x, pos.y);
-      const pct = calcScratchPercent();
-      setScratchPct(pct);
-      if (pct >= REVEAL_THRESHOLD) doReveal();
+
+      // Only calculate percentage every 5 moves for performance
+      moveCount.current++;
+      if (moveCount.current % 5 === 0) {
+        const pct = calcScratchPercent();
+        setScratchPct(pct);
+        if (pct >= REVEAL_THRESHOLD) doReveal();
+      }
     },
     [getPos, scratch, calcScratchPercent, doReveal],
   );
@@ -134,6 +159,7 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     (e: React.MouseEvent | React.TouchEvent) => {
       if (hasRevealed.current) return;
       isDrawing.current = true;
+      lastPos.current = null;
       setScratchingState(true);
       const pos = getPos(e);
       if (pos) scratch(pos.x, pos.y);
@@ -143,8 +169,16 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
 
   const handleUp = useCallback(() => {
     isDrawing.current = false;
+    lastPos.current = null;
     setScratchingState(false);
-  }, []);
+
+    // Check percentage on mouse up too
+    if (!hasRevealed.current) {
+      const pct = calcScratchPercent();
+      setScratchPct(pct);
+      if (pct >= REVEAL_THRESHOLD) doReveal();
+    }
+  }, [calcScratchPercent, doReveal]);
 
   // Already scratched — just show the result
   if (ticket.scratched && ticket.rarity) {
@@ -230,11 +264,18 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
       )}
 
       {/* Scratch progress indicator */}
-      {!revealed && scratchPct > 0.05 && (
+      {!revealed && scratchPct > 0.03 && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 pointer-events-none">
           <span className="text-[10px] text-gray-300 font-medium">
-            {Math.min(Math.round(scratchPct * 100 / REVEAL_THRESHOLD * 100), 100)}%
+            {Math.min(Math.round((scratchPct / REVEAL_THRESHOLD) * 100), 100)}%
           </span>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="absolute top-2 left-2 right-2 z-20 bg-red-500/90 text-white text-[10px] font-medium px-2 py-1.5 rounded-lg text-center">
+          {error}
         </div>
       )}
 
