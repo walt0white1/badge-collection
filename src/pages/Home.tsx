@@ -43,7 +43,7 @@ export default function Home() {
       <div className="badge-showcase">
         {/* Logo / title */}
         <div className="showcase-logo">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[#9146FF] text-xs font-semibold tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[#9146FF] text-sm font-semibold tracking-wider mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#9146FF] animate-pulse" />
             SAISON 2 EN COURS
           </div>
@@ -52,7 +52,7 @@ export default function Home() {
             <br />
             Collection
           </h1>
-          <p className="mt-4 text-gray-500 text-sm sm:text-base max-w-md mx-auto">
+          <p className="mt-5 text-gray-400 text-base sm:text-lg max-w-lg mx-auto">
             Sub sur <strong className="text-white">el_matte0</strong> pour gagner des badges exclusifs.
             Scrolle pour decouvrir les raretes.
           </p>
