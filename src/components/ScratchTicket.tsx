@@ -7,34 +7,35 @@ import type { LotteryTicket } from "../types";
 interface Props {
   ticket: LotteryTicket;
   onScratched: (rarity: string) => void;
+  onDismiss: () => void;
 }
 
-const CANVAS_W = 260;
-const CANVAS_H = 340;
-const SCRATCH_RADIUS = 28;
+const CANVAS_W = 300;
+const CANVAS_H = 400;
+const SCRATCH_RADIUS = 30;
 const REVEAL_THRESHOLD = 0.30;
 
-export default function ScratchTicket({ ticket, onScratched }: Props) {
+export default function ScratchTicket({ ticket, onScratched, onDismiss }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [revealed, setRevealed] = useState(ticket.scratched);
-  const [rarity, setRarity] = useState<string | null>(ticket.rarity);
+  const [revealed, setRevealed] = useState(false);
+  const [rarity, setRarity] = useState<string | null>(null);
   const [scratching, setScratchingState] = useState(false);
   const [scratchPct, setScratchPct] = useState(0);
   const [error, setError] = useState("");
+  const [dismissing, setDismissing] = useState(false);
   const isDrawing = useRef(false);
-  const hasRevealed = useRef(ticket.scratched);
+  const hasRevealed = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const moveCount = useRef(0);
 
   // Initialize scratch overlay
   useEffect(() => {
-    if (ticket.scratched) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Draw the scratch overlay (silver gradient)
+    // Silver scratch overlay with texture
     const gradient = ctx.createLinearGradient(0, 0, CANVAS_W, CANVAS_H);
     gradient.addColorStop(0, "#c0c0c0");
     gradient.addColorStop(0.3, "#d8d8d8");
@@ -44,23 +45,36 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // Add some texture dots
-    for (let i = 0; i < 200; i++) {
+    // Texture dots
+    for (let i = 0; i < 300; i++) {
       const x = Math.random() * CANVAS_W;
       const y = Math.random() * CANVAS_H;
-      ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15})`;
+      ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.12})`;
       ctx.fillRect(x, y, 2, 2);
     }
 
+    // Diagonal shine lines
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 40;
+    for (let i = -CANVAS_H; i < CANVAS_W + CANVAS_H; i += 80) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i - CANVAS_H, CANVAS_H);
+      ctx.stroke();
+    }
+    ctx.restore();
+
     // "GRATTE MOI" text
     ctx.save();
-    ctx.font = "bold 22px system-ui, sans-serif";
+    ctx.font = "bold 24px system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillText("GRATTE MOI !", CANVAS_W / 2, CANVAS_H / 2);
     ctx.restore();
-  }, [ticket.scratched]);
+  }, [ticket.id]);
 
   const getPos = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -90,7 +104,6 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
 
     const prev = lastPos.current;
     if (prev) {
-      // Draw a continuous line from last position
       ctx.lineWidth = SCRATCH_RADIUS * 2;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -99,7 +112,6 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
       ctx.lineTo(x, y);
       ctx.stroke();
     } else {
-      // First point — just a circle
       ctx.beginPath();
       ctx.arc(x, y, SCRATCH_RADIUS, 0, Math.PI * 2);
       ctx.fill();
@@ -136,6 +148,18 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     }
   }, [ticket.id, onScratched]);
 
+  const handleDismiss = useCallback(() => {
+    setDismissing(true);
+    setTimeout(() => onDismiss(), 400);
+  }, [onDismiss]);
+
+  // Auto-dismiss after reveal
+  useEffect(() => {
+    if (!revealed || !rarity) return;
+    const t = setTimeout(handleDismiss, 2500);
+    return () => clearTimeout(t);
+  }, [revealed, rarity, handleDismiss]);
+
   const handleMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       if (!isDrawing.current || hasRevealed.current) return;
@@ -144,7 +168,6 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
       if (!pos) return;
       scratch(pos.x, pos.y);
 
-      // Only calculate percentage every 5 moves for performance
       moveCount.current++;
       if (moveCount.current % 5 === 0) {
         const pct = calcScratchPercent();
@@ -171,8 +194,6 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     isDrawing.current = false;
     lastPos.current = null;
     setScratchingState(false);
-
-    // Check percentage on mouse up too
     if (!hasRevealed.current) {
       const pct = calcScratchPercent();
       setScratchPct(pct);
@@ -180,40 +201,14 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
     }
   }, [calcScratchPercent, doReveal]);
 
-  // Already scratched — just show the result
-  if (ticket.scratched && ticket.rarity) {
-    return (
-      <div className="relative w-full aspect-[260/340] rounded-2xl overflow-hidden border border-white/[0.08] bg-gray-900/50 flex flex-col items-center justify-center gap-3 p-4">
-        <div
-          className="absolute inset-0 opacity-10 rounded-2xl"
-          style={{ background: `radial-gradient(circle, ${RARITY_COLORS[ticket.rarity]}, transparent 70%)` }}
-        />
-        <img
-          src={getBadgeImage(ticket.rarity, ticket.season)}
-          alt={ticket.rarity}
-          className="w-24 h-24 object-contain drop-shadow-xl relative z-10"
-        />
-        <span
-          className="text-sm font-black tracking-widest uppercase relative z-10"
-          style={{ color: RARITY_COLORS[ticket.rarity] }}
-        >
-          {ticket.rarity}
-        </span>
-        <span className="text-[10px] text-gray-600 relative z-10">
-          {ticket.season.replace("saison", "S")}
-        </span>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative w-full aspect-[260/340] select-none">
-      {/* Background: the hidden badge (visible through scratched areas) */}
-      <div
-        className={`absolute inset-0 rounded-2xl overflow-hidden border border-white/[0.08] flex flex-col items-center justify-center gap-3 transition-all duration-700 ${
-          revealed ? "bg-gray-900" : "bg-gray-950"
-        }`}
-      >
+    <div
+      className={`relative w-56 sm:w-64 aspect-[3/4] select-none transition-all duration-400 ${
+        dismissing ? "opacity-0 translate-x-40 -rotate-12 scale-90" : ""
+      }`}
+    >
+      {/* Background: hidden badge */}
+      <div className="absolute inset-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-gray-950 flex flex-col items-center justify-center gap-3">
         {revealed && rarity ? (
           <div className="flex flex-col items-center gap-3 animate-[ticketReveal_0.6s_ease-out]">
             <div
@@ -223,29 +218,31 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
             <img
               src={getBadgeImage(rarity, ticket.season)}
               alt={rarity}
-              className="w-28 h-28 object-contain drop-shadow-2xl relative z-10"
+              className="w-32 h-32 object-contain drop-shadow-2xl relative z-10"
             />
             <span
-              className="text-lg font-black tracking-widest uppercase relative z-10"
+              className="text-xl font-black tracking-widest uppercase relative z-10"
               style={{ color: RARITY_COLORS[rarity] }}
             >
               {rarity}
             </span>
-            <span className="text-xs text-gray-500 relative z-10">
-              {ticket.season.replace("saison", "Saison ")}
-            </span>
+            <button
+              onClick={handleDismiss}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors relative z-10 mt-1"
+            >
+              Suivant &rarr;
+            </button>
           </div>
-        ) : !revealed ? (
-          <div className="flex flex-col items-center gap-2 opacity-30">
-            <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        ) : (
+          <div className="flex flex-col items-center gap-2 opacity-20">
+            <svg className="w-20 h-20 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
             </svg>
-            <span className="text-xs text-gray-600 font-medium">?</span>
           </div>
-        ) : null}
+        )}
       </div>
 
-      {/* Scratch canvas overlay */}
+      {/* Scratch canvas */}
       {!revealed && (
         <canvas
           ref={canvasRef}
@@ -263,23 +260,23 @@ export default function ScratchTicket({ ticket, onScratched }: Props) {
         />
       )}
 
-      {/* Scratch progress indicator */}
+      {/* Progress */}
       {!revealed && scratchPct > 0.03 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 pointer-events-none">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 pointer-events-none">
           <span className="text-[10px] text-gray-300 font-medium">
             {Math.min(Math.round((scratchPct / REVEAL_THRESHOLD) * 100), 100)}%
           </span>
         </div>
       )}
 
-      {/* Error message */}
+      {/* Error */}
       {error && (
         <div className="absolute top-2 left-2 right-2 z-20 bg-red-500/90 text-white text-[10px] font-medium px-2 py-1.5 rounded-lg text-center">
           {error}
         </div>
       )}
 
-      {/* Particles on reveal */}
+      {/* Particles */}
       {revealed && rarity && <RevealParticles color={RARITY_COLORS[rarity] || "#fff"} />}
 
       <style>{`

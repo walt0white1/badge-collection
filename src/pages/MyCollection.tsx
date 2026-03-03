@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -7,6 +7,7 @@ import ShareCardModal from "../components/ShareCardModal";
 import ScratchTicket from "../components/ScratchTicket";
 import { canClaimTicket, claimTicket, getMyTickets } from "../api";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
+import { getBadgeImage } from "../badgeImages";
 
 function countBadges(list: string[]): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -24,6 +25,8 @@ export default function MyCollection() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState("");
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [lastRevealed, setLastRevealed] = useState<string | null>(null);
 
   const { data: ticketAvailable, refetch: refetchTicket } = useQuery({
     queryKey: ["canClaimTicket"],
@@ -46,13 +49,17 @@ export default function MyCollection() {
     0,
   );
 
-  // Compute rarity totals across all seasons
   const allRarityCounts: Record<string, number> = {};
   for (const r of RARITY_ORDER) allRarityCounts[r] = 0;
   for (const list of Object.values(user.badges)) {
     if (!Array.isArray(list)) continue;
     for (const b of list) allRarityCounts[b.toUpperCase()] = (allRarityCounts[b.toUpperCase()] || 0) + 1;
   }
+
+  const unscratchedTickets = tickets.filter((t) => !t.scratched);
+  const scratchedCount = tickets.filter((t) => t.scratched).length;
+  const remaining = unscratchedTickets.length - currentIdx;
+  const topTicket = unscratchedTickets[currentIdx] ?? null;
 
   const handleClaim = async () => {
     setClaiming(true);
@@ -68,14 +75,19 @@ export default function MyCollection() {
     }
   };
 
-  const handleScratched = () => {
+  const handleScratched = useCallback((rarity: string) => {
+    setLastRevealed(rarity);
     queryClient.invalidateQueries({ queryKey: ["myTickets"] });
     refetchTicket();
     refresh();
-  };
+  }, [queryClient, refetchTicket, refresh]);
 
-  const unscratchedTickets = tickets.filter((t) => !t.scratched);
-  const scratchedTickets = tickets.filter((t) => t.scratched);
+  const handleDismiss = useCallback(() => {
+    setCurrentIdx((prev) => prev + 1);
+  }, []);
+
+  // Stack cards behind the top one (up to 3 visible)
+  const stackCards = Math.min(remaining > 0 ? remaining - 1 : 0, 3);
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-10">
@@ -102,7 +114,6 @@ export default function MyCollection() {
               </p>
             </div>
 
-            {/* Rarity breakdown bar */}
             <div className="flex items-center gap-1 h-2 rounded-full overflow-hidden bg-white/[0.04] w-full max-w-md">
               {RARITY_ORDER.map((r) => {
                 const pct = totalBadges > 0 ? (allRarityCounts[r] / totalBadges) * 100 : 0;
@@ -117,7 +128,6 @@ export default function MyCollection() {
               })}
             </div>
 
-            {/* Rarity mini legend */}
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {RARITY_ORDER.map((r) => (
                 <div key={r} className="flex items-center gap-1.5">
@@ -151,71 +161,130 @@ export default function MyCollection() {
         </div>
       </div>
 
-      {/* ── Lottery Tickets ── */}
-      <div className="space-y-5">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-black text-white">Tickets a gratter</h2>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-gray-500">
-              {unscratchedTickets.length} en attente
-            </span>
-            {scratchedTickets.length > 0 && (
+      {/* ── Ticket Pile ── */}
+      {(tickets.length > 0 || ticketAvailable) && (
+        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+          {/* Left: stacked pile */}
+          <div className="relative shrink-0" style={{ width: 272, height: 360 }}>
+            {remaining > 0 ? (
               <>
-                <span className="text-white/10">|</span>
-                <span className="text-gray-600">{scratchedTickets.length} gratte{scratchedTickets.length > 1 ? "s" : ""}</span>
+                {/* Background stack cards */}
+                {Array.from({ length: stackCards }).map((_, i) => {
+                  const depth = stackCards - i;
+                  return (
+                    <div
+                      key={`stack-${depth}`}
+                      className="absolute inset-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-gray-700/40 to-gray-800/40"
+                      style={{
+                        transform: `translateX(${depth * 6}px) translateY(${depth * 6}px) rotate(${depth * 1.5}deg)`,
+                        zIndex: -depth,
+                        filter: `brightness(${1 - depth * 0.12})`,
+                      }}
+                    />
+                  );
+                })}
+
+                {/* Top card — interactive */}
+                {topTicket && (
+                  <div className="relative z-10">
+                    <ScratchTicket
+                      key={topTicket.id}
+                      ticket={topTicket}
+                      onScratched={handleScratched}
+                      onDismiss={handleDismiss}
+                    />
+                  </div>
+                )}
+
+                {/* Counter badge */}
+                {remaining > 1 && (
+                  <div className="absolute -top-2 -right-2 z-20 bg-twitch text-white text-xs font-black w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-twitch/30">
+                    &times;{remaining}
+                  </div>
+                )}
               </>
-            )}
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-white/[0.08] to-transparent" />
-          {ticketAvailable && (
-            <button
-              onClick={handleClaim}
-              disabled={claiming}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 hover:from-yellow-500/30 hover:to-purple-500/30 border border-yellow-500/30 text-yellow-300 text-sm font-semibold rounded-xl transition-all disabled:opacity-50"
-            >
-              {claiming ? (
-                <div className="w-4 h-4 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            ) : (
+              /* Empty pile */
+              <div className="w-full h-full rounded-2xl border-2 border-dashed border-white/[0.06] flex flex-col items-center justify-center gap-3">
+                <svg className="w-14 h-14 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                 </svg>
-              )}
-              Ticket gratuit !
-            </button>
-          )}
-        </div>
-
-        {claimError && (
-          <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl">
-            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            {claimError}
-          </div>
-        )}
-
-        {tickets.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {/* Unscratched first, then scratched */}
-            {unscratchedTickets.map((t) => (
-              <ScratchTicket key={t.id} ticket={t} onScratched={handleScratched} />
-            ))}
-            {scratchedTickets.map((t) => (
-              <ScratchTicket key={t.id} ticket={t} onScratched={handleScratched} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 rounded-2xl border border-white/[0.04] bg-white/[0.01]">
-            <svg className="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-            </svg>
-            <p className="text-gray-500 text-sm">Aucun ticket pour le moment.</p>
-            {ticketAvailable && (
-              <p className="text-gray-600 text-xs mt-1">Reclame ton ticket gratuit du jour !</p>
+                <p className="text-gray-600 text-sm font-medium">Aucun ticket</p>
+              </div>
             )}
           </div>
-        )}
-      </div>
+
+          {/* Right: info */}
+          <div className="flex-1 space-y-6 text-center lg:text-left">
+            <div>
+              <h2 className="text-2xl font-black text-white">Tickets a gratter</h2>
+              <p className="text-gray-500 mt-1">
+                {remaining > 0 ? (
+                  <>
+                    <span className="text-white font-semibold">{remaining}</span> ticket{remaining > 1 ? "s" : ""} en attente
+                  </>
+                ) : (
+                  "Tous tes tickets ont ete grattes !"
+                )}
+                {scratchedCount > 0 && (
+                  <span className="text-gray-600 ml-2">
+                    · {scratchedCount} gratte{scratchedCount > 1 ? "s" : ""}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Claim button */}
+            {ticketAvailable && (
+              <button
+                onClick={handleClaim}
+                disabled={claiming}
+                className="inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 hover:from-yellow-500/30 hover:to-purple-500/30 border border-yellow-500/30 text-yellow-300 font-semibold rounded-xl transition-all disabled:opacity-50"
+              >
+                {claiming ? (
+                  <div className="w-5 h-5 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                )}
+                Reclamer un ticket gratuit !
+              </button>
+            )}
+
+            {claimError && (
+              <p className="text-sm text-red-400">{claimError}</p>
+            )}
+
+            {/* Last revealed */}
+            {lastRevealed && (
+              <div className="flex items-center gap-3 lg:justify-start justify-center">
+                <span className="text-xs text-gray-600 uppercase tracking-wider">Dernier :</span>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={getBadgeImage(lastRevealed, "saison2")}
+                    alt=""
+                    className="w-8 h-8 object-contain"
+                  />
+                  <span
+                    className="text-sm font-black tracking-wider uppercase"
+                    style={{ color: RARITY_COLORS[lastRevealed] }}
+                  >
+                    {lastRevealed}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {remaining > 0 && (
+              <p className="text-xs text-gray-600">
+                Gratte la couche argentee pour reveler ton badge !
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Seasons ── */}
       {seasons.map((season) => {
@@ -229,7 +298,6 @@ export default function MyCollection() {
 
         return (
           <div key={season} className="space-y-5">
-            {/* Season header */}
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-black text-white">{label}</h2>
               <div className="flex items-center gap-3 text-sm">
