@@ -116,93 +116,124 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ═══ SEASON 1 BADGES ═══ */}
-      <section className="relative z-20 py-24">
-        <div className="max-w-[1100px] mx-auto px-6">
-          <p className="text-center text-gray-600 text-xs font-semibold tracking-[0.2em] uppercase mb-6">
-            Archive
-          </p>
-          <h2 className="text-center text-3xl sm:text-5xl font-black tracking-tight mb-3">
-            Saison 1
-          </h2>
-          <p className="text-center text-gray-500 text-sm sm:text-base mb-16 max-w-md mx-auto">
-            Les badges de la premiere saison. Plus disponibles, mais toujours echangeables.
-          </p>
-          <div className="flex items-end justify-center gap-8 sm:gap-14">
-            {RARITY_ORDER.map((r) => (
-              <div key={`s1-${r}`} className="group text-center">
-                <img
-                  src={getBadgeImage(r, "saison1")}
-                  alt={`S1 ${r}`}
-                  className="w-20 sm:w-28 md:w-36 aspect-square object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-2"
-                  draggable={false}
-                />
-                <p className="mt-3 text-[10px] sm:text-xs font-bold tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: RARITY_COLORS[r] }}>
-                  {r}
-                </p>
+      {/* ═══ SEASON 1 — FULL-WIDTH SHOWCASE ═══ */}
+      <section className="relative z-20 overflow-hidden">
+        {/* Gradient bg */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
+
+        <div className="relative py-28 px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-0 max-w-[1400px] mx-auto">
+            {/* Left — text */}
+            <div className="lg:w-[35%] text-center lg:text-left shrink-0">
+              <p className="text-gray-600 text-xs font-semibold tracking-[0.25em] uppercase mb-4">
+                Archive · Terminee
+              </p>
+              <h2 className="text-4xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-5">
+                Saison
+                <br />
+                <span className="bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">One</span>
+              </h2>
+              <p className="text-gray-500 text-sm sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed">
+                Les 5 premiers badges de la collection. Plus disponibles au drop, mais toujours echangeables entre collectionneurs.
+              </p>
+            </div>
+
+            {/* Right — badges flowing */}
+            <div className="lg:w-[65%] flex items-center justify-center gap-3 sm:gap-5 md:gap-8">
+              {RARITY_ORDER.map((r, idx) => (
+                <div
+                  key={`s1-${r}`}
+                  className="group text-center"
+                  style={{ transform: `translateY(${idx % 2 === 0 ? -8 : 8}px)` }}
+                >
+                  <div className="relative">
+                    <img
+                      src={getBadgeImage(r, "saison1")}
+                      alt={`S1 ${r}`}
+                      className="w-24 sm:w-32 md:w-40 lg:w-44 aspect-square object-contain transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-3"
+                      style={{ filter: `drop-shadow(0 0 30px ${RARITY_COLORS[r]}15)` }}
+                      draggable={false}
+                    />
+                  </div>
+                  <p
+                    className="mt-2 text-[9px] sm:text-[11px] font-black tracking-[0.15em] uppercase transition-opacity duration-300 opacity-40 group-hover:opacity-100"
+                    style={{ color: RARITY_COLORS[r] }}
+                  >
+                    {r}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Separator line */}
+        <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      </section>
+
+      {/* ═══ STATS STRIP ═══ */}
+      <section className="relative z-20">
+        <div className="py-16 px-6">
+          <div className="max-w-[1200px] mx-auto flex items-stretch justify-between gap-2">
+            {stats && [
+              { value: stats.total_badges, label: "Badges drops", color: "#a78bfa" },
+              { value: stats.total_users, label: "Collectionneurs", color: "#60a5fa" },
+              { value: stats.by_rarity?.LEGENDARY || 0, label: "Legendaires trouves", color: RARITY_COLORS.LEGENDARY },
+              { value: stats.by_rarity?.UNIQUE || 0, label: "Uniques en circulation", color: RARITY_COLORS.UNIQUE },
+            ].map((s, idx, arr) => (
+              <div key={s.label} className="flex-1 text-center relative">
+                <span className="block text-4xl sm:text-5xl md:text-6xl font-black tabular-nums leading-none" style={{ color: s.color }}>
+                  {s.value.toLocaleString()}
+                </span>
+                <span className="block mt-2 text-[10px] sm:text-xs text-gray-600 uppercase tracking-[0.12em] font-medium">
+                  {s.label}
+                </span>
+                {idx < arr.length - 1 && (
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-10 bg-white/[0.04]" />
+                )}
               </div>
             ))}
           </div>
         </div>
+
+        {/* Separator */}
+        <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       </section>
 
-      {/* ═══ STATS + CTA ═══ */}
-      <section className="relative z-20 py-24">
-        <div className="max-w-[900px] mx-auto px-6 text-center">
-          {/* Stats inline */}
-          {stats && (
-            <div className="flex items-center justify-center gap-6 sm:gap-10 mb-16 flex-wrap">
-              {[
-                { value: stats.total_badges, label: "badges", color: "#a78bfa" },
-                { value: stats.total_users, label: "joueurs", color: "#60a5fa" },
-                { value: stats.by_rarity?.LEGENDARY || 0, label: "legendaires", color: RARITY_COLORS.LEGENDARY },
-                { value: stats.by_rarity?.UNIQUE || 0, label: "uniques", color: RARITY_COLORS.UNIQUE },
-              ].map((s, idx, arr) => (
-                <div key={s.label} className="flex items-center gap-6 sm:gap-10">
-                  <div className="text-center">
-                    <span className="block text-3xl sm:text-4xl font-black tabular-nums" style={{ color: s.color }}>
-                      {s.value.toLocaleString()}
-                    </span>
-                    <span className="text-[10px] text-gray-600 uppercase tracking-[0.15em] font-semibold">
-                      {s.label}
-                    </span>
-                  </div>
-                  {idx < arr.length - 1 && (
-                    <span className="text-white/[0.06] text-2xl font-thin select-none">|</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+      {/* ═══ CTA ═══ */}
+      <section className="relative z-20 overflow-hidden">
+        {/* Purple glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_70%,rgba(145,70,255,0.08),transparent)] pointer-events-none" />
 
-          {/* CTA */}
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
+        <div className="relative py-24 px-6 text-center">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-5">
             Pret a collectionner ?
           </h2>
-          <p className="text-gray-500 max-w-md mx-auto text-sm sm:text-base mb-8">
-            Rejoins les {stats?.total_users || "100"}+ collectionneurs.
+          <p className="text-gray-500 max-w-lg mx-auto text-base sm:text-lg mb-10 leading-relaxed">
+            Rejoins les <strong className="text-gray-300">{stats?.total_users || "100"}+</strong> collectionneurs actifs.
             <br />
-            Sub sur la chaine pour tenter ta chance.
+            Sub sur la chaine pour tenter ta chance a chaque stream.
           </p>
-          <div className="flex flex-wrap items-center gap-3 justify-center">
+          <div className="flex flex-wrap items-center gap-4 justify-center">
             {isAuthenticated ? (
               <Link
                 to="/collection"
-                className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
+                className="px-8 py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-lg"
               >
                 Ma collection
               </Link>
             ) : (
               <button
                 onClick={login}
-                className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
+                className="px-8 py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-lg"
               >
                 Connexion Twitch
               </button>
             )}
             <Link
               to="/leaderboard"
-              className="px-7 py-3.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08] text-gray-300 font-bold rounded-xl transition-all"
+              className="px-8 py-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] text-gray-300 font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 text-lg"
             >
               Classement
             </Link>
