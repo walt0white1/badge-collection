@@ -45,6 +45,15 @@ export interface Stats {
   total_users: number;
 }
 
+export interface LotteryTicket {
+  id: string;
+  rarity: string | null;   // null until scratched
+  season: string;
+  scratched: boolean;
+  claimed_at: string;
+  scratched_at: string | null;
+}
+
 export const RARITY_ORDER = ["COMMON", "RARE", "EPIC", "LEGENDARY", "UNIQUE"] as const;
 
 export const RARITY_POINTS: Record<string, number> = {

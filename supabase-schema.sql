@@ -518,53 +518,56 @@ begin
 end;
 $$;
 
--- 6. Free Spin
--- ------------
+-- 6. Lottery Tickets
+-- ------------------
 
-create table free_spins (
-  id bigserial primary key,
+create table lottery_tickets (
+  id uuid primary key default gen_random_uuid(),
   username text not null references profiles(username) on delete cascade,
-  rarity text not null,
+  rarity text not null check (rarity in ('COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'UNIQUE')),
   season text not null default 'saison2',
-  claimed_at timestamptz default now()
+  scratched boolean not null default false,
+  claimed_at timestamptz default now(),
+  scratched_at timestamptz
 );
 
-create index idx_free_spins_username on free_spins(username);
+create index idx_lottery_tickets_username on lottery_tickets(username);
 
-alter table free_spins enable row level security;
-create policy "public_read_free_spins" on free_spins for select using (true);
+alter table lottery_tickets enable row level security;
+create policy "users_read_own_tickets" on lottery_tickets
+  for select using (username = (select username from profiles where auth_id = auth.uid()));
 
--- Check if user can spin today
-create or replace function can_free_spin()
+-- Check if user can claim a ticket today
+create or replace function can_claim_ticket()
 returns boolean language plpgsql stable security definer as $$
 declare
   v_username text;
-  v_last_spin timestamptz;
+  v_last_claim timestamptz;
 begin
   select username into v_username from profiles where auth_id = auth.uid();
   if v_username is null then return false; end if;
 
-  select max(claimed_at) into v_last_spin from free_spins where username = v_username;
-  return v_last_spin is null or v_last_spin::date < current_date;
+  select max(claimed_at) into v_last_claim from lottery_tickets where username = v_username;
+  return v_last_claim is null or v_last_claim::date < current_date;
 end;
 $$;
 
--- Claim daily free spin (weighted random badge)
-create or replace function claim_free_spin()
-returns text language plpgsql security definer as $$
+-- Claim a daily lottery ticket (rarity determined server-side, hidden until scratch)
+create or replace function claim_ticket()
+returns uuid language plpgsql security definer as $$
 declare
   v_username text;
-  v_last_spin timestamptz;
+  v_last_claim timestamptz;
   v_rarity text;
   v_roll float;
+  v_ticket_id uuid;
 begin
   select username into v_username from profiles where auth_id = auth.uid();
   if v_username is null then raise exception 'Not authenticated'; end if;
 
-  -- Check if already spun today
-  select max(claimed_at) into v_last_spin from free_spins where username = v_username;
-  if v_last_spin is not null and v_last_spin::date >= current_date then
-    raise exception 'Deja utilise aujourd''hui';
+  select max(claimed_at) into v_last_claim from lottery_tickets where username = v_username;
+  if v_last_claim is not null and v_last_claim::date >= current_date then
+    raise exception 'Deja reclame aujourd''hui';
   end if;
 
   -- Weighted random: COMMON 50%, RARE 30%, EPIC 15%, LEGENDARY 4%, UNIQUE 1%
@@ -576,15 +579,68 @@ begin
   else v_rarity := 'COMMON';
   end if;
 
-  -- Grant the badge (current season)
+  insert into lottery_tickets (username, rarity, season)
+  values (v_username, v_rarity, 'saison2')
+  returning id into v_ticket_id;
+
+  return v_ticket_id;
+end;
+$$;
+
+-- Get user's tickets (rarity hidden for unscratched)
+create or replace function get_my_tickets()
+returns json language plpgsql stable security definer as $$
+declare
+  v_username text;
+begin
+  select username into v_username from profiles where auth_id = auth.uid();
+  if v_username is null then raise exception 'Not authenticated'; end if;
+
+  return coalesce(
+    (select json_agg(row_to_json(t) order by t.claimed_at desc)
+     from (
+       select
+         id,
+         case when scratched then rarity else null end as rarity,
+         season,
+         scratched,
+         claimed_at,
+         scratched_at
+       from lottery_tickets
+       where username = v_username
+     ) t),
+    '[]'::json
+  );
+end;
+$$;
+
+-- Scratch a ticket: reveal rarity, grant badge
+create or replace function scratch_ticket(p_ticket_id uuid)
+returns text language plpgsql security definer as $$
+declare
+  v_username text;
+  v_ticket lottery_tickets%rowtype;
+begin
+  select username into v_username from profiles where auth_id = auth.uid();
+  if v_username is null then raise exception 'Not authenticated'; end if;
+
+  select * into v_ticket from lottery_tickets
+  where id = p_ticket_id and username = v_username
+  for update;
+
+  if not found then raise exception 'Ticket introuvable'; end if;
+  if v_ticket.scratched then raise exception 'Deja gratte'; end if;
+
+  -- Mark as scratched
+  update lottery_tickets
+  set scratched = true, scratched_at = now()
+  where id = p_ticket_id;
+
+  -- Grant the badge
   insert into badges (username, season, rarity)
-  values (v_username, 'saison2', v_rarity);
+  values (v_username, v_ticket.season, v_ticket.rarity);
 
-  -- Record the spin
-  insert into free_spins (username, rarity, season)
-  values (v_username, v_rarity, 'saison2');
-
-  return v_rarity;
+  return v_ticket.rarity;
 end;
 $$;
 

@@ -1,5 +1,5 @@
 import { supabase } from "./lib/supabase";
-import type { LeaderboardEntry, PublicUser, Stats, MyTrades, Trade } from "./types";
+import type { LeaderboardEntry, PublicUser, Stats, MyTrades, Trade, LotteryTicket } from "./types";
 
 // ---------- Public ----------
 
@@ -84,16 +84,28 @@ export const cancelTrade = async (id: string): Promise<void> => {
   if (error) throw new Error(error.message);
 };
 
-// ---------- Free Spin ----------
+// ---------- Lottery Tickets ----------
 
-export const canFreeSpin = async (): Promise<boolean> => {
-  const { data, error } = await supabase.rpc("can_free_spin");
+export const canClaimTicket = async (): Promise<boolean> => {
+  const { data, error } = await supabase.rpc("can_claim_ticket");
   if (error) return false;
   return !!data;
 };
 
-export const claimFreeSpin = async (): Promise<string> => {
-  const { data, error } = await supabase.rpc("claim_free_spin");
+export const claimTicket = async (): Promise<string> => {
+  const { data, error } = await supabase.rpc("claim_ticket");
+  if (error) throw new Error(error.message);
+  return data as string;
+};
+
+export const getMyTickets = async (): Promise<LotteryTicket[]> => {
+  const { data, error } = await supabase.rpc("get_my_tickets");
+  if (error) throw new Error(error.message);
+  return (data || []) as LotteryTicket[];
+};
+
+export const scratchTicket = async (ticketId: string): Promise<string> => {
+  const { data, error } = await supabase.rpc("scratch_ticket", { p_ticket_id: ticketId });
   if (error) throw new Error(error.message);
   return data as string;
 };
