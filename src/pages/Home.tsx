@@ -117,31 +117,27 @@ export default function Home() {
       </div>
 
       {/* ═══ SEASON 1 BADGES ═══ */}
-      <section className="relative z-20 py-20">
-        <div className="max-w-[1300px] mx-auto px-6 sm:px-10">
-          <div className="text-center mb-12">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-gray-500 text-xs font-semibold tracking-wider mb-4">
-              ARCHIVE
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Saison 1
-            </h2>
-            <p className="text-gray-500 text-sm sm:text-base mt-3 max-w-md mx-auto">
-              Les badges de la premiere saison. Plus disponibles, mais toujours echangeables.
-            </p>
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-5 sm:gap-8">
+      <section className="relative z-20 py-24">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <p className="text-center text-gray-600 text-xs font-semibold tracking-[0.2em] uppercase mb-6">
+            Archive
+          </p>
+          <h2 className="text-center text-3xl sm:text-5xl font-black tracking-tight mb-3">
+            Saison 1
+          </h2>
+          <p className="text-center text-gray-500 text-sm sm:text-base mb-16 max-w-md mx-auto">
+            Les badges de la premiere saison. Plus disponibles, mais toujours echangeables.
+          </p>
+          <div className="flex items-end justify-center gap-8 sm:gap-14">
             {RARITY_ORDER.map((r) => (
               <div key={`s1-${r}`} className="group text-center">
-                <div className="relative aspect-square rounded-2xl bg-white/[0.02] border border-white/[0.05] p-3 sm:p-4 flex items-center justify-center transition-all hover:bg-white/[0.04] hover:border-white/[0.08]">
-                  <img
-                    src={getBadgeImage(r, "saison1")}
-                    alt={`S1 ${r}`}
-                    className="w-full h-full object-contain drop-shadow-lg transition-transform group-hover:scale-110"
-                    draggable={false}
-                  />
-                </div>
-                <p className="mt-2 text-xs font-bold tracking-wide uppercase" style={{ color: RARITY_COLORS[r] }}>
+                <img
+                  src={getBadgeImage(r, "saison1")}
+                  alt={`S1 ${r}`}
+                  className="w-20 sm:w-28 md:w-36 aspect-square object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-2"
+                  draggable={false}
+                />
+                <p className="mt-3 text-[10px] sm:text-xs font-bold tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: RARITY_COLORS[r] }}>
                   {r}
                 </p>
               </div>
@@ -150,66 +146,66 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ AFTER SHOWCASE — STATS + CTA ═══ */}
-      <section className="relative z-20">
-        <div className="max-w-[1100px] mx-auto px-6 sm:px-8 py-20 space-y-16">
-          {/* Stats */}
+      {/* ═══ STATS + CTA ═══ */}
+      <section className="relative z-20 py-24">
+        <div className="max-w-[900px] mx-auto px-6 text-center">
+          {/* Stats inline */}
           {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="flex items-center justify-center gap-6 sm:gap-10 mb-16 flex-wrap">
               {[
-                { value: stats.total_badges, label: "Badges", color: "#a78bfa" },
-                { value: stats.total_users, label: "Joueurs", color: "#60a5fa" },
-                { value: stats.by_rarity?.LEGENDARY || 0, label: "Legendaires", color: RARITY_COLORS.LEGENDARY },
-                { value: stats.by_rarity?.UNIQUE || 0, label: "Uniques", color: RARITY_COLORS.UNIQUE },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="text-center py-5 rounded-2xl bg-white/[0.02] border border-white/[0.05]"
-                >
-                  <div className="text-2xl sm:text-3xl font-black tabular-nums" style={{ color: s.color }}>
-                    {s.value.toLocaleString()}
+                { value: stats.total_badges, label: "badges", color: "#a78bfa" },
+                { value: stats.total_users, label: "joueurs", color: "#60a5fa" },
+                { value: stats.by_rarity?.LEGENDARY || 0, label: "legendaires", color: RARITY_COLORS.LEGENDARY },
+                { value: stats.by_rarity?.UNIQUE || 0, label: "uniques", color: RARITY_COLORS.UNIQUE },
+              ].map((s, idx, arr) => (
+                <div key={s.label} className="flex items-center gap-6 sm:gap-10">
+                  <div className="text-center">
+                    <span className="block text-3xl sm:text-4xl font-black tabular-nums" style={{ color: s.color }}>
+                      {s.value.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-gray-600 uppercase tracking-[0.15em] font-semibold">
+                      {s.label}
+                    </span>
                   </div>
-                  <div className="text-[10px] text-gray-600 mt-1 uppercase tracking-widest font-semibold">
-                    {s.label}
-                  </div>
+                  {idx < arr.length - 1 && (
+                    <span className="text-white/[0.06] text-2xl font-thin select-none">|</span>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
           {/* CTA */}
-          <div className="text-center space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Pret a collectionner ?
-            </h2>
-            <p className="text-gray-500 max-w-md mx-auto text-sm sm:text-base">
-              Rejoins les {stats?.total_users || "100"}+ collectionneurs.
-              <br />
-              Sub sur la chaine pour tenter ta chance.
-            </p>
-            <div className="flex flex-wrap items-center gap-3 justify-center pt-2">
-              {isAuthenticated ? (
-                <Link
-                  to="/collection"
-                  className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
-                >
-                  Ma collection
-                </Link>
-              ) : (
-                <button
-                  onClick={login}
-                  className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
-                >
-                  Connexion Twitch
-                </button>
-              )}
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
+            Pret a collectionner ?
+          </h2>
+          <p className="text-gray-500 max-w-md mx-auto text-sm sm:text-base mb-8">
+            Rejoins les {stats?.total_users || "100"}+ collectionneurs.
+            <br />
+            Sub sur la chaine pour tenter ta chance.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 justify-center">
+            {isAuthenticated ? (
               <Link
-                to="/leaderboard"
-                className="px-7 py-3.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08] text-gray-300 font-bold rounded-xl transition-all"
+                to="/collection"
+                className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
               >
-                Classement
+                Ma collection
               </Link>
-            </div>
+            ) : (
+              <button
+                onClick={login}
+                className="px-7 py-3.5 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-[#9146FF]/25"
+              >
+                Connexion Twitch
+              </button>
+            )}
+            <Link
+              to="/leaderboard"
+              className="px-7 py-3.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08] text-gray-300 font-bold rounded-xl transition-all"
+            >
+              Classement
+            </Link>
           </div>
         </div>
       </section>
