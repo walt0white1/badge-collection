@@ -116,6 +116,40 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ═══ SEASON 1 BADGES ═══ */}
+      <section className="relative z-20 py-20">
+        <div className="max-w-[1000px] mx-auto px-6 sm:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-gray-500 text-xs font-semibold tracking-wider mb-4">
+              ARCHIVE
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
+              Saison 1
+            </h2>
+            <p className="text-gray-500 text-sm sm:text-base mt-3 max-w-md mx-auto">
+              Les badges de la premiere saison. Plus disponibles, mais toujours echangeables.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 sm:gap-6">
+            {RARITY_ORDER.map((r) => (
+              <div key={`s1-${r}`} className="group text-center">
+                <div className="relative aspect-square rounded-2xl bg-white/[0.02] border border-white/[0.05] p-3 sm:p-4 flex items-center justify-center transition-all hover:bg-white/[0.04] hover:border-white/[0.08]">
+                  <img
+                    src={getBadgeImage(r, "saison1")}
+                    alt={`S1 ${r}`}
+                    className="w-full h-full object-contain drop-shadow-lg transition-transform group-hover:scale-110"
+                    draggable={false}
+                  />
+                </div>
+                <p className="mt-2 text-xs font-bold tracking-wide uppercase" style={{ color: RARITY_COLORS[r] }}>
+                  {r}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ AFTER SHOWCASE — STATS + CTA ═══ */}
       <section className="relative z-20">
         <div className="max-w-[1100px] mx-auto px-6 sm:px-8 py-20 space-y-16">
