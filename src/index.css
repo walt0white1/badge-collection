@@ -50,7 +50,7 @@ body {
 
 /* ── Showcase scroll area ── */
 .badge-showcase {
-  height: 1200vh;
+  height: 880vh;
   position: relative;
   z-index: 1;
 }
@@ -93,9 +93,10 @@ body {
   text-align: center;
   opacity: 0;
   --total: 5;
-  --item-slot: calc(100% / var(--total));
-  --item-entry: calc((var(--i) - 1) * var(--item-slot));
-  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  --slot: 150vh;
+  --dur: 220vh;
+  --item-entry: calc((var(--i) - 1) * var(--slot));
+  --item-exit: calc(var(--item-entry) + var(--dur));
   animation: badge-name-fade 1ms 0.2ms both;
   animation-timeline: scroll();
   animation-range: var(--item-entry) var(--item-exit);
@@ -136,9 +137,10 @@ body {
   text-align: center;
   opacity: 0;
   --total: 5;
-  --item-slot: calc(100% / var(--total));
-  --item-entry: calc((var(--i) - 1) * var(--item-slot));
-  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  --slot: 150vh;
+  --dur: 220vh;
+  --item-entry: calc((var(--i) - 1) * var(--slot));
+  --item-exit: calc(var(--item-entry) + var(--dur));
   animation: badge-name-fade 1ms 0.2ms both;
   animation-timeline: scroll();
   animation-range: var(--item-entry) var(--item-exit);
@@ -205,9 +207,10 @@ body {
 /* ── Individual badge items ── */
 .badge-item {
   --total: 5;
-  --item-slot: calc(100% / var(--total));
-  --item-entry: calc((var(--i) - 1) * var(--item-slot));
-  --item-exit: calc(var(--item-entry) + var(--item-slot) * 2.5 - 22%);
+  --slot: 150vh;
+  --dur: 220vh;
+  --item-entry: calc((var(--i) - 1) * var(--slot));
+  --item-exit: calc(var(--item-entry) + var(--dur));
   --focus: 0;
   --info-scale: 0;
   --item-x: calc(
