@@ -50,7 +50,7 @@ body {
 
 /* ── Showcase scroll area ── */
 .badge-showcase {
-  height: 650vh;
+  height: 900vh;
   position: relative;
   z-index: 1;
 }
