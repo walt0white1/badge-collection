@@ -331,6 +331,34 @@ body {
   to { opacity: 0; }
 }
 
+/* ── Responsive – tablet & medium desktop ── */
+@media (max-width: 1200px) {
+  .badge-item > img {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .badge-item > img {
+    max-width: 240px;
+  }
+  .badge-wrapper {
+    height: 55vh;
+  }
+}
+
+@media (max-width: 900px) {
+  .badge-item > img {
+    max-width: 200px;
+  }
+  .rarity-titles {
+    padding-top: 12vh;
+  }
+  .rarity-infos {
+    padding-bottom: 6vh;
+  }
+}
+
 /* ── Fallback for browsers without scroll-driven animations ── */
 @supports not (animation-timeline: scroll()) {
   .badge-showcase {
