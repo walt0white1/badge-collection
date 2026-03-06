@@ -2,8 +2,9 @@ import { useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
-import BadgeGrid from "../components/BadgeGrid";
+import ArcRow from "../components/ArcRow";
 import ShareCardModal from "../components/ShareCardModal";
+import { ARC_CONFIG } from "../arcConfig";
 import ScratchTicket from "../components/ScratchTicket";
 import { canClaimTicket, claimTicket, getMyTickets } from "../api";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
@@ -286,31 +287,32 @@ export default function MyCollection() {
         </div>
       )}
 
-      {/* ── Seasons ── */}
-      {seasons.map((season) => {
+      {/* ── Arcs ── */}
+      {seasons.map((season, idx) => {
         const currentList = user.badges[season] || [];
         const counts = countBadges(currentList);
-        const label = season.replace("saison", "Saison ");
         const seasonPts = currentList.reduce(
           (sum, b) => sum + (RARITY_POINTS[b.toUpperCase()] || 0),
           0,
         );
+        const arc = ARC_CONFIG[season] || {
+          name: season.replace("saison", "Saison "),
+          subtitle: "",
+          status: "archive" as const,
+        };
 
         return (
-          <div key={season} className="space-y-5">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-black text-white">{label}</h2>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="text-gray-500">
-                  {currentList.length} badge{currentList.length > 1 ? "s" : ""}
-                </span>
-                <span className="text-white/10">|</span>
-                <span className="text-twitch font-semibold">{seasonPts} pts</span>
-              </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-white/[0.08] to-transparent" />
-            </div>
-
-            <BadgeGrid counts={counts} season={season} />
+          <div key={season}>
+            <ArcRow
+              season={season}
+              counts={counts}
+              arc={arc}
+              totalBadges={currentList.length}
+              totalPts={seasonPts}
+            />
+            {idx < seasons.length - 1 && (
+              <div className="mx-auto w-[60%] max-w-[400px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-10" />
+            )}
           </div>
         );
       })}
