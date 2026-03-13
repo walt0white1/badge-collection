@@ -90,20 +90,20 @@ export default function Leaderboard() {
           style={{ background: "radial-gradient(ellipse at center, rgba(178,102,255,0.08), transparent 55%)" }} />
       </div>
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8 pt-10 pb-28">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-28">
 
         {/* ━━━ HEADER ━━━ */}
-        <header className="mb-10">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.92] bg-gradient-to-r from-[#9146FF] via-purple-400 to-[#ff66cc] bg-clip-text text-transparent">
+        <header className="mb-6 sm:mb-10">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.92] bg-gradient-to-r from-[#9146FF] via-purple-400 to-[#ff66cc] bg-clip-text text-transparent">
             Classement
           </h1>
-          <p className="mt-3 text-gray-500 text-sm sm:text-base max-w-md">
+          <p className="mt-2 sm:mt-3 text-gray-500 text-sm sm:text-base max-w-md">
             Les meilleurs collectionneurs de badges de la communauté.
           </p>
         </header>
 
         {/* ━━━ CONTROLS BAR ━━━ */}
-        <div className="flex flex-wrap items-center gap-3 mb-10">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           {/* Tabs */}
           <div className="inline-flex bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1 gap-0.5">
             {tabs.map(({ id, label }) => (
@@ -140,8 +140,8 @@ export default function Leaderboard() {
             </div>
           )}
 
-          {/* Search — pushed right */}
-          <div className="relative ml-auto">
+          {/* Search — pushed right on desktop, full width on mobile */}
+          <div className="relative w-full sm:w-auto sm:ml-auto">
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -150,7 +150,7 @@ export default function Leaderboard() {
               placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-48 sm:w-56 pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#0f0f13] border border-white/[0.06] text-white placeholder-gray-700 focus:outline-none focus:border-[#9146FF]/40 focus:bg-[#0a0a0d] transition-all"
+              className="w-full sm:w-56 pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#0f0f13] border border-white/[0.06] text-white placeholder-gray-700 focus:outline-none focus:border-[#9146FF]/40 focus:bg-[#0a0a0d] transition-all"
             />
           </div>
         </div>
@@ -168,12 +168,12 @@ export default function Leaderboard() {
 
                 {/* ── TOP 3 PODIUM ── */}
                 {showPodium && top3.length > 0 && (
-                  <div className="relative mb-16">
+                  <div className="relative mb-8 sm:mb-16">
                     {/* Ambient glow under podium */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
                       style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
-                    <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
+                    <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
                       {[top3[1], top3[0], top3[2]].map((entry) => {
                         if (!entry) return <div key={Math.random()} />;
                         const ri = entry.rank - 1;
@@ -183,9 +183,9 @@ export default function Leaderboard() {
                         return (
                           <Link key={entry.username} to={`/user/${entry.username}`} className="group block">
                             <div
-                              className="relative rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
+                              className="relative rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
                               style={{
-                                padding: isFirst ? "32px 20px 24px" : "24px 16px 20px",
+                                padding: isFirst ? "16px 10px 14px" : "12px 8px 12px",
                                 background: isFirst
                                   ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
                                   : "#050508",
@@ -196,8 +196,8 @@ export default function Leaderboard() {
                               }}
                             >
                               {/* Rank badge */}
-                              <div className="flex justify-center mb-4">
-                                <span className="text-[11px] font-black tracking-[0.18em] uppercase px-3 py-1 rounded-full"
+                              <div className="flex justify-center mb-2 sm:mb-4">
+                                <span className="text-[10px] sm:text-[11px] font-black tracking-[0.18em] uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
                                   style={{
                                     color: accent,
                                     background: `${accent}14`,
@@ -208,10 +208,10 @@ export default function Leaderboard() {
                               </div>
 
                               {/* Avatar */}
-                              <div className="flex justify-center mb-4 relative">
+                              <div className="flex justify-center mb-2 sm:mb-4 relative">
                                 {isFirst && (
                                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-32 h-32 rounded-full"
+                                    <div className="w-20 sm:w-32 h-20 sm:h-32 rounded-full"
                                       style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
                                   </div>
                                 )}
@@ -221,16 +221,16 @@ export default function Leaderboard() {
                                     alt={entry.username}
                                     className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
                                     style={{
-                                      width: isFirst ? 104 : 76,
-                                      height: isFirst ? 104 : 76,
-                                      border: `3px solid ${accent}55`,
+                                      width: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
+                                      height: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
+                                      border: `2px solid ${accent}55`,
                                       boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
                                     }}
                                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                                   />
                                   {isFirst && (
-                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                                      <svg className="w-8 h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
+                                    <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2">
+                                      <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
                                         <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
                                       </svg>
                                     </div>
@@ -239,17 +239,17 @@ export default function Leaderboard() {
                               </div>
 
                               {/* Name */}
-                              <p className={`text-center font-bold text-white truncate mb-1 ${isFirst ? "text-base" : "text-sm"}`}>
+                              <p className={`text-center font-bold text-white truncate mb-0.5 ${isFirst ? "text-xs sm:text-base" : "text-[11px] sm:text-sm"}`}>
                                 {entry.display_name || entry.username}
                               </p>
 
                               {/* Points */}
                               <p className="text-center">
-                                <span className={`font-black tabular-nums ${isFirst ? "text-4xl" : "text-2xl"}`}
+                                <span className={`font-black tabular-nums ${isFirst ? "text-2xl sm:text-4xl" : "text-xl sm:text-2xl"}`}
                                   style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
                                   {entry.total_pts}
                                 </span>
-                                <span className="text-xs text-gray-600 ml-1.5 font-medium">pts</span>
+                                <span className="text-[10px] sm:text-xs text-gray-600 ml-1 font-medium">pts</span>
                               </p>
                             </div>
                           </Link>
@@ -340,15 +340,15 @@ export default function Leaderboard() {
 
                 {/* ── TOP 3 PODIUM ── */}
                 {showWizePodium && wizeTop3.length > 0 && (
-                  <div className="relative mb-16">
+                  <div className="relative mb-8 sm:mb-16">
                     {/* Ambient glow under podium */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
                       style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
-                    <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
+                    <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
                       {[wizeTop3[1], wizeTop3[0], wizeTop3[2]].map((entry, displayIdx) => {
                         if (!entry) return <div key={`empty-${displayIdx}`} />;
-                        const ri = [1, 0, 2][displayIdx]; // actual rank index: 2nd, 1st, 3rd
+                        const ri = [1, 0, 2][displayIdx];
                         const accent = PODIUM_COLORS[ri];
                         const isFirst = ri === 0;
                         const badge = badgeMap.get(entry.user_name.toLowerCase());
@@ -358,9 +358,9 @@ export default function Leaderboard() {
                         return (
                           <Link key={entry.user_uid} to={`/user/${entry.user_name}`} className="group block">
                             <div
-                              className="relative rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
+                              className="relative rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
                               style={{
-                                padding: isFirst ? "32px 20px 24px" : "24px 16px 20px",
+                                padding: isFirst ? "16px 10px 14px" : "12px 8px 12px",
                                 background: isFirst
                                   ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
                                   : "#050508",
@@ -371,8 +371,8 @@ export default function Leaderboard() {
                               }}
                             >
                               {/* Rank badge */}
-                              <div className="flex justify-center mb-4">
-                                <span className="text-[11px] font-black tracking-[0.18em] uppercase px-3 py-1 rounded-full"
+                              <div className="flex justify-center mb-2 sm:mb-4">
+                                <span className="text-[10px] sm:text-[11px] font-black tracking-[0.18em] uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
                                   style={{
                                     color: accent,
                                     background: `${accent}14`,
@@ -383,10 +383,10 @@ export default function Leaderboard() {
                               </div>
 
                               {/* Avatar */}
-                              <div className="flex justify-center mb-4 relative">
+                              <div className="flex justify-center mb-2 sm:mb-4 relative">
                                 {isFirst && (
                                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-32 h-32 rounded-full"
+                                    <div className="w-20 sm:w-32 h-20 sm:h-32 rounded-full"
                                       style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
                                   </div>
                                 )}
@@ -396,16 +396,16 @@ export default function Leaderboard() {
                                     alt={entry.user_name}
                                     className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
                                     style={{
-                                      width: isFirst ? 104 : 76,
-                                      height: isFirst ? 104 : 76,
-                                      border: `3px solid ${accent}55`,
+                                      width: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
+                                      height: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
+                                      border: `2px solid ${accent}55`,
                                       boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
                                     }}
                                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                                   />
                                   {isFirst && (
-                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                                      <svg className="w-8 h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
+                                    <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2">
+                                      <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
                                         <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
                                       </svg>
                                     </div>
@@ -414,13 +414,13 @@ export default function Leaderboard() {
                               </div>
 
                               {/* Name */}
-                              <p className={`text-center font-bold text-white truncate mb-1 ${isFirst ? "text-base" : "text-sm"}`}>
+                              <p className={`text-center font-bold text-white truncate mb-0.5 ${isFirst ? "text-xs sm:text-base" : "text-[11px] sm:text-sm"}`}>
                                 {badge?.display_name || entry.user_name}
                               </p>
 
                               {/* Value */}
                               <p className="text-center">
-                                <span className={`font-black tabular-nums ${isFirst ? "text-4xl" : "text-2xl"}`}
+                                <span className={`font-black tabular-nums ${isFirst ? "text-2xl sm:text-4xl" : "text-xl sm:text-2xl"}`}
                                   style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
                                   {display}
                                 </span>
