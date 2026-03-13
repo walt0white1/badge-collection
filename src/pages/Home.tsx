@@ -226,7 +226,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
-        <div className="relative pt-3 pb-8 md:py-28 px-6">
+        {/* Subtle divider on mobile */}
+        <div className="mx-auto w-[50%] max-w-[200px] h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent sm:hidden" />
+
+        <div className="relative pt-6 pb-8 md:py-28 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-0 max-w-[1400px] mx-auto">
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
               <p className="text-gray-600 text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4">
