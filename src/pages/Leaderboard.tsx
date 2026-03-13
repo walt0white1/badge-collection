@@ -80,7 +80,7 @@ export default function Leaderboard() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
 
       {/* ── Ambient glow matching the home page ── */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
@@ -170,7 +170,7 @@ export default function Leaderboard() {
                 {showPodium && top3.length > 0 && (
                   <div className="relative mb-8 sm:mb-16">
                     {/* Ambient glow under podium */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[200px] pointer-events-none"
                       style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
                     <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
@@ -181,77 +181,51 @@ export default function Leaderboard() {
                         const isFirst = ri === 0;
 
                         return (
-                          <Link key={entry.username} to={`/user/${entry.username}`} className="group block">
-                            <div
-                              className="relative rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
-                              style={{
-                                padding: isFirst ? "16px 10px 14px" : "12px 8px 12px",
-                                background: isFirst
-                                  ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
-                                  : "#050508",
-                                border: `1px solid ${isFirst ? "rgba(145,70,255,0.3)" : "rgba(255,255,255,0.07)"}`,
-                                boxShadow: isFirst
-                                  ? "0 32px 80px rgba(145,70,255,0.2), 0 0 0 1px rgba(145,70,255,0.12) inset"
-                                  : "0 8px 32px rgba(0,0,0,0.3)",
-                              }}
-                            >
-                              {/* Rank badge */}
-                              <div className="flex justify-center mb-2 sm:mb-4">
-                                <span className="text-[10px] sm:text-[11px] font-black tracking-[0.18em] uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
-                                  style={{
-                                    color: accent,
-                                    background: `${accent}14`,
-                                    border: `1px solid ${accent}25`,
-                                  }}>
-                                  {["1er", "2ème", "3ème"][ri]}
-                                </span>
-                              </div>
+                          <Link key={entry.username} to={`/user/${entry.username}`} className="group flex flex-col items-center">
+                            {/* Rank badge */}
+                            <span className="text-[10px] sm:text-[11px] font-black tracking-[0.15em] uppercase mb-2 sm:mb-3"
+                              style={{ color: accent }}>
+                              {["1er", "2ème", "3ème"][ri]}
+                            </span>
 
-                              {/* Avatar */}
-                              <div className="flex justify-center mb-2 sm:mb-4 relative">
-                                {isFirst && (
-                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-20 sm:w-32 h-20 sm:h-32 rounded-full"
-                                      style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
-                                  </div>
-                                )}
-                                <div className="relative">
-                                  <img
-                                    src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
-                                    alt={entry.username}
-                                    className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
-                                    style={{
-                                      width: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
-                                      height: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
-                                      border: `2px solid ${accent}55`,
-                                      boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
-                                    }}
-                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
-                                  />
-                                  {isFirst && (
-                                    <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2">
-                                      <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
-                                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
-                                      </svg>
-                                    </div>
-                                  )}
+                            {/* Avatar */}
+                            <div className="relative mb-2 sm:mb-3">
+                              {isFirst && (
+                                <div className="absolute -inset-3 rounded-full pointer-events-none"
+                                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }} />
+                              )}
+                              <img
+                                src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                                alt={entry.username}
+                                className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
+                                style={{
+                                  border: `2px solid ${accent}55`,
+                                  boxShadow: `0 0 ${isFirst ? 30 : 15}px ${accent}30`,
+                                }}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
+                              />
+                              {isFirst && (
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                  <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 6px ${accent}80)` }}>
+                                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
+                                  </svg>
                                 </div>
-                              </div>
-
-                              {/* Name */}
-                              <p className={`text-center font-bold text-white truncate mb-0.5 ${isFirst ? "text-xs sm:text-base" : "text-[11px] sm:text-sm"}`}>
-                                {entry.display_name || entry.username}
-                              </p>
-
-                              {/* Points */}
-                              <p className="text-center">
-                                <span className={`font-black tabular-nums ${isFirst ? "text-2xl sm:text-4xl" : "text-xl sm:text-2xl"}`}
-                                  style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
-                                  {entry.total_pts}
-                                </span>
-                                <span className="text-[10px] sm:text-xs text-gray-600 ml-1 font-medium">pts</span>
-                              </p>
+                              )}
                             </div>
+
+                            {/* Name */}
+                            <p className={`text-center font-semibold text-white truncate max-w-full px-1 ${isFirst ? "text-sm sm:text-base" : "text-xs sm:text-sm"}`}>
+                              {entry.display_name || entry.username}
+                            </p>
+
+                            {/* Points */}
+                            <p className="text-center mt-0.5">
+                              <span className={`font-black tabular-nums ${isFirst ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"}`}
+                                style={{ color: accent, textShadow: `0 0 20px ${accent}40` }}>
+                                {entry.total_pts}
+                              </span>
+                              <span className="text-[10px] sm:text-xs text-gray-600 ml-1">pts</span>
+                            </p>
                           </Link>
                         );
                       })}
@@ -341,8 +315,7 @@ export default function Leaderboard() {
                 {/* ── TOP 3 PODIUM ── */}
                 {showWizePodium && wizeTop3.length > 0 && (
                   <div className="relative mb-8 sm:mb-16">
-                    {/* Ambient glow under podium */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[200px] pointer-events-none"
                       style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
                     <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
@@ -356,76 +329,50 @@ export default function Leaderboard() {
                         const display = tab === "uptime" ? formatSeconds(value) : value.toLocaleString();
 
                         return (
-                          <Link key={entry.user_uid} to={`/user/${entry.user_name}`} className="group block">
-                            <div
-                              className="relative rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
-                              style={{
-                                padding: isFirst ? "16px 10px 14px" : "12px 8px 12px",
-                                background: isFirst
-                                  ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
-                                  : "#050508",
-                                border: `1px solid ${isFirst ? "rgba(145,70,255,0.3)" : "rgba(255,255,255,0.07)"}`,
-                                boxShadow: isFirst
-                                  ? "0 32px 80px rgba(145,70,255,0.2), 0 0 0 1px rgba(145,70,255,0.12) inset"
-                                  : "0 8px 32px rgba(0,0,0,0.3)",
-                              }}
-                            >
-                              {/* Rank badge */}
-                              <div className="flex justify-center mb-2 sm:mb-4">
-                                <span className="text-[10px] sm:text-[11px] font-black tracking-[0.18em] uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
-                                  style={{
-                                    color: accent,
-                                    background: `${accent}14`,
-                                    border: `1px solid ${accent}25`,
-                                  }}>
-                                  {["1er", "2ème", "3ème"][ri]}
-                                </span>
-                              </div>
+                          <Link key={entry.user_uid} to={`/user/${entry.user_name}`} className="group flex flex-col items-center">
+                            {/* Rank badge */}
+                            <span className="text-[10px] sm:text-[11px] font-black tracking-[0.15em] uppercase mb-2 sm:mb-3"
+                              style={{ color: accent }}>
+                              {["1er", "2ème", "3ème"][ri]}
+                            </span>
 
-                              {/* Avatar */}
-                              <div className="flex justify-center mb-2 sm:mb-4 relative">
-                                {isFirst && (
-                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-20 sm:w-32 h-20 sm:h-32 rounded-full"
-                                      style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
-                                  </div>
-                                )}
-                                <div className="relative">
-                                  <img
-                                    src={badge?.avatar_url || `https://unavatar.io/twitch/${entry.user_name}`}
-                                    alt={entry.user_name}
-                                    className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
-                                    style={{
-                                      width: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
-                                      height: isFirst ? "clamp(64px, 18vw, 104px)" : "clamp(48px, 14vw, 76px)",
-                                      border: `2px solid ${accent}55`,
-                                      boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
-                                    }}
-                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
-                                  />
-                                  {isFirst && (
-                                    <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2">
-                                      <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
-                                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
-                                      </svg>
-                                    </div>
-                                  )}
+                            {/* Avatar */}
+                            <div className="relative mb-2 sm:mb-3">
+                              {isFirst && (
+                                <div className="absolute -inset-3 rounded-full pointer-events-none"
+                                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }} />
+                              )}
+                              <img
+                                src={badge?.avatar_url || `https://unavatar.io/twitch/${entry.user_name}`}
+                                alt={entry.user_name}
+                                className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
+                                style={{
+                                  border: `2px solid ${accent}55`,
+                                  boxShadow: `0 0 ${isFirst ? 30 : 15}px ${accent}30`,
+                                }}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
+                              />
+                              {isFirst && (
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                  <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 6px ${accent}80)` }}>
+                                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
+                                  </svg>
                                 </div>
-                              </div>
-
-                              {/* Name */}
-                              <p className={`text-center font-bold text-white truncate mb-0.5 ${isFirst ? "text-xs sm:text-base" : "text-[11px] sm:text-sm"}`}>
-                                {badge?.display_name || entry.user_name}
-                              </p>
-
-                              {/* Value */}
-                              <p className="text-center">
-                                <span className={`font-black tabular-nums ${isFirst ? "text-2xl sm:text-4xl" : "text-xl sm:text-2xl"}`}
-                                  style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
-                                  {display}
-                                </span>
-                              </p>
+                              )}
                             </div>
+
+                            {/* Name */}
+                            <p className={`text-center font-semibold text-white truncate max-w-full px-1 ${isFirst ? "text-sm sm:text-base" : "text-xs sm:text-sm"}`}>
+                              {badge?.display_name || entry.user_name}
+                            </p>
+
+                            {/* Value */}
+                            <p className="text-center mt-0.5">
+                              <span className={`font-black tabular-nums ${isFirst ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"}`}
+                                style={{ color: accent, textShadow: `0 0 20px ${accent}40` }}>
+                                {display}
+                              </span>
+                            </p>
                           </Link>
                         );
                       })}
