@@ -36,12 +36,26 @@ const BADGE_INFO: Record<string, { name: string; desc: string; drop: string }> =
 
 function MobileShowcase() {
   const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
   const touchX = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout>>();
+  const pending = useRef<number | null>(null);
 
   const go = (next: number) => {
     clearTimeout(timer.current);
-    setIdx(((next % RARITY_ORDER.length) + RARITY_ORDER.length) % RARITY_ORDER.length);
+    const target = ((next % RARITY_ORDER.length) + RARITY_ORDER.length) % RARITY_ORDER.length;
+    // Fade out, then swap content and fade in
+    pending.current = target;
+    setVisible(false);
+  };
+
+  // When fade-out finishes, swap content and fade back in
+  const onFadeEnd = () => {
+    if (!visible && pending.current !== null) {
+      setIdx(pending.current);
+      pending.current = null;
+      setVisible(true);
+    }
   };
 
   useEffect(() => {
@@ -66,7 +80,6 @@ function MobileShowcase() {
         if (Math.abs(d) > 40) {
           go(d < 0 ? idx + 1 : idx - 1);
         } else {
-          // Swipe trop court : relancer le timer manuellement
           timer.current = setTimeout(() => go(idx + 1), 3200);
         }
       }}
@@ -77,34 +90,40 @@ function MobileShowcase() {
         style={{ background: `radial-gradient(ellipse 80% 60% at 50% 55%, ${color}30, transparent 70%)` }}
       />
 
-      {/* Big background rarity text */}
-      <div key={`bg-${idx}`} className="mobile-bg-rarity" style={{ color }}>
-        {rarity}
-      </div>
-
-      {/* Badge — keyed to trigger pop animation on change */}
-      <div key={`badge-${idx}`} className="mobile-badge-enter">
-        <img
-          src={getBadgeImage(rarity, "saison2")}
-          alt={rarity}
-          style={{ filter: `drop-shadow(0 0 50px ${color}80)` }}
-          draggable={false}
-        />
-      </div>
-
-      {/* Rarity name */}
-      <p key={`name-${idx}`} className="mobile-rarity-name" style={{ color }}>
-        {rarity}
-      </p>
-
-      {/* Info */}
-      <div key={`info-${idx}`} className="mobile-rarity-info">
-        <div className="mobile-stats-row">
-          <span style={{ color, fontWeight: 800 }}>{pts} PTS</span>
-          <span className="mobile-sep">·</span>
-          <span>Drop {info.drop}</span>
+      {/* Fading container — single set of elements, no remounting */}
+      <div
+        className={`mobile-fade ${visible ? "mobile-fade-in" : "mobile-fade-out"}`}
+        onTransitionEnd={onFadeEnd}
+      >
+        {/* Big background rarity text */}
+        <div className="mobile-bg-rarity" style={{ color }}>
+          {rarity}
         </div>
-        <p>{info.desc}</p>
+
+        {/* Badge */}
+        <div className="mobile-badge-enter">
+          <img
+            src={getBadgeImage(rarity, "saison2")}
+            alt={rarity}
+            style={{ filter: `drop-shadow(0 0 50px ${color}80)` }}
+            draggable={false}
+          />
+        </div>
+
+        {/* Rarity name */}
+        <p className="mobile-rarity-name" style={{ color }}>
+          {rarity}
+        </p>
+
+        {/* Info */}
+        <div className="mobile-rarity-info">
+          <div className="mobile-stats-row">
+            <span style={{ color, fontWeight: 800 }}>{pts} PTS</span>
+            <span className="mobile-sep">·</span>
+            <span>Drop {info.drop}</span>
+          </div>
+          <p>{info.desc}</p>
+        </div>
       </div>
 
       {/* Dots */}
