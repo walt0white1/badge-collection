@@ -222,7 +222,7 @@ export default function Home() {
       </div>
 
       {/* ═══ SEASON 1 — FULL-WIDTH SHOWCASE ═══ */}
-      <section className="relative z-20 overflow-hidden">
+      <section className="relative z-20 overflow-hidden mt-8 sm:mt-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
