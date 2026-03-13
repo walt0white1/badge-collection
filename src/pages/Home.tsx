@@ -78,7 +78,7 @@ function MobileShowcase() {
       />
 
       {/* Big background rarity text */}
-      <div className="mobile-bg-rarity" style={{ color }}>
+      <div key={`bg-${idx}`} className="mobile-bg-rarity" style={{ color }}>
         {rarity}
       </div>
 

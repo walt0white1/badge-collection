@@ -446,13 +446,13 @@ body::before {
   opacity: 0.07;
   pointer-events: none;
   user-select: none;
-  transition: color 0.5s ease;
+  animation: mob-fade-in 0.4s ease both;
 }
 
 .mobile-badge-enter {
   position: relative;
   z-index: 2;
-  animation: mob-badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: mob-badge-pop 0.35s ease-out both;
   margin-bottom: 0.25rem;
 }
 
@@ -465,9 +465,13 @@ body::before {
 }
 
 @keyframes mob-badge-pop {
-  0%   { opacity: 0; scale: 0.5; filter: blur(12px); }
-  60%  { filter: blur(0); }
-  100% { opacity: 1; scale: 1; filter: blur(0); }
+  0%   { opacity: 0; transform: scale(0.88); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes mob-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 0.07; }
 }
 
 .mobile-rarity-name {
@@ -478,8 +482,8 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-top: 0.5rem;
-  animation: mob-fade-up 0.4s ease both;
-  animation-delay: 0.08s;
+  animation: mob-fade-up 0.35s ease both;
+  animation-delay: 0.05s;
 }
 
 .mobile-rarity-info {
@@ -487,8 +491,8 @@ body::before {
   z-index: 2;
   margin-top: 0.5rem;
   max-width: 290px;
-  animation: mob-fade-up 0.4s ease both;
-  animation-delay: 0.14s;
+  animation: mob-fade-up 0.35s ease both;
+  animation-delay: 0.1s;
 }
 
 .mobile-stats-row {
