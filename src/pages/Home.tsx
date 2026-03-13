@@ -226,19 +226,20 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
-        <div className="relative pt-3 pb-14 md:py-28 px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-0 max-w-[1400px] mx-auto">
+        <div className="relative pt-3 pb-8 md:py-28 px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-0 max-w-[1400px] mx-auto">
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
-              <p className="text-gray-600 text-xs font-semibold tracking-[0.25em] uppercase mb-4">
+              <p className="text-gray-600 text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4">
                 Archive · Terminee
               </p>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-5">
-                Saison
-                <br />
-                <span className="bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">One</span>
+              <h2 className="text-3xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-2 sm:mb-5">
+                Saison <span className="bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">One</span>
               </h2>
-              <p className="text-gray-500 text-sm sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-gray-500 text-xs sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed hidden sm:block">
                 Les 5 premiers badges de la collection. Plus disponibles au drop, mais toujours echangeables entre collectionneurs.
+              </p>
+              <p className="text-gray-500 text-xs max-w-[280px] mx-auto leading-snug sm:hidden">
+                Plus dispo au drop, mais echangeables entre collectionneurs.
               </p>
             </div>
 
