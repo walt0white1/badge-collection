@@ -544,7 +544,7 @@ body::before {
   .badge-showcase {
     height: auto;
     min-height: 100vh;
-    padding: 2rem 0 4rem;
+    padding: 2rem 0 0;
   }
   .rarity-titles,
   .rarity-infos {
