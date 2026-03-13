@@ -169,9 +169,6 @@ export default function Leaderboard() {
                 {/* ── TOP 3 PODIUM ── */}
                 {showPodium && top3.length > 0 && (
                   <div className="relative mb-8 sm:mb-16">
-                    {/* Ambient glow under podium */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[200px] pointer-events-none"
-                      style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
                     <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
                       {[top3[1], top3[0], top3[2]].map((entry) => {
@@ -195,7 +192,7 @@ export default function Leaderboard() {
                                 alt={entry.username}
                                 className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
                                 style={{
-                                  border: `2px solid ${accent}44`,
+                                  border: "2px solid rgba(255,255,255,0.12)",
                                 }}
                                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                               />
@@ -338,7 +335,7 @@ export default function Leaderboard() {
                                 alt={entry.user_name}
                                 className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
                                 style={{
-                                  border: `2px solid ${accent}44`,
+                                  border: "2px solid rgba(255,255,255,0.12)",
                                 }}
                                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                               />
