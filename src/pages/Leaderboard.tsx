@@ -307,9 +307,6 @@ export default function Leaderboard() {
                 {/* ── TOP 3 PODIUM ── */}
                 {showWizePodium && wizeTop3.length > 0 && (
                   <div className="relative mb-8 sm:mb-16">
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[200px] pointer-events-none"
-                      style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
-
                     <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
                       {[wizeTop3[1], wizeTop3[0], wizeTop3[2]].map((entry, displayIdx) => {
                         if (!entry) return <div key={`empty-${displayIdx}`} />;
