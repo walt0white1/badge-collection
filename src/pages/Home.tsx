@@ -63,7 +63,12 @@ function MobileShowcase() {
       }}
       onTouchEnd={(e) => {
         const d = e.changedTouches[0].clientX - touchX.current;
-        if (Math.abs(d) > 40) go(d < 0 ? idx + 1 : idx - 1);
+        if (Math.abs(d) > 40) {
+          go(d < 0 ? idx + 1 : idx - 1);
+        } else {
+          // Swipe trop court : relancer le timer manuellement
+          timer.current = setTimeout(() => go(idx + 1), 3200);
+        }
       }}
     >
       {/* Ambient glow */}

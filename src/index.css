@@ -460,7 +460,8 @@ body::before {
   width: min(62vw, 240px);
   height: auto;
   object-fit: contain;
-  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle, white 55%, transparent 78%);
+  mask-image: radial-gradient(circle, white 55%, transparent 78%);
 }
 
 @keyframes mob-badge-pop {
