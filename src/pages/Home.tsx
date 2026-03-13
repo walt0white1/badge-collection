@@ -49,12 +49,16 @@ function MobileShowcase() {
     setVisible(false);
   };
 
-  // When fade-out finishes, swap content and fade back in
+  // When fade-out finishes, swap content then fade in on next frame
   const onFadeEnd = () => {
     if (!visible && pending.current !== null) {
       setIdx(pending.current);
       pending.current = null;
-      setVisible(true);
+      // Wait one frame so React paints the new content at opacity 0
+      // before we start the fade-in transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setVisible(true));
+      });
     }
   };
 
