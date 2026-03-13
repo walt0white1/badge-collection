@@ -190,17 +190,12 @@ export default function Leaderboard() {
 
                             {/* Avatar */}
                             <div className="relative mb-2 sm:mb-3">
-                              {isFirst && (
-                                <div className="absolute -inset-3 rounded-full pointer-events-none"
-                                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }} />
-                              )}
                               <img
                                 src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
                                 alt={entry.username}
                                 className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
                                 style={{
-                                  border: `2px solid ${accent}55`,
-                                  boxShadow: `0 0 ${isFirst ? 30 : 15}px ${accent}30`,
+                                  border: `2px solid ${accent}44`,
                                 }}
                                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                               />
@@ -221,7 +216,7 @@ export default function Leaderboard() {
                             {/* Points */}
                             <p className="text-center mt-0.5">
                               <span className={`font-black tabular-nums ${isFirst ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"}`}
-                                style={{ color: accent, textShadow: `0 0 20px ${accent}40` }}>
+                                style={{ color: accent }}>
                                 {entry.total_pts}
                               </span>
                               <span className="text-[10px] sm:text-xs text-gray-600 ml-1">pts</span>
@@ -338,17 +333,12 @@ export default function Leaderboard() {
 
                             {/* Avatar */}
                             <div className="relative mb-2 sm:mb-3">
-                              {isFirst && (
-                                <div className="absolute -inset-3 rounded-full pointer-events-none"
-                                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }} />
-                              )}
                               <img
                                 src={badge?.avatar_url || `https://unavatar.io/twitch/${entry.user_name}`}
                                 alt={entry.user_name}
                                 className={`rounded-full object-cover transition-all duration-500 group-hover:scale-110 ${isFirst ? "w-20 h-20 sm:w-[104px] sm:h-[104px]" : "w-14 h-14 sm:w-[76px] sm:h-[76px]"}`}
                                 style={{
-                                  border: `2px solid ${accent}55`,
-                                  boxShadow: `0 0 ${isFirst ? 30 : 15}px ${accent}30`,
+                                  border: `2px solid ${accent}44`,
                                 }}
                                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
                               />
@@ -369,7 +359,7 @@ export default function Leaderboard() {
                             {/* Value */}
                             <p className="text-center mt-0.5">
                               <span className={`font-black tabular-nums ${isFirst ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"}`}
-                                style={{ color: accent, textShadow: `0 0 20px ${accent}40` }}>
+                                style={{ color: accent }}>
                                 {display}
                               </span>
                             </p>
