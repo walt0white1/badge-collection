@@ -543,7 +543,7 @@ body::before {
 @supports not (animation-timeline: scroll()) {
   .badge-showcase {
     height: auto;
-    min-height: 100vh;
+    min-height: auto;
     padding: 2rem 0 0;
   }
   .rarity-titles,
