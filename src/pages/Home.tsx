@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalStats } from "../api";
@@ -33,13 +34,96 @@ const BADGE_INFO: Record<string, { name: string; desc: string; drop: string }> =
   },
 };
 
+function MobileShowcase() {
+  const [idx, setIdx] = useState(0);
+  const touchX = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  const go = (next: number) => {
+    clearTimeout(timer.current);
+    setIdx(((next % RARITY_ORDER.length) + RARITY_ORDER.length) % RARITY_ORDER.length);
+  };
+
+  useEffect(() => {
+    timer.current = setTimeout(() => go(idx + 1), 3200);
+    return () => clearTimeout(timer.current);
+  }, [idx]);
+
+  const rarity = RARITY_ORDER[idx];
+  const color = RARITY_COLORS[rarity];
+  const info = BADGE_INFO[rarity];
+  const pts = RARITY_POINTS[rarity];
+
+  return (
+    <div
+      className="mobile-showcase"
+      onTouchStart={(e) => {
+        touchX.current = e.touches[0].clientX;
+        clearTimeout(timer.current);
+      }}
+      onTouchEnd={(e) => {
+        const d = e.changedTouches[0].clientX - touchX.current;
+        if (Math.abs(d) > 40) go(d < 0 ? idx + 1 : idx - 1);
+      }}
+    >
+      {/* Ambient glow */}
+      <div
+        className="mobile-glow"
+        style={{ background: `radial-gradient(ellipse 80% 60% at 50% 55%, ${color}30, transparent 70%)` }}
+      />
+
+      {/* Big background rarity text */}
+      <div className="mobile-bg-rarity" style={{ color }}>
+        {rarity}
+      </div>
+
+      {/* Badge — keyed to trigger pop animation on change */}
+      <div key={`badge-${idx}`} className="mobile-badge-enter">
+        <img
+          src={getBadgeImage(rarity, "saison2")}
+          alt={rarity}
+          style={{ filter: `drop-shadow(0 0 50px ${color}80)` }}
+          draggable={false}
+        />
+      </div>
+
+      {/* Rarity name */}
+      <p key={`name-${idx}`} className="mobile-rarity-name" style={{ color }}>
+        {rarity}
+      </p>
+
+      {/* Info */}
+      <div key={`info-${idx}`} className="mobile-rarity-info">
+        <div className="mobile-stats-row">
+          <span style={{ color, fontWeight: 800 }}>{pts} PTS</span>
+          <span className="mobile-sep">·</span>
+          <span>Drop {info.drop}</span>
+        </div>
+        <p>{info.desc}</p>
+      </div>
+
+      {/* Dots */}
+      <div className="mobile-dots">
+        {RARITY_ORDER.map((r, i) => (
+          <button
+            key={r}
+            className={`mobile-dot${i === idx ? " active" : ""}`}
+            style={i === idx ? { background: color } : undefined}
+            onClick={() => go(i)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { isAuthenticated, login } = useAuth();
   const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: fetchGlobalStats });
 
   return (
     <div className="showcase-page">
-      {/* ═══ SCROLL-DRIVEN BADGE SHOWCASE ═══ */}
+      {/* ═══ SCROLL-DRIVEN BADGE SHOWCASE (desktop) + MOBILE CAROUSEL ═══ */}
       <div className="badge-showcase">
         {/* Logo / title */}
         <div className="showcase-logo">
@@ -58,7 +142,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Rarity titles — above the badge */}
+        {/* Desktop scroll showcase — hidden on mobile via CSS */}
         <div className="rarity-titles">
           {RARITY_ORDER.map((r) => (
             <div key={r} className="rarity-title-slide">
@@ -67,7 +151,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Rarity info — below the badge */}
         <div className="rarity-infos">
           {RARITY_ORDER.map((r) => {
             const info = BADGE_INFO[r];
@@ -87,7 +170,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Badge wrapper — items animate based on scroll progress */}
         <div className="badge-wrapper">
           {RARITY_ORDER.map((r) => (
             <div key={r} className="badge-item">
@@ -100,31 +182,24 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Scroll indicator */}
         <div className="scroll-indicator">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12l7 7 7-7" />
           </svg>
           <span>Scroll</span>
         </div>
+
+        {/* Mobile carousel — shown only on mobile via CSS */}
+        <MobileShowcase />
       </div>
 
       {/* ═══ SEASON 1 — FULL-WIDTH SHOWCASE ═══ */}
       <section className="relative z-20 overflow-hidden">
-        {/* Gradient bg */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
         <div className="relative py-28 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-0 max-w-[1400px] mx-auto">
-            {/* Left — text */}
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
               <p className="text-gray-600 text-xs font-semibold tracking-[0.25em] uppercase mb-4">
                 Archive · Terminee
@@ -139,7 +214,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Right — badges flowing */}
             <div className="lg:w-[65%] flex items-center justify-center gap-3 sm:gap-5 md:gap-8">
               {RARITY_ORDER.map((r, idx) => (
                 <div
@@ -168,7 +242,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Separator line */}
         <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       </section>
 
@@ -197,13 +270,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Separator */}
         <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       </section>
 
       {/* ═══ CTA ═══ */}
       <section className="relative z-20 overflow-hidden">
-        {/* Purple glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_70%,rgba(145,70,255,0.08),transparent)] pointer-events-none" />
 
         <div className="relative py-24 px-6 text-center">
