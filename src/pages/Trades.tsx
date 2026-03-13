@@ -68,7 +68,7 @@ function TradeRow({
   const toColor = RARITY_COLORS[trade.to_badge.rarity.toUpperCase()] || "#888";
 
   return (
-    <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden group hover:border-white/[0.1] transition-colors">
+    <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-2xl border border-white/[0.06] bg-[#0a0a0d] overflow-hidden group hover:border-white/[0.1] transition-colors">
       {/* Subtle gradient accent */}
       <div
         className="absolute top-0 left-0 w-full h-px opacity-40"
@@ -140,7 +140,7 @@ function TradeRow({
         {isPending && type === "outgoing" && (
           <button
             onClick={() => onCancel(trade.id)}
-            className="px-4 py-2 bg-white/[0.04] text-gray-400 text-xs font-bold rounded-xl border border-white/[0.08] hover:bg-white/[0.08] transition-colors"
+            className="px-4 py-2 bg-[#0f0f13] text-gray-400 text-xs font-bold rounded-xl border border-white/[0.08] hover:bg-white/[0.08] transition-colors"
           >
             Annuler
           </button>
@@ -152,7 +152,7 @@ function TradeRow({
                 ? "bg-green-500/15 text-green-400 border border-green-500/20"
                 : trade.status === "rejected"
                   ? "bg-red-500/15 text-red-400 border border-red-500/20"
-                  : "bg-white/[0.04] text-gray-500 border border-white/[0.06]"
+                  : "bg-[#0f0f13] text-gray-500 border border-white/[0.06]"
             }`}
           >
             {trade.status === "accepted"
@@ -219,7 +219,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
   return (
     <div className="space-y-6">
       {/* Step 1: Target user */}
-      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-3">
+      <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-5 space-y-3">
         <div className="flex items-center gap-2 mb-1">
           <span className="w-6 h-6 rounded-full bg-twitch/20 text-twitch text-xs font-black flex items-center justify-center">1</span>
           <label className="text-sm font-bold text-white">Avec qui echanger ?</label>
@@ -237,7 +237,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
               <button
                 key={u}
                 onClick={() => setToUser(u)}
-                className="text-xs px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg transition-colors"
+                className="text-xs px-3 py-1.5 bg-[#0f0f13] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg transition-colors"
               >
                 {u}
               </button>
@@ -249,7 +249,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
       {/* Step 2: Badges */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* My badge */}
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-3">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-5 space-y-3">
           <div className="flex items-center gap-2 mb-1">
             <span className="w-6 h-6 rounded-full bg-twitch/20 text-twitch text-xs font-black flex items-center justify-center">2</span>
             <label className="text-sm font-bold text-white">Tu donnes</label>
@@ -271,7 +271,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                   fromRarity === r
                     ? "border-twitch bg-twitch/15 scale-105"
-                    : "border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02]"
+                    : "border-white/[0.06] hover:border-white/[0.12] bg-[#0a0a0d]"
                 }`}
                 style={{ color: RARITY_COLORS[r] }}
               >
@@ -286,7 +286,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
         </div>
 
         {/* Target badge */}
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-3">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-5 space-y-3">
           <div className="flex items-center gap-2 mb-1">
             <span className="w-6 h-6 rounded-full bg-twitch/20 text-twitch text-xs font-black flex items-center justify-center">3</span>
             <label className="text-sm font-bold text-white">Tu recois</label>
@@ -308,7 +308,7 @@ function ProposeForm({ defaultTarget }: { defaultTarget: string }) {
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                   toRarity === r
                     ? "border-twitch bg-twitch/15 scale-105"
-                    : "border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02]"
+                    : "border-white/[0.06] hover:border-white/[0.12] bg-[#0a0a0d]"
                 }`}
                 style={{ color: RARITY_COLORS[r] }}
               >
@@ -436,7 +436,7 @@ export default function Trades() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white/[0.02] border border-white/[0.06] rounded-xl p-1">
+      <div className="flex gap-1 bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -444,7 +444,7 @@ export default function Trades() {
             className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
               tab === t.key
                 ? "bg-twitch text-white shadow-lg shadow-twitch/20"
-                : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]"
+                : "text-gray-500 hover:text-gray-300 hover:bg-[#0f0f13]"
             }`}
           >
             {t.icon}

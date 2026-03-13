@@ -40,8 +40,8 @@ export default function BadgeCard({ rarity, count, season = "saison2", onClick, 
       style={{
         borderColor: owned ? color + borderOpacity : "rgba(255,255,255,0.06)",
         background: owned
-          ? `radial-gradient(ellipse at 50% 0%, ${color}08 0%, transparent 70%), rgba(255,255,255,0.02)`
-          : "rgba(255,255,255,0.015)",
+          ? `radial-gradient(ellipse at 50% 0%, ${color}08 0%, transparent 70%), #0a0a0d`
+          : "#09090c",
         boxShadow: owned
           ? `0 0 ${glowBlur}px ${glowSpread}px ${color}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")}, inset 0 1px 0 rgba(255,255,255,0.04)`
           : "none",

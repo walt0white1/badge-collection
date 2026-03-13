@@ -10,6 +10,28 @@ interface Props {
   onClose: () => void;
 }
 
+function formatWatchTime(minutes: number | null): string {
+  if (!minutes) return "—";
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  return `${d}j ${h % 24}h`;
+}
+
+function formatNumber(n: number | null): string {
+  if (n == null) return "—";
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return n.toLocaleString();
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const months = ["Jan", "Fev", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export default function ShareCardModal({ user, onClose }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
@@ -17,22 +39,20 @@ export default function ShareCardModal({ user, onClose }: Props) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Fetch rank from leaderboard
   const { data: leaderboard } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: fetchLeaderboard,
   });
-  const rank =
-    leaderboard?.find(
-      (e) => e.username.toLowerCase() === user.twitch_login.toLowerCase(),
-    )?.rank ?? null;
+  const entry = leaderboard?.find(
+    (e) => e.username.toLowerCase() === user.twitch_login.toLowerCase(),
+  );
+  const rank = entry?.rank ?? null;
 
   const totalBadges = Object.values(user.badges).reduce(
     (sum, list) => sum + (Array.isArray(list) ? list.length : 0),
     0,
   );
 
-  // Rarity totals across all seasons
   const rarityCounts: Record<string, number> = {};
   for (const r of RARITY_ORDER) rarityCounts[r] = 0;
   for (const list of Object.values(user.badges)) {
@@ -40,10 +60,8 @@ export default function ShareCardModal({ user, onClose }: Props) {
     for (const b of list) rarityCounts[b.toUpperCase()] = (rarityCounts[b.toUpperCase()] || 0) + 1;
   }
 
-  // Top rarity
   const topRarity = [...RARITY_ORDER].reverse().find((r) => rarityCounts[r] > 0) || "COMMON";
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -52,14 +70,16 @@ export default function ShareCardModal({ user, onClose }: Props) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
+  const generatePng = async () => {
+    if (!cardRef.current) return null;
+    return toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
+  };
+
   const downloadCard = async () => {
-    if (!cardRef.current) return;
     setGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-      });
+      const dataUrl = await generatePng();
+      if (!dataUrl) return;
       const link = document.createElement("a");
       link.download = `${user.twitch_login}-badge-card.png`;
       link.href = dataUrl;
@@ -72,13 +92,10 @@ export default function ShareCardModal({ user, onClose }: Props) {
   };
 
   const copyCard = async () => {
-    if (!cardRef.current) return;
     setGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-      });
+      const dataUrl = await generatePng();
+      if (!dataUrl) return;
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       await navigator.clipboard.write([
@@ -94,13 +111,10 @@ export default function ShareCardModal({ user, onClose }: Props) {
   };
 
   const shareLink = async () => {
-    if (!cardRef.current) return;
     setGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-      });
+      const dataUrl = await generatePng();
+      if (!dataUrl) return;
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const url = await uploadShareCard(user.twitch_login, blob);
@@ -115,14 +129,19 @@ export default function ShareCardModal({ user, onClose }: Props) {
     }
   };
 
+  // Build stat pairs for the inline row
+  const stats = [
+    { label: "messages", value: formatNumber(entry?.message_count ?? null) },
+    { label: "watch", value: formatWatchTime(entry?.watch_time_minutes ?? null) },
+    { label: "echanges", value: String(entry?.trade_count ?? 0) },
+    { label: "saisons", value: String(Object.keys(user.badges).length) },
+  ];
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
@@ -138,278 +157,131 @@ export default function ShareCardModal({ user, onClose }: Props) {
             <p className="text-sm text-gray-500 mt-1">Telecharge ou copie ta carte de profil.</p>
           </div>
 
-          {/* ── The Card (captured as image) ── */}
-          <div className="flex justify-center">
+          {/* ── The Card ── */}
+          <div className="flex justify-center overflow-hidden">
             <div
               ref={cardRef}
+              className="origin-top scale-[0.78] sm:scale-100"
               style={{
-                width: 420,
+                width: 440,
                 fontFamily: "'Outfit', 'Inter', system-ui, sans-serif",
-                background: "linear-gradient(145deg, #0f0f1a 0%, #0a0a14 40%, #12091e 100%)",
+                background: "linear-gradient(160deg, #0c0c16 0%, #08080f 50%, #100a1a 100%)",
                 borderRadius: 20,
                 overflow: "hidden",
                 position: "relative",
               }}
             >
-              {/* Ambient glow */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: -60,
-                  right: -40,
-                  width: 200,
-                  height: 200,
-                  borderRadius: "50%",
-                  background: `radial-gradient(circle, ${RARITY_COLORS[topRarity]}22, transparent 70%)`,
-                  pointerEvents: "none",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: -40,
-                  left: -30,
-                  width: 160,
-                  height: 160,
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(145,70,255,0.08), transparent 70%)",
-                  pointerEvents: "none",
-                }}
-              />
+              {/* Subtle ambient blurs */}
+              <div style={{ position: "absolute", top: -80, right: -60, width: 220, height: 220, borderRadius: "50%", background: `radial-gradient(circle, ${RARITY_COLORS[topRarity]}18, transparent 70%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: -60, left: -40, width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle, rgba(145,70,255,0.06), transparent 70%)", pointerEvents: "none" }} />
 
-              {/* Top accent line */}
-              <div
-                style={{
-                  height: 3,
-                  background: `linear-gradient(90deg, transparent, ${RARITY_COLORS[topRarity]}, #9146FF, transparent)`,
-                  opacity: 0.6,
-                }}
-              />
+              {/* Top accent */}
+              <div style={{ height: 2, background: `linear-gradient(90deg, transparent 5%, ${RARITY_COLORS[topRarity]}80, #9146FF80, transparent 95%)` }} />
 
-              <div style={{ padding: "28px 28px 24px", position: "relative" }}>
-                {/* Header: Avatar + Name + Rank */}
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-                  {/* Avatar with glow */}
+              <div style={{ padding: "28px 30px 24px", position: "relative" }}>
+
+                {/* ── Profile row ── */}
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
                   <div style={{ position: "relative", flexShrink: 0 }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: -4,
-                        borderRadius: "50%",
-                        background: `conic-gradient(from 45deg, ${RARITY_COLORS[topRarity]}88, #9146FF88, ${RARITY_COLORS[topRarity]}88)`,
-                        filter: "blur(1px)",
-                      }}
-                    />
+                    <div style={{ position: "absolute", inset: -3, borderRadius: "50%", background: `conic-gradient(from 45deg, ${RARITY_COLORS[topRarity]}66, #9146FF66, ${RARITY_COLORS[topRarity]}66)`, filter: "blur(1px)" }} />
                     <img
                       src={user.twitch_profile_image}
                       alt=""
                       crossOrigin="anonymous"
-                      style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        position: "relative",
-                        border: "3px solid #0f0f1a",
-                      }}
+                      style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", position: "relative", border: "2px solid #0c0c16" }}
                     />
                   </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", lineHeight: 1.2 }}>
-                      {user.twitch_display_name}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                      <span style={{ fontSize: 20, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>
+                        {user.twitch_display_name}
+                      </span>
                       {rank && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: "#9146FF",
-                            background: "rgba(145,70,255,0.15)",
-                            border: "1px solid rgba(145,70,255,0.25)",
-                            borderRadius: 6,
-                            padding: "2px 8px",
-                          }}
-                        >
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#9146FF" }}>
                           #{rank}
                         </span>
                       )}
-                      <span style={{ fontSize: 12, color: "#666" }}>
-                        el_matte0 Badge Collection
-                      </span>
                     </div>
+                    {entry?.followed_at && (
+                      <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>
+                        Follow depuis {formatDate(entry.followed_at)}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Stats row */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 12,
-                    marginBottom: 24,
-                  }}
-                >
-                  {/* Points */}
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: 14,
-                      padding: "14px 16px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 28, fontWeight: 900, color: "#9146FF", lineHeight: 1 }}>
-                      {user.total_pts.toLocaleString()}
-                    </div>
-                    <div style={{ fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.1em", marginTop: 4, textTransform: "uppercase" as const }}>
-                      Points
-                    </div>
-                  </div>
-
-                  {/* Badges */}
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: 14,
-                      padding: "14px 16px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", lineHeight: 1 }}>
-                      {totalBadges}
-                    </div>
-                    <div style={{ fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.1em", marginTop: 4, textTransform: "uppercase" as const }}>
-                      Badges
-                    </div>
-                  </div>
-
-                  {/* Seasons */}
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: 14,
-                      padding: "14px 16px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", lineHeight: 1 }}>
-                      {Object.keys(user.badges).length}
-                    </div>
-                    <div style={{ fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.1em", marginTop: 4, textTransform: "uppercase" as const }}>
-                      Saisons
-                    </div>
-                  </div>
+                {/* ── Big numbers: points + badges ── */}
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontSize: 42, fontWeight: 900, color: "#9146FF", lineHeight: 1, letterSpacing: "-0.03em" }}>
+                    {user.total_pts.toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#555", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                    pts
+                  </span>
+                  <span style={{ fontSize: 13, color: "#333", margin: "0 4px" }}>·</span>
+                  <span style={{ fontSize: 42, fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: "-0.03em" }}>
+                    {totalBadges}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#555", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                    badges
+                  </span>
                 </div>
 
-                {/* Rarity breakdown */}
-                <div
-                  style={{
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: 14,
-                    padding: "16px",
-                    marginBottom: 16,
-                  }}
-                >
-                  {/* Progress bar */}
-                  <div
-                    style={{
-                      display: "flex",
-                      height: 6,
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      background: "rgba(255,255,255,0.04)",
-                      marginBottom: 14,
-                    }}
-                  >
-                    {RARITY_ORDER.map((r) => {
-                      const pct = totalBadges > 0 ? (rarityCounts[r] / totalBadges) * 100 : 0;
-                      if (pct === 0) return null;
-                      return (
-                        <div
-                          key={r}
-                          style={{
-                            width: `${pct}%`,
-                            minWidth: pct > 0 ? 4 : 0,
-                            background: RARITY_COLORS[r],
-                            borderRadius: 3,
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
+                {/* ── Inline stat line ── */}
+                <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 24 }}>
+                  {stats.map((s, i) => (
+                    <span key={s.label} style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                      {i > 0 && <span style={{ color: "#2a2a35", margin: "0 8px", fontSize: 10 }}>·</span>}
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>{s.value}</span>
+                      <span style={{ fontSize: 10, fontWeight: 500, color: "#444", marginLeft: 3 }}>{s.label}</span>
+                    </span>
+                  ))}
+                </div>
 
-                  {/* Rarity rows */}
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                    {RARITY_ORDER.map((r) => (
-                      <div
-                        key={r}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          opacity: rarityCounts[r] > 0 ? 1 : 0.3,
-                        }}
-                      >
+                {/* ── Thin separator ── */}
+                <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)", marginBottom: 20 }} />
+
+                {/* ── Rarity rows — no box, just rows ── */}
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: 20 }}>
+                  {RARITY_ORDER.map((r) => {
+                    const count = rarityCounts[r];
+                    const active = count > 0;
+                    const pct = totalBadges > 0 ? (count / totalBadges) * 100 : 0;
+                    return (
+                      <div key={r} style={{ display: "flex", alignItems: "center", gap: 10, opacity: active ? 1 : 0.25 }}>
                         <img
                           src={getBadgeImage(r, "saison2")}
                           alt=""
                           crossOrigin="anonymous"
                           style={{ width: 22, height: 22, objectFit: "contain" }}
                         />
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: RARITY_COLORS[r],
-                            letterSpacing: "0.08em",
-                            flex: 1,
-                          }}
-                        >
+                        <span style={{ fontSize: 10, fontWeight: 700, color: RARITY_COLORS[r], letterSpacing: "0.1em", width: 80, textTransform: "uppercase" as const }}>
                           {r}
                         </span>
-                        <span
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 800,
-                            color: rarityCounts[r] > 0 ? "#fff" : "#333",
-                          }}
-                        >
-                          {rarityCounts[r]}
+                        {/* Inline mini bar */}
+                        <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.04)", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${Math.max(pct, active ? 3 : 0)}%`, background: RARITY_COLORS[r], borderRadius: 2, opacity: 0.7 }} />
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: active ? "#fff" : "#333", minWidth: 20, textAlign: "right" as const }}>
+                          {count}
                         </span>
-                        <span style={{ fontSize: 10, color: "#444", fontWeight: 600, minWidth: 32, textAlign: "right" as const }}>
-                          {rarityCounts[r] * (RARITY_POINTS[r] || 0)} pts
+                        <span style={{ fontSize: 9, color: "#444", fontWeight: 600, minWidth: 32, textAlign: "right" as const }}>
+                          {count * (RARITY_POINTS[r] || 0)} pts
                         </span>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
 
-                {/* Footer */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    opacity: 0.4,
-                  }}
-                >
+                {/* ── Footer ── */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", opacity: 0.35 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#9146FF">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#9146FF">
                       <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
                     </svg>
-                    <span style={{ fontSize: 10, color: "#888", fontWeight: 600 }}>
-                      el_matte0
-                    </span>
+                    <span style={{ fontSize: 10, color: "#888", fontWeight: 600 }}>el_matte0</span>
                   </div>
-                  <span style={{ fontSize: 9, color: "#555", fontWeight: 500 }}>
+                  <span style={{ fontSize: 8, color: "#555", fontWeight: 500, letterSpacing: "0.05em" }}>
                     badge-collection.vercel.app
                   </span>
                 </div>

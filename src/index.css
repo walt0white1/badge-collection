@@ -4,6 +4,27 @@
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: #050508;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 80px 80px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 40%, transparent 65%);
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 40%, transparent 65%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 @layer utilities {
@@ -32,7 +53,7 @@ body {
 
 /* ── Page wrapper ── */
 .showcase-page {
-  background: #050508;
+  /* bg inherited from body grid */
 }
 
 .showcase-page::before {

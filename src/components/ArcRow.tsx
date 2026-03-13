@@ -18,10 +18,19 @@ export default function ArcRow({
   totalPts,
 }: Props) {
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="lg:flex lg:gap-10 lg:items-start space-y-6 sm:space-y-8 lg:space-y-0">
       {/* ── Arc header ── */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-3">
+      <div className="text-center lg:text-left space-y-2 lg:w-44 lg:shrink-0 lg:pt-2 lg:relative lg:pl-12">
+        {/* Dot on the connecting timeline — desktop only */}
+        <div
+          className="hidden lg:block absolute left-[17px] top-3 w-2.5 h-2.5 rounded-full"
+          style={{
+            background: arc.status === "active" ? "rgba(145,70,255,0.25)" : "rgba(255,255,255,0.04)",
+            border: `2px solid ${arc.status === "active" ? "rgba(145,70,255,0.7)" : "rgba(255,255,255,0.1)"}`,
+            boxShadow: arc.status === "active" ? "0 0 12px rgba(145,70,255,0.5)" : "none",
+          }}
+        />
+        <div className="flex items-center justify-center lg:justify-start gap-3 flex-wrap">
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-none">
             {arc.name}
           </h2>
@@ -37,7 +46,7 @@ export default function ArcRow({
           )}
         </div>
         <p className="text-sm text-gray-600">{arc.subtitle}</p>
-        <div className="flex items-center justify-center gap-4 text-sm">
+        <div className="flex items-center justify-center lg:justify-start gap-4 text-sm">
           <span className="text-gray-500">
             <span className="text-white font-semibold">{totalBadges}</span>{" "}
             badge{totalBadges > 1 ? "s" : ""}
@@ -48,7 +57,7 @@ export default function ArcRow({
       </div>
 
       {/* ── Roster ── */}
-      <div className="relative max-w-4xl mx-auto">
+      <div className="relative flex-1">
         {/* Vertical timeline bar (left side) */}
         <div className="absolute left-5 sm:left-7 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
 
@@ -75,7 +84,7 @@ export default function ArcRow({
                     className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 relative z-10"
                     style={{
                       borderColor: owned ? color : "rgba(255,255,255,0.08)",
-                      background: owned ? color : "#0a0a0f",
+                      background: owned ? color : "#0a0a0d",
                       boxShadow: owned
                         ? `0 0 10px ${color}50, 0 0 20px ${color}20`
                         : "none",
@@ -88,8 +97,8 @@ export default function ArcRow({
                   className="group relative flex-1 overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-[1.01]"
                   style={{
                     background: owned
-                      ? `linear-gradient(135deg, ${color}05 0%, ${color}10 40%, ${color}05 100%)`
-                      : "rgba(255,255,255,0.015)",
+                      ? `linear-gradient(135deg, ${color}05 0%, ${color}10 40%, ${color}05 100%), #0a0a0d`
+                      : "#09090c",
                     border: `1px solid ${owned ? color + "18" : "rgba(255,255,255,0.04)"}`,
                     boxShadow: owned
                       ? `0 0 30px -10px ${color}15, inset 0 1px 0 ${color}08`

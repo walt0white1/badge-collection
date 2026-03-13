@@ -1,6 +1,32 @@
 import { supabase } from "./lib/supabase";
 import type { LeaderboardEntry, PublicUser, Stats, MyTrades, Trade, LotteryTicket } from "./types";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+export type WizebotType = "uptime" | "message" | "currency";
+export type WizebotPeriod = "week" | "month" | "global";
+
+export interface WizebotEntry {
+  user_name: string;
+  user_uid: string;
+  value: string;
+}
+
+export const fetchWizebotRanking = async (
+  type: WizebotType,
+  period: WizebotPeriod,
+  limit = 100
+): Promise<WizebotEntry[]> => {
+  const url = `${SUPABASE_URL}/functions/v1/wizebot-ranking?type=${type}&period=${period}&limit=${limit}`;
+  const res = await fetch(url, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error("WizeBot API error");
+  return (data.list || []) as WizebotEntry[];
+};
+
 // ---------- Public ----------
 
 export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {

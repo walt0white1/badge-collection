@@ -1,350 +1,524 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { fetchLeaderboard } from "../api";
+import { fetchLeaderboard, fetchWizebotRanking } from "../api";
+import type { WizebotPeriod, WizebotType } from "../api";
 import { RARITY_COLORS } from "../types";
 import { getBadgeImage } from "../badgeImages";
 
-const PODIUM_CFG = [
-  { accent: "#fbbf24", glow: "rgba(251,191,36,0.3)",  shadow: "rgba(251,191,36,0.15)", icon: "👑", label: "OR",     podiumH: 120 },
-  { accent: "#94a3b8", glow: "rgba(148,163,184,0.2)", shadow: "rgba(148,163,184,0.08)", icon: "✦",  label: "ARGENT", podiumH: 80  },
-  { accent: "#b45309", glow: "rgba(180,83,9,0.2)",   shadow: "rgba(180,83,9,0.08)",   icon: "✧",  label: "BRONZE", podiumH: 50  },
-];
+/* ═══════════════════════════════════════════════════════
+   CLASSEMENT — Cohesive with the site's purple/dark aesthetic.
+   Uses site colors: #9146FF, rarity palette, #050508 bg.
+   ═══════════════════════════════════════════════════════ */
+
+type MainTab = "badges" | "uptime" | "messages";
+
+const PODIUM_COLORS = ["#9146FF", "#a78bfa", "#7c3aed"];
+
+const RARITY = [
+  { key: "unique_count",    label: "Unique",     color: RARITY_COLORS.UNIQUE },
+  { key: "legendary_count", label: "Légendaire", color: RARITY_COLORS.LEGENDARY },
+  { key: "epic_count",      label: "Épique",     color: RARITY_COLORS.EPIC },
+  { key: "rare_count",      label: "Rare",       color: RARITY_COLORS.RARE },
+  { key: "common_count",    label: "Commun",     color: RARITY_COLORS.COMMON },
+] as const;
+
+/* ─── Helpers ──────────────────────────────────────── */
+
+function formatSeconds(sec: number): string {
+  if (!sec) return "—";
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (h === 0) return `${m}min`;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function segments(entry: { badge_count: number; [k: string]: any }) {
+  return RARITY.map(({ key, color }) => ({ count: entry[key] as number, color })).filter((s) => s.count > 0);
+}
+
+/* ═══════════════════════════════════════════════════════ */
 
 export default function Leaderboard() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["leaderboard"],
-    queryFn: fetchLeaderboard,
-  });
+  const [tab, setTab] = useState<MainTab>("badges");
+  const [period, setPeriod] = useState<WizebotPeriod>("global");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;900&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-    return () => {
-      try { document.head.removeChild(link); } catch {}
-    };
-  }, []);
 
-  const all = data ?? [];
-  const filtered = all.filter((e) =>
-    e.username.toLowerCase().includes(search.toLowerCase())
-  );
-  const maxPts = all[0]?.total_pts || 1;
-  const showPodium = !search && filtered.length >= 1;
+  const { data: badgeData = [], isLoading: badgeLoading } = useQuery({ queryKey: ["leaderboard"], queryFn: fetchLeaderboard });
+  const wizeType: WizebotType = tab === "messages" ? "message" : "uptime";
+  const { data: wizeData = [], isLoading: wizeLoading } = useQuery({
+    queryKey: ["wizebot", wizeType, period],
+    queryFn: () => fetchWizebotRanking(wizeType, period),
+    enabled: tab !== "badges",
+  });
+
+  const badgeMap = useMemo(() => new Map(badgeData.map((e) => [e.username.toLowerCase(), e])), [badgeData]);
+  const filtered = useMemo(() => badgeData.filter((e) => e.username.toLowerCase().includes(search.toLowerCase())), [badgeData, search]);
+  const filteredWize = useMemo(() => wizeData.filter((e) => e.user_name.toLowerCase().includes(search.toLowerCase())), [wizeData, search]);
+
+  const maxPts = badgeData[0]?.total_pts || 1;
+  const showPodium = tab === "badges" && !search && filtered.length >= 1;
   const top3 = showPodium ? filtered.slice(0, 3) : [];
   const rest = showPodium ? filtered.slice(3) : filtered;
 
-  return (
-    <div
-      style={{ fontFamily: "'Outfit', sans-serif" }}
-      className="min-h-screen"
-    >
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 pt-10 pb-20">
+  const showWizePodium = tab !== "badges" && !search && filteredWize.length >= 1;
+  const wizeTop3 = showWizePodium ? filteredWize.slice(0, 3) : [];
+  const wizeRest = showWizePodium ? filteredWize.slice(3) : filteredWize;
+  const loading = tab === "badges" ? badgeLoading : wizeLoading;
 
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-          <div>
-            <p className="text-[10px] tracking-[0.35em] text-twitch/60 uppercase mb-1 font-medium">
-              el_matte0 · Badge Collection
-            </p>
-            <h1
-              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}
-              className="text-5xl sm:text-7xl leading-none text-white"
-            >
-              Classement
-            </h1>
+  const tabs: { id: MainTab; label: string }[] = [
+    { id: "badges", label: "Badges" },
+    { id: "uptime", label: "Uptime" },
+    { id: "messages", label: "Messages" },
+  ];
+
+  const periods: { v: WizebotPeriod; label: string }[] = [
+    { v: "week", label: "Semaine" },
+    { v: "month", label: "Mois" },
+    { v: "global", label: "Global" },
+  ];
+
+  return (
+    <div className="min-h-screen">
+
+      {/* ── Ambient glow matching the home page ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
+        <div className="absolute top-0 left-[20%] w-[800px] h-[500px]"
+          style={{ background: "radial-gradient(ellipse at center, rgba(145,70,255,0.12), transparent 60%)" }} />
+        <div className="absolute bottom-[20%] right-[15%] w-[600px] h-[500px]"
+          style={{ background: "radial-gradient(ellipse at center, rgba(178,102,255,0.08), transparent 55%)" }} />
+      </div>
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8 pt-10 pb-28">
+
+        {/* ━━━ HEADER ━━━ */}
+        <header className="mb-10">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.92] bg-gradient-to-r from-[#9146FF] via-purple-400 to-[#ff66cc] bg-clip-text text-transparent">
+            Classement
+          </h1>
+          <p className="mt-3 text-gray-500 text-sm sm:text-base max-w-md">
+            Les meilleurs collectionneurs de badges de la communauté.
+          </p>
+        </header>
+
+        {/* ━━━ CONTROLS BAR ━━━ */}
+        <div className="flex flex-wrap items-center gap-3 mb-10">
+          {/* Tabs */}
+          <div className="inline-flex bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1 gap-0.5">
+            {tabs.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  tab === id
+                    ? "bg-[#9146FF] text-white shadow-lg shadow-[#9146FF]/20"
+                    : "text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {/* Search */}
-          <div className="relative group">
-            <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 group-focus-within:text-twitch transition-colors"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          {/* Periods */}
+          {tab !== "badges" && (
+            <div className="inline-flex bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1 gap-0.5">
+              {periods.map(({ v, label }) => (
+                <button
+                  key={v}
+                  onClick={() => setPeriod(v)}
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                    period === v
+                      ? "bg-white/[0.08] text-white"
+                      : "text-gray-600 hover:text-gray-400"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Search — pushed right */}
+          <div className="relative ml-auto">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
-              placeholder="Rechercher un joueur…"
+              placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-twitch/40 focus:bg-white/[0.06] transition-all w-60"
+              className="w-48 sm:w-56 pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#0f0f13] border border-white/[0.06] text-white placeholder-gray-700 focus:outline-none focus:border-[#9146FF]/40 focus:bg-[#0a0a0d] transition-all"
             />
           </div>
         </div>
 
-        {isLoading ? (
+        {/* ━━━ LOADING ━━━ */}
+        {loading ? (
           <div className="flex justify-center py-32">
-            <div className="w-10 h-10 border-2 border-twitch border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-[#9146FF]/20 border-t-[#9146FF] animate-spin" />
           </div>
         ) : (
-          <div className="space-y-8">
+          <>
+            {/* ━━━ BADGES TAB ━━━ */}
+            {tab === "badges" && (
+              <div>
 
-            {/* ── PODIUM TOP 3 ── */}
-            {showPodium && top3.length > 0 && (
-              <div className="relative py-8 sm:py-12">
-                {/* Ambient background glows */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-[0.04]"
-                    style={{ background: "radial-gradient(ellipse, #fbbf24, transparent 70%)" }} />
-                  <div className="absolute top-1/2 left-[20%] -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-[0.03]"
-                    style={{ background: "radial-gradient(ellipse, #94a3b8, transparent 70%)" }} />
-                  <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-[0.03]"
-                    style={{ background: "radial-gradient(ellipse, #b45309, transparent 70%)" }} />
-                </div>
+                {/* ── TOP 3 PODIUM ── */}
+                {showPodium && top3.length > 0 && (
+                  <div className="relative mb-16">
+                    {/* Ambient glow under podium */}
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
+                      style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
 
-                <div className="relative flex items-end justify-center gap-3 sm:gap-4 lg:gap-6 px-2">
-                  {/* Order: 2nd · 1st · 3rd */}
-                  {[top3[1], top3[0], top3[2]].map((entry, podiumSlot) => {
-                    if (!entry) return <div key={`empty-${podiumSlot}`} className="flex-1 max-w-[260px]" />;
-                    const rankIdx = entry.rank - 1;
-                    const cfg = PODIUM_CFG[rankIdx];
-                    const isFirst = entry.rank === 1;
-                    const avatarSize = isFirst ? 88 : 72;
+                    <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
+                      {[top3[1], top3[0], top3[2]].map((entry) => {
+                        if (!entry) return <div key={Math.random()} />;
+                        const ri = entry.rank - 1;
+                        const accent = PODIUM_COLORS[ri];
+                        const isFirst = ri === 0;
+
+                        return (
+                          <Link key={entry.username} to={`/user/${entry.username}`} className="group block">
+                            <div
+                              className="relative rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
+                              style={{
+                                padding: isFirst ? "32px 20px 24px" : "24px 16px 20px",
+                                background: isFirst
+                                  ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
+                                  : "#050508",
+                                border: `1px solid ${isFirst ? "rgba(145,70,255,0.3)" : "rgba(255,255,255,0.07)"}`,
+                                boxShadow: isFirst
+                                  ? "0 32px 80px rgba(145,70,255,0.2), 0 0 0 1px rgba(145,70,255,0.12) inset"
+                                  : "0 8px 32px rgba(0,0,0,0.3)",
+                              }}
+                            >
+                              {/* Rank badge */}
+                              <div className="flex justify-center mb-4">
+                                <span className="text-[11px] font-black tracking-[0.18em] uppercase px-3 py-1 rounded-full"
+                                  style={{
+                                    color: accent,
+                                    background: `${accent}14`,
+                                    border: `1px solid ${accent}25`,
+                                  }}>
+                                  {["1er", "2ème", "3ème"][ri]}
+                                </span>
+                              </div>
+
+                              {/* Avatar */}
+                              <div className="flex justify-center mb-4 relative">
+                                {isFirst && (
+                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="w-32 h-32 rounded-full"
+                                      style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
+                                  </div>
+                                )}
+                                <div className="relative">
+                                  <img
+                                    src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                                    alt={entry.username}
+                                    className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
+                                    style={{
+                                      width: isFirst ? 104 : 76,
+                                      height: isFirst ? 104 : 76,
+                                      border: `3px solid ${accent}55`,
+                                      boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
+                                    }}
+                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
+                                  />
+                                  {isFirst && (
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                                      <svg className="w-8 h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
+                                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Name */}
+                              <p className={`text-center font-bold text-white truncate mb-1 ${isFirst ? "text-base" : "text-sm"}`}>
+                                {entry.display_name || entry.username}
+                              </p>
+
+                              {/* Points */}
+                              <p className="text-center">
+                                <span className={`font-black tabular-nums ${isFirst ? "text-4xl" : "text-2xl"}`}
+                                  style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
+                                  {entry.total_pts}
+                                </span>
+                                <span className="text-xs text-gray-600 ml-1.5 font-medium">pts</span>
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── LIST ── */}
+                <div className="rounded-2xl overflow-hidden bg-[#0f0f13]" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+                  {rest.map((entry, idx) => {
+                    const isTop10 = entry.rank <= 10;
+                    const isTop3 = entry.rank <= 3;
 
                     return (
-                      <div key={entry.username} className="flex flex-col items-center flex-1" style={{ maxWidth: isFirst ? "280px" : "240px" }}>
-                        {/* Player card */}
-                        <Link
-                          to={`/user/${entry.username}`}
-                          className="relative flex flex-col items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all duration-300 group w-full hover:scale-[1.02]"
+                      <Link
+                        key={entry.username}
+                        to={`/user/${entry.username}`}
+                        className="group relative flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-4 overflow-hidden transition-all duration-200"
+                        style={{ borderTop: idx > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                      >
+                        {/* Hover sweep */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                          style={{ background: "linear-gradient(90deg, rgba(145,70,255,0.06) 0%, transparent 60%)" }} />
+
+                        {/* Rank */}
+                        <span className="w-9 text-right shrink-0 tabular-nums font-black relative select-none"
                           style={{
-                            background: `linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.015) 100%)`,
-                            borderColor: cfg.accent + "44",
-                            boxShadow: `0 0 60px ${cfg.shadow}, 0 0 1px ${cfg.accent}33, inset 0 1px 0 rgba(255,255,255,0.06)`,
-                            backdropFilter: "blur(12px)",
+                            fontSize: isTop10 ? "1.15rem" : "0.9rem",
+                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "#2a2a2a",
+                            backgroundImage: isTop3 ? "linear-gradient(135deg, #9146FF, #e879f9)" : "none",
+                            WebkitBackgroundClip: isTop3 ? "text" : "unset",
+                            backgroundClip: isTop3 ? "text" : "unset",
+                          }}>
+                          {entry.rank}
+                        </span>
+
+                        {/* Avatar */}
+                        <img
+                          src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
+                          alt={entry.username}
+                          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover shrink-0 relative transition-transform duration-300 group-hover:scale-105"
+                          style={{
+                            border: `2px solid rgba(145,70,255,${isTop3 ? "0.5" : isTop10 ? "0.2" : "0.07"})`,
+                            boxShadow: isTop3 ? "0 0 18px rgba(145,70,255,0.35)" : isTop10 ? "0 0 8px rgba(145,70,255,0.15)" : "none",
                           }}
-                        >
-                          {/* Top shine line */}
-                          <div
-                            className="absolute top-0 left-[10%] right-[10%] h-px opacity-40"
-                            style={{ background: `linear-gradient(90deg, transparent, ${cfg.accent}, transparent)` }}
-                          />
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.username[0]}&background=1a1a2e&color=9146FF&bold=true&size=96`; }}
+                        />
 
-                          {/* Rank badge */}
-                          <div
-                            className="absolute -top-4 -right-4 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shadow-lg ring-4 ring-gray-950"
-                            style={{ background: cfg.accent, color: entry.rank === 1 ? "#000" : "#fff" }}
-                          >
-                            {entry.rank}
-                          </div>
-
-                          {/* Icon */}
-                          <span className={`leading-none ${isFirst ? "text-3xl" : "text-2xl"}`}>{cfg.icon}</span>
-
-                          {/* Avatar */}
-                          <div className="relative">
-                            <div
-                              className="absolute inset-0 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity"
-                              style={{ background: cfg.accent, transform: "scale(1.5)" }}
-                            />
-                            <img
-                              src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
-                              alt={entry.username}
-                              className="rounded-full object-cover relative z-10"
-                              style={{
-                                width: avatarSize,
-                                height: avatarSize,
-                                border: `3px solid ${cfg.accent}66`,
-                              }}
-                              onError={(e) => {
-                                const el = e.currentTarget as HTMLImageElement;
-                                el.style.display = "none";
-                                const fallback = el.nextElementSibling as HTMLElement;
-                                if (fallback) fallback.style.display = "flex";
-                              }}
-                            />
-                            <div
-                              className="rounded-full items-center justify-center font-black text-black relative z-10"
-                              style={{
-                                display: "none",
-                                width: avatarSize,
-                                height: avatarSize,
-                                background: cfg.accent,
-                                fontSize: isFirst ? "1.4rem" : "1.1rem",
-                              }}
-                            >
-                              {entry.username[0].toUpperCase()}
-                            </div>
-                          </div>
-
-                          {/* Username */}
-                          <span
-                            className="font-bold text-center text-white group-hover:text-twitch transition-colors w-full truncate"
-                            style={{ fontSize: isFirst ? "1.1rem" : "0.95rem" }}
-                          >
+                        {/* Name + badges */}
+                        <div className="flex-1 min-w-0 relative">
+                          <div className="text-[15px] font-semibold text-gray-200 group-hover:text-white transition-colors truncate leading-tight">
                             {entry.display_name || entry.username}
-                          </span>
-
-                          {/* Points */}
-                          <div className="text-center">
-                            <span
-                              className="font-black tabular-nums leading-none"
-                              style={{ color: cfg.accent, fontSize: isFirst ? "2rem" : "1.5rem" }}
-                            >
-                              {entry.total_pts.toLocaleString()}
-                            </span>
-                            <span className="text-xs text-gray-500 ml-1">pts</span>
                           </div>
-
-                          {/* Badge count + top rarity */}
-                          <div className="flex items-center gap-2">
-                            {entry.top_rarity !== "NONE" && (
-                              <img
-                                src={getBadgeImage(entry.top_rarity, "saison2")}
-                                alt={entry.top_rarity}
-                                className="w-5 h-5 object-contain opacity-70"
-                              />
-                            )}
-                            <span className="text-[11px] text-gray-500 font-medium tracking-wide">
-                              {entry.badge_count} BADGE{entry.badge_count > 1 ? "S" : ""}
-                            </span>
+                          <div className="text-[11px] text-gray-600 font-medium mt-0.5">
+                            {entry.badge_count} badge{entry.badge_count > 1 ? "s" : ""}
                           </div>
-
-                          {/* Bottom glow line */}
-                          <div
-                            className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px rounded-full opacity-50"
-                            style={{ width: "60%", background: cfg.accent }}
-                          />
-                        </Link>
-
-                        {/* Podium block */}
-                        <div
-                          className="hidden sm:flex w-full items-center justify-center rounded-b-xl relative overflow-hidden"
-                          style={{
-                            height: cfg.podiumH,
-                            background: `linear-gradient(180deg, ${cfg.accent}15 0%, ${cfg.accent}08 100%)`,
-                            borderLeft: `1px solid ${cfg.accent}22`,
-                            borderRight: `1px solid ${cfg.accent}22`,
-                            borderBottom: `1px solid ${cfg.accent}22`,
-                          }}
-                        >
-                          <span
-                            className="text-4xl font-black opacity-[0.08] select-none"
-                            style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.1em" }}
-                          >
-                            {cfg.label}
-                          </span>
-                          {/* Horizontal lines decoration */}
-                          <div className="absolute inset-0 pointer-events-none" style={{
-                            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 11px, ${cfg.accent}08 11px, ${cfg.accent}08 12px)`,
-                          }} />
                         </div>
-                      </div>
+
+                        {/* Points */}
+                        <div className="shrink-0 text-right relative">
+                          <span className="font-black tabular-nums"
+                            style={{
+                              fontSize: isTop10 ? "1.25rem" : "1rem",
+                              color: isTop3 ? "#e879f9" : isTop10 ? "#c4b5fd" : "#555",
+                            }}>
+                            {entry.total_pts}
+                          </span>
+                          <span className="text-[11px] text-gray-700 ml-1">pts</span>
+                        </div>
+                      </Link>
                     );
                   })}
                 </div>
+
+                {filtered.length === 0 && (
+                  <div className="text-center py-28">
+                    <p className="text-sm text-gray-600">Aucun joueur trouvé.</p>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* ── DIVIDER ── */}
-            {showPodium && top3.length > 0 && rest.length > 0 && (
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                <span className="text-[10px] tracking-[0.25em] text-gray-700 uppercase font-medium">
-                  Suite du classement
-                </span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            {/* ━━━ UPTIME / MESSAGES ━━━ */}
+            {tab !== "badges" && (
+              <div>
+
+                {/* ── TOP 3 PODIUM ── */}
+                {showWizePodium && wizeTop3.length > 0 && (
+                  <div className="relative mb-16">
+                    {/* Ambient glow under podium */}
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none"
+                      style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(145,70,255,0.15), transparent 70%)" }} />
+
+                    <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
+                      {[wizeTop3[1], wizeTop3[0], wizeTop3[2]].map((entry, displayIdx) => {
+                        if (!entry) return <div key={`empty-${displayIdx}`} />;
+                        const ri = [1, 0, 2][displayIdx]; // actual rank index: 2nd, 1st, 3rd
+                        const accent = PODIUM_COLORS[ri];
+                        const isFirst = ri === 0;
+                        const badge = badgeMap.get(entry.user_name.toLowerCase());
+                        const value = parseInt(entry.value, 10);
+                        const display = tab === "uptime" ? formatSeconds(value) : value.toLocaleString();
+
+                        return (
+                          <Link key={entry.user_uid} to={`/user/${entry.user_name}`} className="group block">
+                            <div
+                              className="relative rounded-3xl overflow-hidden transition-all duration-500 group-hover:-translate-y-2"
+                              style={{
+                                padding: isFirst ? "32px 20px 24px" : "24px 16px 20px",
+                                background: isFirst
+                                  ? "linear-gradient(160deg, rgba(145,70,255,0.18) 0%, rgba(145,70,255,0.06) 50%, rgba(255,102,204,0.04) 100%), #050508"
+                                  : "#050508",
+                                border: `1px solid ${isFirst ? "rgba(145,70,255,0.3)" : "rgba(255,255,255,0.07)"}`,
+                                boxShadow: isFirst
+                                  ? "0 32px 80px rgba(145,70,255,0.2), 0 0 0 1px rgba(145,70,255,0.12) inset"
+                                  : "0 8px 32px rgba(0,0,0,0.3)",
+                              }}
+                            >
+                              {/* Rank badge */}
+                              <div className="flex justify-center mb-4">
+                                <span className="text-[11px] font-black tracking-[0.18em] uppercase px-3 py-1 rounded-full"
+                                  style={{
+                                    color: accent,
+                                    background: `${accent}14`,
+                                    border: `1px solid ${accent}25`,
+                                  }}>
+                                  {["1er", "2ème", "3ème"][ri]}
+                                </span>
+                              </div>
+
+                              {/* Avatar */}
+                              <div className="flex justify-center mb-4 relative">
+                                {isFirst && (
+                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="w-32 h-32 rounded-full"
+                                      style={{ background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)` }} />
+                                  </div>
+                                )}
+                                <div className="relative">
+                                  <img
+                                    src={badge?.avatar_url || `https://unavatar.io/twitch/${entry.user_name}`}
+                                    alt={entry.user_name}
+                                    className="rounded-full object-cover transition-all duration-500 group-hover:scale-105"
+                                    style={{
+                                      width: isFirst ? 104 : 76,
+                                      height: isFirst ? 104 : 76,
+                                      border: `3px solid ${accent}55`,
+                                      boxShadow: `0 0 ${isFirst ? 40 : 20}px ${accent}35`,
+                                    }}
+                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=${accent.slice(1)}&color=fff&bold=true&size=128`; }}
+                                  />
+                                  {isFirst && (
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                                      <svg className="w-8 h-8" viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 8px ${accent}80)` }}>
+                                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z" fill={accent} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Name */}
+                              <p className={`text-center font-bold text-white truncate mb-1 ${isFirst ? "text-base" : "text-sm"}`}>
+                                {badge?.display_name || entry.user_name}
+                              </p>
+
+                              {/* Value */}
+                              <p className="text-center">
+                                <span className={`font-black tabular-nums ${isFirst ? "text-4xl" : "text-2xl"}`}
+                                  style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}>
+                                  {display}
+                                </span>
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── LIST ── */}
+                <div className="rounded-2xl overflow-hidden bg-[#0f0f13]" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+                  {wizeRest.map((entry, idx) => {
+                    const rank = (showWizePodium ? 3 : 0) + idx + 1;
+                    const isTop10 = rank <= 10;
+                    const isTop3 = rank <= 3;
+                    const value = parseInt(entry.value, 10);
+                    const display = tab === "uptime" ? formatSeconds(value) : value.toLocaleString();
+                    const badge = badgeMap.get(entry.user_name.toLowerCase());
+
+                    return (
+                      <Link
+                        key={entry.user_uid}
+                        to={`/user/${entry.user_name}`}
+                        className="group relative flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-4 overflow-hidden transition-all duration-200"
+                        style={{ borderTop: idx > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                      >
+                        {/* Hover sweep */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                          style={{ background: "linear-gradient(90deg, rgba(145,70,255,0.06) 0%, transparent 60%)" }} />
+
+                        {/* Rank */}
+                        <span className="w-9 text-right shrink-0 tabular-nums font-black relative select-none"
+                          style={{
+                            fontSize: isTop10 ? "1.15rem" : "0.9rem",
+                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "#2a2a2a",
+                            backgroundImage: isTop3 ? "linear-gradient(135deg, #9146FF, #e879f9)" : "none",
+                            WebkitBackgroundClip: isTop3 ? "text" : "unset",
+                            backgroundClip: isTop3 ? "text" : "unset",
+                          }}>
+                          {rank}
+                        </span>
+
+                        {/* Avatar */}
+                        <img
+                          src={badge?.avatar_url || `https://unavatar.io/twitch/${entry.user_name}`}
+                          alt={entry.user_name}
+                          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover shrink-0 relative transition-transform duration-300 group-hover:scale-105"
+                          style={{
+                            border: `2px solid rgba(145,70,255,${isTop3 ? "0.5" : isTop10 ? "0.2" : "0.07"})`,
+                            boxShadow: isTop3 ? "0 0 18px rgba(145,70,255,0.35)" : isTop10 ? "0 0 8px rgba(145,70,255,0.15)" : "none",
+                          }}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.user_name[0]}&background=1a1a2e&color=9146FF&bold=true&size=96`; }}
+                        />
+
+                        {/* Name + badge info */}
+                        <div className="flex-1 min-w-0 relative">
+                          <div className="text-[15px] font-semibold text-gray-200 group-hover:text-white transition-colors truncate leading-tight">
+                            {badge?.display_name || entry.user_name}
+                          </div>
+                          {badge ? (
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {badge.top_rarity !== "NONE" && <img src={getBadgeImage(badge.top_rarity, "saison2")} alt="" className="w-3.5 h-3.5 object-contain opacity-60" />}
+                              <span className="text-[11px] text-gray-600 font-medium">{badge.badge_count} badges · {badge.total_pts} pts</span>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-gray-600 font-medium">Pas de badges</span>
+                          )}
+                        </div>
+
+                        {/* Value */}
+                        <div className="shrink-0 text-right relative">
+                          <span className="font-black tabular-nums"
+                            style={{
+                              fontSize: isTop10 ? "1.25rem" : "1rem",
+                              color: isTop3 ? "#e879f9" : isTop10 ? "#c4b5fd" : "#555",
+                            }}>
+                            {display}
+                          </span>
+                          <div className="text-[10px] text-gray-700 mt-0.5">
+                            {tab === "uptime" ? "de stream" : "messages"}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {filteredWize.length === 0 && (
+                  <div className="text-center py-28">
+                    <p className="text-sm text-gray-600">Aucune donnée.</p>
+                  </div>
+                )}
               </div>
             )}
-
-            {/* ── REST OF LIST ── */}
-            <div className="space-y-1">
-              {rest.map((entry) => {
-                const rColor =
-                  entry.top_rarity !== "NONE"
-                    ? RARITY_COLORS[entry.top_rarity] || "#666"
-                    : "#333";
-                const pct = (entry.total_pts / maxPts) * 100;
-
-                return (
-                  <Link
-                    key={entry.username}
-                    to={`/user/${entry.username}`}
-                    className="relative flex items-center gap-5 px-5 py-3.5 rounded-xl overflow-hidden group transition-all duration-200 hover:bg-white/[0.035]"
-                  >
-                    {/* Progress bar bg */}
-                    <div
-                      className="absolute inset-y-0 left-0 opacity-[0.025] group-hover:opacity-[0.05] transition-opacity pointer-events-none"
-                      style={{
-                        width: `${pct}%`,
-                        background: `linear-gradient(90deg, ${rColor}, transparent)`,
-                      }}
-                    />
-
-                    {/* Left accent */}
-                    <div
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-full opacity-50"
-                      style={{ background: rColor }}
-                    />
-
-                    {/* Rank */}
-                    <span className="w-10 text-right text-sm font-bold text-gray-600 tabular-nums shrink-0">
-                      {entry.rank}
-                    </span>
-
-                    {/* Avatar */}
-                    <img
-                      src={entry.avatar_url || `https://unavatar.io/twitch/${entry.username}`}
-                      alt={entry.username}
-                      className="w-10 h-10 rounded-full object-cover shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
-                      style={{ border: `2px solid ${rColor}55` }}
-                      onError={(e) => {
-                        const el = e.currentTarget as HTMLImageElement;
-                        el.style.display = "none";
-                        const fallback = el.nextElementSibling as HTMLElement;
-                        if (fallback) fallback.style.display = "flex";
-                      }}
-                    />
-                    <div
-                      className="w-10 h-10 rounded-full shrink-0 items-center justify-center text-sm font-black text-black"
-                      style={{ display: "none", background: rColor + "cc" }}
-                    >
-                      {entry.username[0].toUpperCase()}
-                    </div>
-
-                    {/* Username */}
-                    <span className="flex-1 text-base font-semibold text-gray-300 group-hover:text-white transition-colors truncate">
-                      {entry.display_name || entry.username}
-                    </span>
-
-                    {/* Top rarity badge */}
-                    {entry.top_rarity !== "NONE" && (
-                      <img
-                        src={getBadgeImage(entry.top_rarity, "saison2")}
-                        alt={entry.top_rarity}
-                        className="w-7 h-7 object-contain shrink-0 opacity-60 group-hover:opacity-90 transition-opacity"
-                      />
-                    )}
-
-                    {/* Badge count */}
-                    <span className="hidden sm:block text-sm text-gray-600 tabular-nums shrink-0 font-medium min-w-[80px] text-right">
-                      {entry.badge_count} badges
-                    </span>
-
-                    {/* Points */}
-                    <div className="shrink-0 text-right min-w-[70px]">
-                      <span className="text-base font-bold text-white tabular-nums">
-                        {entry.total_pts.toLocaleString()}
-                      </span>
-                      <span className="text-[11px] text-gray-600 ml-1">pts</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {filtered.length === 0 && (
-              <p className="text-center text-gray-700 py-20 text-sm tracking-wide">
-                Aucun joueur trouvé.
-              </p>
-            )}
-          </div>
+          </>
         )}
       </div>
     </div>

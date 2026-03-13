@@ -6,9 +6,10 @@ import ArcRow from "../components/ArcRow";
 import ShareCardModal from "../components/ShareCardModal";
 import { ARC_CONFIG } from "../arcConfig";
 import ScratchTicket from "../components/ScratchTicket";
-import { canClaimTicket, claimTicket, getMyTickets } from "../api";
+import { canClaimTicket, claimTicket, getMyTickets, scratchTicket } from "../api";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 import { getBadgeImage } from "../badgeImages";
+import type { LotteryTicket } from "../types";
 
 function countBadges(list: string[]): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -27,7 +28,10 @@ export default function MyCollection() {
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState("");
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [lastRevealed, setLastRevealed] = useState<string | null>(null);
+  const [sessionResults, setSessionResults] = useState<{ rarity: string; season: string }[]>([]);
+  const [revealingAll, setRevealingAll] = useState(false);
+  const [bulkResults, setBulkResults] = useState<{ rarity: string; season: string }[]>([]);
+  const [showSummary, setShowSummary] = useState(false);
 
   const { data: ticketAvailable, refetch: refetchTicket } = useQuery({
     queryKey: ["canClaimTicket"],
@@ -77,35 +81,72 @@ export default function MyCollection() {
   };
 
   const handleScratched = useCallback((rarity: string) => {
-    setLastRevealed(rarity);
+    const season = topTicket?.season || "saison2";
+    setSessionResults((prev) => [...prev, { rarity, season }]);
+    // Don't refresh data here — it would re-render and kill the reveal animation.
+    // Data refresh happens on dismiss instead.
+  }, [topTicket]);
+
+  const handleDismiss = useCallback(() => {
+    setCurrentIdx((prev) => {
+      const nextIdx = prev + 1;
+      // If that was the last ticket, show the session summary
+      if (nextIdx >= unscratchedTickets.length) {
+        // Small delay so the dismiss animation finishes first
+        setTimeout(() => setShowSummary(true), 450);
+      }
+      return nextIdx;
+    });
+    // Refresh data now that user dismissed the reveal
     queryClient.invalidateQueries({ queryKey: ["myTickets"] });
     refetchTicket();
     refresh();
-  }, [queryClient, refetchTicket, refresh]);
+  }, [queryClient, refetchTicket, refresh, unscratchedTickets.length]);
 
-  const handleDismiss = useCallback(() => {
-    setCurrentIdx((prev) => prev + 1);
-  }, []);
+  const handleRevealAll = useCallback(async () => {
+    const toReveal = unscratchedTickets.slice(currentIdx);
+    if (toReveal.length === 0) return;
+    setRevealingAll(true);
+    const results: { rarity: string; season: string }[] = [];
+    for (const t of toReveal) {
+      try {
+        const rarity = await scratchTicket(t.id);
+        results.push({ rarity, season: t.season });
+        setBulkResults([...results]);
+        await new Promise((r) => setTimeout(r, 400));
+      } catch {
+        break;
+      }
+    }
+    setBulkResults(results);
+    setSessionResults((prev) => [...prev, ...results]);
+    setShowSummary(true);
+    setRevealingAll(false);
+    setCurrentIdx(unscratchedTickets.length);
+    queryClient.invalidateQueries({ queryKey: ["myTickets"] });
+    refetchTicket();
+    refresh();
+  }, [unscratchedTickets, currentIdx, queryClient, refetchTicket, refresh]);
 
   // Stack cards behind the top one (up to 3 visible)
   const stackCards = Math.min(remaining > 0 ? remaining - 1 : 0, 3);
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-10">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10">
 
       {/* ── Header ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-4 sm:p-6 md:p-8">
         <div className="absolute top-0 right-0 w-72 h-72 bg-twitch/[0.05] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row gap-6 items-start">
           <img
             src={user.twitch_profile_image}
             alt=""
-            className="w-20 h-20 rounded-2xl ring-2 ring-twitch/30 shadow-xl"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ring-2 ring-twitch/30 shadow-xl"
           />
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-3 sm:space-y-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tight">{user.twitch_display_name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{user.twitch_display_name}</h1>
               <p className="text-gray-500 mt-1">
                 <span className="text-twitch font-bold text-lg">{user.total_pts}</span>{" "}
                 <span className="text-sm">points</span>
@@ -167,7 +208,7 @@ export default function MyCollection() {
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
           {/* Left: stacked pile */}
-          <div className="relative shrink-0" style={{ width: 272, height: 360 }}>
+          <div className="relative shrink-0 w-56 sm:w-64 aspect-[3/4]">
             {remaining > 0 ? (
               <>
                 {/* Background stack cards */}
@@ -258,64 +299,167 @@ export default function MyCollection() {
               <p className="text-sm text-red-400">{claimError}</p>
             )}
 
-            {/* Last revealed */}
-            {lastRevealed && (
-              <div className="flex items-center gap-3 lg:justify-start justify-center">
-                <span className="text-xs text-gray-600 uppercase tracking-wider">Dernier :</span>
-                <div className="flex items-center gap-2">
-                  <img
-                    src={getBadgeImage(lastRevealed, "saison2")}
-                    alt=""
-                    className="w-8 h-8 object-contain"
-                  />
-                  <span
-                    className="text-sm font-black tracking-wider uppercase"
-                    style={{ color: RARITY_COLORS[lastRevealed] }}
-                  >
-                    {lastRevealed}
-                  </span>
+            {/* Session results preview */}
+            {sessionResults.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs text-gray-600 uppercase tracking-wider">
+                  Obtenu{sessionResults.length > 1 ? "s" : ""} :
+                </span>
+                <div className="flex flex-wrap gap-2 lg:justify-start justify-center">
+                  {sessionResults.map((r, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06]"
+                    >
+                      <img
+                        src={getBadgeImage(r.rarity, r.season)}
+                        alt=""
+                        className="w-6 h-6 object-contain"
+                      />
+                      <span
+                        className="text-[10px] font-bold uppercase"
+                        style={{ color: RARITY_COLORS[r.rarity] }}
+                      >
+                        {r.rarity}
+                      </span>
+                    </div>
+                  ))}
                 </div>
+                {remaining === 0 && sessionResults.length > 0 && (
+                  <button
+                    onClick={() => setShowSummary(true)}
+                    className="text-xs text-twitch hover:text-twitch-light underline underline-offset-2 transition-colors"
+                  >
+                    Voir le recap
+                  </button>
+                )}
               </div>
             )}
 
-            {remaining > 0 && (
+            {remaining > 0 && !revealingAll && (
               <p className="text-xs text-gray-600">
                 Gratte la couche argentee pour reveler ton badge !
               </p>
+            )}
+
+            {/* Reveal all button */}
+            {remaining > 1 && !revealingAll && (
+              <button
+                onClick={handleRevealAll}
+                className="text-xs text-gray-600 hover:text-gray-400 underline underline-offset-2 transition-colors"
+              >
+                Tout reveler d'un coup ({remaining} tickets)
+              </button>
+            )}
+
+            {/* Bulk reveal in progress */}
+            {revealingAll && (
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-twitch border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-gray-400">
+                  Revelation... {bulkResults.length}/{unscratchedTickets.length - currentIdx}
+                </span>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* ── Arcs ── */}
-      {seasons.map((season, idx) => {
-        const currentList = user.badges[season] || [];
-        const counts = countBadges(currentList);
-        const seasonPts = currentList.reduce(
-          (sum, b) => sum + (RARITY_POINTS[b.toUpperCase()] || 0),
-          0,
-        );
-        const arc = ARC_CONFIG[season] || {
-          name: season.replace("saison", "Saison "),
-          subtitle: "",
-          status: "archive" as const,
-        };
+      {/* ── Session Summary Modal ── */}
+      {showSummary && sessionResults.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#0a0a0d] border border-white/[0.08] rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-[fadeIn_0.3s_ease-out]">
+            <div className="text-center">
+              <h3 className="text-xl font-black text-white">Pack Opening</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {sessionResults.length} badge{sessionResults.length > 1 ? "s" : ""} revele{sessionResults.length > 1 ? "s" : ""}
+              </p>
+            </div>
 
-        return (
-          <div key={season}>
-            <ArcRow
-              season={season}
-              counts={counts}
-              arc={arc}
-              totalBadges={currentList.length}
-              totalPts={seasonPts}
-            />
-            {idx < seasons.length - 1 && (
-              <div className="mx-auto w-[60%] max-w-[400px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-10" />
-            )}
+            <div className="flex flex-wrap justify-center gap-3">
+              {sessionResults.map((r, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/[0.06] animate-[badgePopIn_0.4s_ease-out_forwards]"
+                  style={{ animationDelay: `${i * 80}ms`, opacity: 0 }}
+                >
+                  <img
+                    src={getBadgeImage(r.rarity, r.season)}
+                    alt={r.rarity}
+                    className="w-16 h-16 object-contain"
+                    style={{ filter: `drop-shadow(0 0 10px ${RARITY_COLORS[r.rarity]}60)` }}
+                  />
+                  <span className="text-[10px] font-bold uppercase" style={{ color: RARITY_COLORS[r.rarity] }}>
+                    {r.rarity}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Points total */}
+            <div className="text-center space-y-1">
+              <span className="text-twitch font-black text-2xl">
+                +{sessionResults.reduce((sum, r) => sum + (RARITY_POINTS[r.rarity] || 0), 0)} pts
+              </span>
+              <p className="text-xs text-gray-600">ajoutes a ta collection</p>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowSummary(false);
+                setBulkResults([]);
+                setSessionResults([]);
+                setCurrentIdx(0);
+              }}
+              className="w-full py-3 bg-twitch/20 hover:bg-twitch/30 border border-twitch/30 text-twitch text-sm font-semibold rounded-xl transition-colors"
+            >
+              Fermer
+            </button>
           </div>
-        );
-      })}
+
+          <style>{`
+            @keyframes fadeIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+            @keyframes badgePopIn { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+          `}</style>
+        </div>
+      )}
+
+      {/* ── Arcs ── */}
+      <div className="relative">
+        {/* Vertical line connecting arcs — desktop only */}
+        <div className="hidden lg:block absolute left-[22px] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/[0.1] to-transparent pointer-events-none" />
+
+        <div className="space-y-10">
+          {seasons.map((season, idx) => {
+            const currentList = user.badges[season] || [];
+            const counts = countBadges(currentList);
+            const seasonPts = currentList.reduce(
+              (sum, b) => sum + (RARITY_POINTS[b.toUpperCase()] || 0),
+              0,
+            );
+            const arc = ARC_CONFIG[season] || {
+              name: season.replace("saison", "Saison "),
+              subtitle: "",
+              status: "archive" as const,
+            };
+
+            return (
+              <div key={season}>
+                <ArcRow
+                  season={season}
+                  counts={counts}
+                  arc={arc}
+                  totalBadges={currentList.length}
+                  totalPts={seasonPts}
+                />
+                {idx < seasons.length - 1 && (
+                  <div className="lg:hidden mx-auto w-[60%] max-w-[400px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-10" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {seasons.length === 0 && tickets.length === 0 && (
         <p className="text-center text-gray-500 py-10">

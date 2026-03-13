@@ -8,6 +8,7 @@ export interface AuthUser {
 
 export interface PublicUser {
   username: string;
+  avatar_url: string | null;
   badges: Record<string, Record<string, number>>;
   total_pts: number;
   rank: number;
@@ -21,6 +22,19 @@ export interface LeaderboardEntry {
   total_pts: number;
   badge_count: number;
   top_rarity: string;
+  common_count: number;
+  rare_count: number;
+  epic_count: number;
+  legendary_count: number;
+  unique_count: number;
+  first_badge_at: string | null;
+  last_badge_at: string | null;
+  season_count: number;
+  message_count: number | null;
+  watch_time_minutes: number | null;
+  followed_at: string | null;
+  trade_count: number;
+  member_since: string | null;
 }
 
 export interface Trade {

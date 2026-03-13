@@ -1,7 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../api";
-import BadgeGrid from "../components/BadgeGrid";
+import ArcRow from "../components/ArcRow";
+import { ARC_CONFIG } from "../arcConfig";
 import { useAuth } from "../hooks/useAuth";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 
@@ -50,13 +51,13 @@ export default function UserProfile() {
     }
   }
 
-  const avatarUrl = `https://unavatar.io/twitch/${data.username}`;
+  const avatarUrl = data.avatar_url || `https://unavatar.io/twitch/${data.username}`;
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-10 space-y-10">
 
       {/* ── Header ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-72 h-72 bg-twitch/[0.05] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row gap-6 items-start">
@@ -64,7 +65,7 @@ export default function UserProfile() {
             src={avatarUrl}
             alt={data.username}
             className="w-20 h-20 rounded-2xl ring-2 ring-twitch/30 shadow-xl object-cover"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${data.username[0]}&background=1a1a2e&color=9146FF&bold=true&size=128`; }}
           />
           <div className="flex-1 space-y-4">
             <div>
@@ -120,33 +121,41 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* ── Seasons ── */}
-      {seasons.map((season) => {
-        const counts = data.badges[season] || {};
-        const totalInSeason = Object.values(counts).reduce((sum, n) => sum + (n as number), 0);
-        const seasonPts = Object.entries(counts).reduce(
-          (sum, [key, val]) => sum + (RARITY_POINTS[key.toUpperCase()] || 0) * (val as number),
-          0,
-        );
-        const label = season.replace("saison", "Saison ");
+      {/* ── Arcs ── */}
+      <div className="relative">
+        <div className="hidden lg:block absolute left-[22px] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/[0.1] to-transparent pointer-events-none" />
 
-        return (
-          <div key={season} className="space-y-5">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-black text-white">{label}</h2>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="text-gray-500">
-                  {totalInSeason} badge{totalInSeason > 1 ? "s" : ""}
-                </span>
-                <span className="text-white/10">|</span>
-                <span className="text-twitch font-semibold">{seasonPts} pts</span>
+        <div className="space-y-10">
+          {seasons.map((season, idx) => {
+            const counts = data.badges[season] || {};
+            const totalInSeason = Object.values(counts).reduce((sum, n) => sum + (n as number), 0);
+            const seasonPts = Object.entries(counts).reduce(
+              (sum, [key, val]) => sum + (RARITY_POINTS[key.toUpperCase()] || 0) * (val as number),
+              0,
+            );
+            const arc = ARC_CONFIG[season] || {
+              name: season.replace("saison", "Saison "),
+              subtitle: "",
+              status: "archive" as const,
+            };
+
+            return (
+              <div key={season}>
+                <ArcRow
+                  season={season}
+                  counts={counts}
+                  arc={arc}
+                  totalBadges={totalInSeason}
+                  totalPts={seasonPts}
+                />
+                {idx < seasons.length - 1 && (
+                  <div className="lg:hidden mx-auto w-[60%] max-w-[400px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-10" />
+                )}
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-white/[0.08] to-transparent" />
-            </div>
-            <BadgeGrid counts={counts} season={season} />
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      </div>
 
       {seasons.length === 0 && (
         <p className="text-center text-gray-500 py-10">
