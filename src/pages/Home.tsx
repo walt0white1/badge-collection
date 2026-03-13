@@ -198,7 +198,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
-        <div className="relative py-28 px-6">
+        <div className="relative py-14 md:py-28 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-0 max-w-[1400px] mx-auto">
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
               <p className="text-gray-600 text-xs font-semibold tracking-[0.25em] uppercase mb-4">

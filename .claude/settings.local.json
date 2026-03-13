@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(cmd /c \"where npm\")",
+      "Bash(cmd /c \"where npm 2>&1\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"feat: replace scroll showcase with mobile carousel on small screens:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
