@@ -277,66 +277,39 @@ export default function Home() {
         <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       </section>
 
-      {/* ═══ STATS STRIP ═══ */}
-      <section className="relative z-20">
-        <div className="py-16 px-6">
-          <div className="max-w-[1200px] mx-auto flex items-stretch justify-between gap-2">
-            {stats && [
-              { value: stats.total_badges, label: "Badges drops", color: "#a78bfa" },
-              { value: stats.total_users, label: "Collectionneurs", color: "#60a5fa" },
-              { value: stats.by_rarity?.LEGENDARY || 0, label: "Legendaires trouves", color: RARITY_COLORS.LEGENDARY },
-              { value: stats.by_rarity?.UNIQUE || 0, label: "Uniques en circulation", color: RARITY_COLORS.UNIQUE },
-            ].map((s, idx, arr) => (
-              <div key={s.label} className="flex-1 text-center relative">
-                <span className="block text-4xl sm:text-5xl md:text-6xl font-black tabular-nums leading-none" style={{ color: s.color }}>
-                  {s.value.toLocaleString()}
-                </span>
-                <span className="block mt-2 text-[10px] sm:text-xs text-gray-600 uppercase tracking-[0.12em] font-medium">
-                  {s.label}
-                </span>
-                {idx < arr.length - 1 && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-10 bg-white/[0.04]" />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-      </section>
-
       {/* ═══ CTA ═══ */}
       <section className="relative z-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_70%,rgba(145,70,255,0.08),transparent)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_60%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
-        <div className="relative py-24 px-6 text-center">
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-5">
-            Pret a collectionner ?
-          </h2>
-          <p className="text-gray-500 max-w-lg mx-auto text-base sm:text-lg mb-10 leading-relaxed">
-            Rejoins les <strong className="text-gray-300">{stats?.total_users || "100"}+</strong> collectionneurs actifs.
-            <br />
-            Sub sur la chaine pour tenter ta chance a chaque stream.
+        <div className="relative py-14 sm:py-24 px-6 text-center">
+          <p className="text-[#9146FF] text-xs font-semibold tracking-[0.25em] uppercase mb-4">
+            {stats?.total_users || "100"}+ collectionneurs actifs
           </p>
-          <div className="flex flex-wrap items-center gap-4 justify-center">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-5">
+            A ton tour
+          </h2>
+          <p className="text-gray-500 max-w-md mx-auto text-sm sm:text-base mb-8 sm:mb-10 leading-relaxed">
+            Sub sur la chaine et tente ta chance a chaque stream.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 justify-center">
             {isAuthenticated ? (
               <Link
                 to="/collection"
-                className="px-8 py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-lg"
+                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-base sm:text-lg"
               >
                 Ma collection
               </Link>
             ) : (
               <button
                 onClick={login}
-                className="px-8 py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-lg"
+                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-base sm:text-lg"
               >
                 Connexion Twitch
               </button>
             )}
             <Link
               to="/leaderboard"
-              className="px-8 py-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] text-gray-300 font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 text-lg"
+              className="px-7 py-3.5 sm:px-8 sm:py-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] text-gray-300 font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 text-base sm:text-lg"
             >
               Classement
             </Link>
