@@ -175,8 +175,8 @@ export default function Home() {
             <br />
             Collection
           </h1>
-          <p className="mt-5 text-[#86868b] text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
-            Sub sur <strong className="text-white font-semibold">el_matte0</strong> pour gagner des badges exclusifs.{" "}
+          <p className="mt-5 text-base sm:text-lg max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+            Sub sur <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>el_matte0</strong> pour gagner des badges exclusifs.{" "}
             Scrolle pour decouvrir les raretes.
           </p>
         </div>
@@ -241,16 +241,16 @@ export default function Home() {
         <div className="relative pt-6 pb-8 md:py-28 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-0 max-w-[1400px] mx-auto">
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
-              <p className="text-[#3a3a3c] text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4" style={{ color: 'var(--text-faint)' }}>
                 Archive · Terminee
               </p>
-              <h2 className="text-3xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-2 sm:mb-5 text-white">
-                Saison <span className="text-[#86868b]">One</span>
+              <h2 className="text-3xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-2 sm:mb-5" style={{ color: 'var(--text-primary)' }}>
+                Saison <span style={{ color: 'var(--text-tertiary)' }}>One</span>
               </h2>
-              <p className="text-[#86868b] text-xs sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed hidden sm:block">
+              <p className="text-xs sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed hidden sm:block" style={{ color: 'var(--text-tertiary)' }}>
                 Les 5 premiers badges de la collection. Plus disponibles au drop, mais toujours echangeables entre collectionneurs.
               </p>
-              <p className="text-[#86868b] text-xs max-w-[280px] mx-auto leading-snug sm:hidden">
+              <p className="text-xs max-w-[280px] mx-auto leading-snug sm:hidden" style={{ color: 'var(--text-tertiary)' }}>
                 Plus dispo au drop, mais echangeables entre collectionneurs.
               </p>
             </div>
