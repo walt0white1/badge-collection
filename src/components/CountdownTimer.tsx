@@ -44,9 +44,9 @@ function FlipDigit({
   }, [value, prevValue]);
 
   const bg = isDark ? "#1a1a1f" : "#f0f0f3";
-  const bgDarker = isDark ? "#141418" : "#e4e4e8";
+  const bgDarker = isDark ? "#17171b" : "#eaeaed";
   const textColor = color;
-  const lineColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
+  const lineColor = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)";
 
   return (
     <div
