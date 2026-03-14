@@ -339,18 +339,25 @@ export default function MyCollection() {
               )}
             </div>
 
-            {/* Right: Session panel — visible on desktop when results exist */}
-            <div className="w-full lg:w-72 flex flex-col items-center lg:items-start gap-4">
-              {/* Session results — badge list */}
+            {/* Right: Info + Session panel */}
+            <div className="w-full lg:w-80 flex flex-col items-center lg:items-stretch gap-6">
+
+              {/* Session results — appears when scratching */}
               {sessionResults.length > 0 && (
-                <>
+                <div
+                  className="rounded-xl p-4 space-y-3"
+                  style={{
+                    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                    border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                  }}
+                >
                   <p
                     className="text-[10px] font-semibold tracking-[0.15em] uppercase"
-                    style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                    style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
                   >
                     Cette session
                   </p>
-                  <div className="flex flex-col gap-2 w-full">
+                  <div className="flex flex-col gap-2">
                     {sessionResults.map((r, i) => (
                       <div
                         key={i}
@@ -381,10 +388,8 @@ export default function MyCollection() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Total */}
                   <div
-                    className="w-full pt-2 mt-1 flex items-center justify-between"
+                    className="pt-2 flex items-center justify-between"
                     style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}
                   >
                     <span
@@ -397,24 +402,112 @@ export default function MyCollection() {
                       +{sessionResults.reduce((s, r) => s + (RARITY_POINTS[r.rarity] || 0), 0)} pts
                     </span>
                   </div>
-
                   {remaining === 0 && (
                     <button
                       onClick={() => setShowSummary(true)}
-                      className="text-xs font-medium text-[#9146FF] hover:underline mt-1"
+                      className="text-xs font-medium text-[#9146FF] hover:underline"
                     >
                       Voir le recap
                     </button>
                   )}
-                </>
+                </div>
               )}
+
+              {/* Possible rewards */}
+              <div
+                className="rounded-xl p-4 space-y-3"
+                style={{
+                  background: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                }}
+              >
+                <p
+                  className="text-[10px] font-semibold tracking-[0.15em] uppercase"
+                  style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                >
+                  Recompenses possibles
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  {([
+                    { rarity: "COMMON", pct: "40%" },
+                    { rarity: "RARE", pct: "30%" },
+                    { rarity: "EPIC", pct: "18%" },
+                    { rarity: "LEGENDARY", pct: "9%" },
+                    { rarity: "UNIQUE", pct: "3%" },
+                  ] as const).map(({ rarity, pct }) => {
+                    const color = RARITY_COLORS[rarity];
+                    const pts = RARITY_POINTS[rarity];
+                    return (
+                      <div key={rarity} className="flex items-center gap-3">
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ background: color, boxShadow: `0 0 6px ${color}40` }}
+                        />
+                        <span
+                          className="text-xs font-bold uppercase tracking-wide flex-1"
+                          style={{ color }}
+                        >
+                          {rarity}
+                        </span>
+                        <span
+                          className="text-[10px] tabular-nums font-medium"
+                          style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
+                        >
+                          {pct}
+                        </span>
+                        <span
+                          className="text-[10px] tabular-nums w-12 text-right"
+                          style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
+                        >
+                          +{pts} pt{pts > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Future rewards teaser */}
+                <div
+                  className="pt-2 mt-1 space-y-2"
+                  style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}` }}
+                >
+                  <p
+                    className="text-[10px] font-semibold tracking-[0.15em] uppercase"
+                    style={{ color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
+                  >
+                    Bientot
+                  </p>
+                  {[
+                    { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
+                    { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
+                  ].map((reward) => (
+                    <div key={reward.label} className="flex items-center gap-3 opacity-40">
+                      <span className="text-sm w-5 text-center">{reward.icon}</span>
+                      <div className="flex-1">
+                        <p
+                          className="text-xs font-medium"
+                          style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
+                        >
+                          {reward.label}
+                        </p>
+                        <p
+                          className="text-[10px]"
+                          style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                        >
+                          {reward.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Claim button */}
               {ticketAvailable && (
                 <button
                   onClick={handleClaim}
                   disabled={claiming}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 hover:scale-[1.03]"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 hover:scale-[1.03]"
                   style={{
                     background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(145,70,255,0.15))",
                     border: `1px solid ${isDark ? "rgba(234,179,8,0.2)" : "rgba(234,179,8,0.3)"}`,
