@@ -138,18 +138,18 @@ export default function MyCollection() {
   const stackCards = Math.min(remaining > 0 ? remaining - 1 : 0, 3);
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 space-y-8 sm:space-y-10">
 
       {/* ── Header ── */}
-      <div className="relative text-center pt-4 pb-10 sm:pt-8 sm:pb-14">
-        {/* Layered ambient glow */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="relative text-center pt-10 pb-10 sm:pt-16 sm:pb-14">
+        {/* Layered ambient glow — extends above into navbar area */}
+        <div className="absolute -top-20 left-0 right-0 bottom-0 pointer-events-none">
           <div
-            className="absolute left-1/2 -translate-x-1/2 top-0 w-[500px] h-[300px] rounded-full blur-[100px] opacity-[0.07]"
+            className="absolute left-1/2 -translate-x-1/2 top-0 w-[600px] h-[350px] rounded-full blur-[120px] opacity-[0.06]"
             style={{ background: topRarityColor || "#9146FF" }}
           />
           <div
-            className="absolute left-1/2 -translate-x-1/2 top-8 w-[200px] h-[200px] rounded-full blur-[60px] opacity-[0.12]"
+            className="absolute left-1/2 -translate-x-1/2 top-10 w-[250px] h-[250px] rounded-full blur-[80px] opacity-[0.1]"
             style={{ background: "#9146FF" }}
           />
         </div>
