@@ -1,6 +1,7 @@
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 import { getBadgeImage } from "../badgeImages";
 import type { ArcInfo } from "../arcConfig";
+import { useTheme } from "../context/ThemeContext";
 
 interface Props {
   season: string;
@@ -17,6 +18,7 @@ export default function ArcRow({
   totalBadges,
   totalPts,
 }: Props) {
+  const { isDark } = useTheme();
   return (
     <div className="lg:flex lg:gap-10 lg:items-start space-y-6 sm:space-y-8 lg:space-y-0">
       {/* ── Arc header ── */}
@@ -25,8 +27,8 @@ export default function ArcRow({
         <div
           className="hidden lg:block absolute left-[17px] top-3 w-2.5 h-2.5 rounded-full"
           style={{
-            background: arc.status === "active" ? "rgba(145,70,255,0.25)" : "rgba(255,255,255,0.04)",
-            border: `2px solid ${arc.status === "active" ? "rgba(145,70,255,0.7)" : "rgba(255,255,255,0.1)"}`,
+            background: arc.status === "active" ? "rgba(145,70,255,0.25)" : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)",
+            border: `2px solid ${arc.status === "active" ? "rgba(145,70,255,0.7)" : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)"}`,
             boxShadow: arc.status === "active" ? "0 0 12px rgba(145,70,255,0.5)" : "none",
           }}
         />
@@ -83,8 +85,8 @@ export default function ArcRow({
                   <div
                     className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 relative z-10"
                     style={{
-                      borderColor: owned ? color : "rgba(255,255,255,0.08)",
-                      background: owned ? color : "#0a0a0d",
+                      borderColor: owned ? color : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)",
+                      background: owned ? color : isDark ? "#0a0a0d" : "#ffffff",
                       boxShadow: owned
                         ? `0 0 10px ${color}50, 0 0 20px ${color}20`
                         : "none",
@@ -97,9 +99,9 @@ export default function ArcRow({
                   className="group relative flex-1 overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-[1.01]"
                   style={{
                     background: owned
-                      ? `linear-gradient(135deg, ${color}05 0%, ${color}10 40%, ${color}05 100%), #0a0a0d`
-                      : "#09090c",
-                    border: `1px solid ${owned ? color + "18" : "rgba(255,255,255,0.04)"}`,
+                      ? `linear-gradient(135deg, ${color}05 0%, ${color}10 40%, ${color}05 100%), ${isDark ? "#0a0a0d" : "#ffffff"}`
+                      : isDark ? "#09090c" : "#f5f5f7",
+                    border: `1px solid ${owned ? color + "18" : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)"}`,
                     boxShadow: owned
                       ? `0 0 30px -10px ${color}15, inset 0 1px 0 ${color}08`
                       : "none",
@@ -155,7 +157,7 @@ export default function ArcRow({
                         style={{
                           filter: owned
                             ? `drop-shadow(0 4px 16px ${color}30)`
-                            : "grayscale(1) brightness(0.15)",
+                            : isDark ? "grayscale(1) brightness(0.15)" : "grayscale(1) opacity(0.2)",
                         }}
                       />
                     </div>
@@ -165,7 +167,7 @@ export default function ArcRow({
                       <p
                         className="text-base sm:text-xl md:text-2xl font-black tracking-tight uppercase leading-none"
                         style={{
-                          color: owned ? color : "rgba(255,255,255,0.06)",
+                          color: owned ? color : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.1)",
                         }}
                       >
                         {r}
@@ -180,7 +182,7 @@ export default function ArcRow({
                       <span
                         className="text-2xl sm:text-3xl md:text-4xl font-black tabular-nums leading-none"
                         style={{
-                          color: owned ? "white" : "rgba(255,255,255,0.04)",
+                          color: owned ? (isDark ? "white" : "var(--text-primary)") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.08)",
                         }}
                       >
                         {count}
