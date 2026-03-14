@@ -4,11 +4,13 @@ import { fetchUserProfile } from "../api";
 import ArcRow from "../components/ArcRow";
 import { ARC_CONFIG } from "../arcConfig";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../context/ThemeContext";
 import { RARITY_ORDER, RARITY_COLORS, RARITY_POINTS } from "../types";
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
   const { isAuthenticated, user: me } = useAuth();
+  const { isDark } = useTheme();
   const { data, isLoading, error } = useQuery({
     queryKey: ["user", username],
     queryFn: () => fetchUserProfile(username!),
@@ -123,7 +125,10 @@ export default function UserProfile() {
 
       {/* ── Arcs ── */}
       <div className="relative">
-        <div className="hidden lg:block absolute left-[22px] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/[0.1] to-transparent pointer-events-none" />
+        <div
+          className="hidden lg:block absolute left-[22px] top-0 bottom-0 w-px pointer-events-none"
+          style={{ background: `linear-gradient(to bottom, transparent, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.2)"}, transparent)` }}
+        />
 
         <div className="space-y-10">
           {seasons.map((season, idx) => {
@@ -149,7 +154,10 @@ export default function UserProfile() {
                   totalPts={seasonPts}
                 />
                 {idx < seasons.length - 1 && (
-                  <div className="lg:hidden mx-auto w-[60%] max-w-[400px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-10" />
+                  <div
+                    className="lg:hidden mx-auto w-[60%] max-w-[400px] h-px mt-10"
+                    style={{ background: `linear-gradient(to right, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.15)"}, transparent)` }}
+                  />
                 )}
               </div>
             );
