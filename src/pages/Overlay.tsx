@@ -111,16 +111,16 @@ export default function Overlay() {
 
           {/* Message bar */}
           {current.message && (
-            <div className="px-5 py-3 bg-gray-900/90 border-t border-gray-800/60">
-              <div className="flex items-center gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-twitch/20 flex items-center justify-center text-twitch text-sm font-bold">
+            <div className="px-6 py-4 bg-gray-900/90 border-t border-gray-800/60">
+              <div className="flex items-center gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-twitch/20 flex items-center justify-center text-twitch text-base font-bold">
                   {current.username[0].toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-twitch text-xs font-semibold">
+                  <p className="text-twitch text-sm font-semibold">
                     {current.username}
                   </p>
-                  <p className="text-white text-sm truncate">
+                  <p className="text-white text-lg font-medium">
                     {current.message}
                   </p>
                 </div>
@@ -130,8 +130,8 @@ export default function Overlay() {
 
           {/* Username tag if no message */}
           {!current.message && (
-            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <span className="text-twitch text-xs font-semibold">
+            <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full">
+              <span className="text-twitch text-sm font-semibold">
                 {current.username}
               </span>
             </div>
