@@ -78,6 +78,16 @@ export const RARITY_POINTS: Record<string, number> = {
   UNIQUE: 8,
 };
 
+export interface LiveSubmission {
+  id: string;
+  username: string;
+  video_path: string;
+  message: string;
+  duration_seconds: number;
+  played: boolean;
+  created_at: string;
+}
+
 export const RARITY_COLORS: Record<string, string> = {
   COMMON: "#d9d9d9",
   RARE: "#4da6ff",

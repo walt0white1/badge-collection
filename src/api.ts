@@ -136,6 +136,56 @@ export const scratchTicket = async (ticketId: string): Promise<string> => {
   return data as string;
 };
 
+// ---------- Live Submissions ----------
+
+export const submitLiveVideo = async (
+  file: File,
+  message: string,
+  durationSeconds: number,
+): Promise<void> => {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new Error("Non authentifié");
+
+  const ext = file.name.split(".").pop() || "mp4";
+  const path = `${authUser.id}/${Date.now()}.${ext}`;
+
+  const { error: uploadErr } = await supabase.storage
+    .from("live-videos")
+    .upload(path, file, { contentType: file.type });
+  if (uploadErr) throw new Error(uploadErr.message);
+
+  // Get the user's username from profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("auth_id", authUser.id)
+    .single();
+  if (!profile) throw new Error("Profil introuvable");
+
+  const { error: insertErr } = await supabase.from("live_submissions").insert({
+    username: profile.username,
+    video_path: path,
+    message: message.trim(),
+    duration_seconds: durationSeconds,
+  });
+  if (insertErr) throw new Error(insertErr.message);
+};
+
+export const getVideoUrl = (path: string): string => {
+  const { data } = supabase.storage.from("live-videos").getPublicUrl(path);
+  return data.publicUrl;
+};
+
+export const markSubmissionPlayed = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from("live_submissions")
+    .update({ played: true })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+};
+
 // ---------- Share card ----------
 
 export const uploadShareCard = async (

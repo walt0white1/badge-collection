@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
@@ -7,9 +7,18 @@ import Leaderboard from "./pages/Leaderboard";
 import UserProfile from "./pages/UserProfile";
 import MyCollection from "./pages/MyCollection";
 import Trades from "./pages/Trades";
+import LiveChat from "./pages/LiveChat";
+import Overlay from "./pages/Overlay";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
+  const location = useLocation();
+  const isOverlay = location.pathname === "/overlay";
+
+  if (isOverlay) {
+    return <Overlay />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -32,6 +41,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Trades />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/livechat"
+            element={
+              <ProtectedRoute>
+                <LiveChat />
               </ProtectedRoute>
             }
           />

@@ -20,6 +20,7 @@ export default function Navbar() {
       ? [
           { to: "/collection", label: "Ma Collection" },
           { to: "/trades", label: "Echanges" },
+          { to: "/livechat", label: "Live Chat" },
         ]
       : []),
   ];
