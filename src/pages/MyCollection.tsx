@@ -34,6 +34,7 @@ export default function MyCollection() {
   const [revealingAll, setRevealingAll] = useState(false);
   const [bulkResults, setBulkResults] = useState<{ rarity: string; season: string }[]>([]);
   const [showSummary, setShowSummary] = useState(false);
+  const [rewardsExpanded, setRewardsExpanded] = useState(false);
 
   const { data: ticketAvailable, refetch: refetchTicket } = useQuery({
     queryKey: ["canClaimTicket"],
@@ -413,109 +414,137 @@ export default function MyCollection() {
                 </div>
               )}
 
-              {/* Possible rewards — plain list, no card */}
-              <div className="space-y-2">
-                <p
-                  className="text-xs font-bold tracking-[0.15em] uppercase px-1"
-                  style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
-                >
-                  Recompenses possibles
-                </p>
-
-                {([
+              {/* Possible rewards — collapsible list */}
+              {(() => {
+                const allRewards = [
                   { rarity: "COMMON", pct: "40%" },
                   { rarity: "RARE", pct: "30%" },
                   { rarity: "EPIC", pct: "18%" },
                   { rarity: "LEGENDARY", pct: "9%" },
                   { rarity: "UNIQUE", pct: "3%" },
-                ] as const).map(({ rarity, pct }) => {
-                  const color = RARITY_COLORS[rarity];
-                  const pts = RARITY_POINTS[rarity];
-                  const img = getBadgeImage(rarity, "saison2");
-                  return (
-                    <div
-                      key={rarity}
-                      className="flex items-center gap-4 py-2.5 px-1"
-                      style={{
-                        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
-                      }}
-                    >
-                      <div className="relative shrink-0">
-                        <div
-                          className="absolute inset-0 rounded-full blur-xl opacity-15"
-                          style={{ background: color, transform: "scale(1.5)" }}
-                        />
-                        <img
-                          src={img}
-                          alt={rarity}
-                          className="relative w-12 h-12 sm:w-14 sm:h-14 object-contain"
-                          style={{ filter: `drop-shadow(0 2px 8px ${color}30)` }}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="text-sm sm:text-base font-black uppercase tracking-wide leading-tight"
-                          style={{ color }}
-                        >
-                          {rarity}
-                        </p>
-                        <p
-                          className="text-xs mt-0.5"
-                          style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                        >
-                          +{pts} pt{pts > 1 ? "s" : ""} par badge
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p
-                          className="text-lg sm:text-xl font-black tabular-nums leading-none"
-                          style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)" }}
-                        >
-                          {pct}
-                        </p>
-                        <p
-                          className="text-[10px] mt-0.5"
-                          style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
-                        >
-                          de chance
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                ] as const;
+                const visible = rewardsExpanded ? allRewards : allRewards.slice(0, 3);
+                const hiddenCount = allRewards.length - 3;
 
-                {/* Future rewards teaser */}
-                <div className="pt-2 space-y-2.5">
-                  <p
-                    className="text-[10px] font-bold tracking-[0.15em] uppercase px-1"
-                    style={{ color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
-                  >
-                    Bientot
-                  </p>
-                  {[
-                    { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
-                    { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
-                  ].map((reward) => (
-                    <div key={reward.label} className="flex items-center gap-3 px-1 opacity-40">
-                      <span className="text-base w-6 text-center">{reward.icon}</span>
-                      <div className="flex-1">
-                        <p
-                          className="text-sm font-medium"
-                          style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
+                return (
+                  <div className="space-y-2">
+                    <p
+                      className="text-xs font-bold tracking-[0.15em] uppercase px-1"
+                      style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
+                    >
+                      Recompenses possibles
+                    </p>
+
+                    {visible.map(({ rarity, pct }) => {
+                      const color = RARITY_COLORS[rarity];
+                      const pts = RARITY_POINTS[rarity];
+                      const img = getBadgeImage(rarity, "saison2");
+                      return (
+                        <div
+                          key={rarity}
+                          className="flex items-center gap-4 py-2.5 px-1"
+                          style={{
+                            borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                          }}
                         >
-                          {reward.label}
-                        </p>
+                          <div className="relative shrink-0">
+                            <div
+                              className="absolute inset-0 rounded-full blur-xl opacity-15"
+                              style={{ background: color, transform: "scale(1.5)" }}
+                            />
+                            <img
+                              src={img}
+                              alt={rarity}
+                              className="relative w-12 h-12 sm:w-14 sm:h-14 object-contain"
+                              style={{ filter: `drop-shadow(0 2px 8px ${color}30)` }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-sm sm:text-base font-black uppercase tracking-wide leading-tight"
+                              style={{ color }}
+                            >
+                              {rarity}
+                            </p>
+                            <p
+                              className="text-xs mt-0.5"
+                              style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                            >
+                              +{pts} pt{pts > 1 ? "s" : ""} par badge
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p
+                              className="text-lg sm:text-xl font-black tabular-nums leading-none"
+                              style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)" }}
+                            >
+                              {pct}
+                            </p>
+                            <p
+                              className="text-[10px] mt-0.5"
+                              style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
+                            >
+                              de chance
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Expand / Collapse toggle */}
+                    <button
+                      onClick={() => setRewardsExpanded(!rewardsExpanded)}
+                      className="flex items-center gap-1.5 px-1 py-1.5 text-xs font-medium transition-colors"
+                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                    >
+                      {rewardsExpanded ? "Voir moins" : `+${hiddenCount} autres`}
+                      <svg
+                        className="w-3 h-3 transition-transform duration-200"
+                        style={{ transform: rewardsExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Future rewards teaser — only when expanded */}
+                    {rewardsExpanded && (
+                      <div className="pt-2 space-y-2.5">
                         <p
-                          className="text-xs"
-                          style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                          className="text-[10px] font-bold tracking-[0.15em] uppercase px-1"
+                          style={{ color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
                         >
-                          {reward.desc}
+                          Bientot
                         </p>
+                        {[
+                          { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
+                          { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
+                        ].map((reward) => (
+                          <div key={reward.label} className="flex items-center gap-3 px-1 opacity-40">
+                            <span className="text-base w-6 text-center">{reward.icon}</span>
+                            <div className="flex-1">
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
+                              >
+                                {reward.label}
+                              </p>
+                              <p
+                                className="text-xs"
+                                style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                              >
+                                {reward.desc}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Claim button */}
               {ticketAvailable && (
