@@ -99,12 +99,14 @@ export default function ArcRow({
                   className="group relative flex-1 overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-[1.01]"
                   style={{
                     background: owned
-                      ? `linear-gradient(135deg, ${color}05 0%, ${color}10 40%, ${color}05 100%), ${isDark ? "#0a0a0d" : "#ffffff"}`
-                      : isDark ? "#09090c" : "#f5f5f7",
-                    border: `1px solid ${owned ? color + "18" : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)"}`,
+                      ? `linear-gradient(135deg, ${color}${isDark ? "05" : "08"} 0%, ${color}${isDark ? "10" : "14"} 40%, ${color}${isDark ? "05" : "08"} 100%), ${isDark ? "#0a0a0d" : "#ffffff"}`
+                      : isDark ? "#09090c" : "#ebebef",
+                    border: `1px solid ${owned ? color + (isDark ? "18" : "35") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.09)"}`,
                     boxShadow: owned
-                      ? `0 0 30px -10px ${color}15, inset 0 1px 0 ${color}08`
-                      : "none",
+                      ? isDark
+                        ? `0 0 30px -10px ${color}15, inset 0 1px 0 ${color}08`
+                        : `0 2px 12px -4px ${color}25, 0 0 0 1px ${color}20`
+                      : isDark ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
                   }}
                 >
                   {/* Diagonal accent lines */}
