@@ -44,9 +44,7 @@ function FlipDigit({
   }, [value, prevValue]);
 
   const bg = isDark ? "#1a1a1f" : "#f0f0f3";
-  const bgDarker = isDark ? "#17171b" : "#eaeaed";
   const textColor = color;
-  const lineColor = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)";
 
   return (
     <div
@@ -64,7 +62,6 @@ function FlipDigit({
         style={{
           height: "50%",
           background: bg,
-          borderBottom: `1px solid ${lineColor}`,
           borderRadius: "8px 8px 0 0",
         }}
       >
@@ -85,7 +82,7 @@ function FlipDigit({
         className="absolute inset-x-0 bottom-0 overflow-hidden flex items-center justify-center"
         style={{
           height: "50%",
-          background: bgDarker,
+          background: bg,
           borderRadius: "0 0 8px 8px",
         }}
       >
@@ -133,7 +130,7 @@ function FlipDigit({
           className="absolute inset-x-0 bottom-0 overflow-hidden flex items-center justify-center flip-bottom-anim"
           style={{
             height: "50%",
-            background: bgDarker,
+            background: bg,
             borderRadius: "0 0 8px 8px",
             transformOrigin: "top center",
             zIndex: 2,
