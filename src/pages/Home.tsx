@@ -155,17 +155,17 @@ export default function Home() {
       <div className="badge-showcase">
         {/* Logo / title */}
         <div className="showcase-logo">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[#9146FF] text-sm font-semibold tracking-wider mb-5">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#9146FF]/10 text-[#9146FF] text-xs font-semibold tracking-[0.18em] uppercase mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#9146FF] animate-pulse" />
-            SAISON 2 EN COURS
+            Saison 2 en cours
           </div>
           <h1>
             Badge
             <br />
             Collection
           </h1>
-          <p className="mt-5 text-gray-400 text-base sm:text-lg max-w-lg mx-auto">
-            Sub sur <strong className="text-white">el_matte0</strong> pour gagner des badges exclusifs.
+          <p className="mt-5 text-[#86868b] text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
+            Sub sur <strong className="text-white font-semibold">el_matte0</strong> pour gagner des badges exclusifs.{" "}
             Scrolle pour decouvrir les raretes.
           </p>
         </div>
@@ -230,16 +230,16 @@ export default function Home() {
         <div className="relative pt-6 pb-8 md:py-28 px-6">
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-0 max-w-[1400px] mx-auto">
             <div className="lg:w-[35%] text-center lg:text-left shrink-0">
-              <p className="text-gray-600 text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4">
+              <p className="text-[#3a3a3c] text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-2 sm:mb-4">
                 Archive · Terminee
               </p>
-              <h2 className="text-3xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-2 sm:mb-5">
-                Saison <span className="bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">One</span>
+              <h2 className="text-3xl sm:text-6xl font-black tracking-tight leading-[0.95] mb-2 sm:mb-5 text-white">
+                Saison <span className="text-[#86868b]">One</span>
               </h2>
-              <p className="text-gray-500 text-xs sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed hidden sm:block">
+              <p className="text-[#86868b] text-xs sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed hidden sm:block">
                 Les 5 premiers badges de la collection. Plus disponibles au drop, mais toujours echangeables entre collectionneurs.
               </p>
-              <p className="text-gray-500 text-xs max-w-[280px] mx-auto leading-snug sm:hidden">
+              <p className="text-[#86868b] text-xs max-w-[280px] mx-auto leading-snug sm:hidden">
                 Plus dispo au drop, mais echangeables entre collectionneurs.
               </p>
             </div>
@@ -279,34 +279,34 @@ export default function Home() {
       <section className="relative z-20 overflow-hidden">
 
         <div className="relative py-14 sm:py-24 px-6 text-center">
-          <p className="text-[#9146FF] text-xs font-semibold tracking-[0.25em] uppercase mb-4">
+          <p className="text-[#9146FF] text-xs font-semibold tracking-[0.2em] uppercase mb-4">
             {stats?.total_users || "100"}+ collectionneurs actifs
           </p>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-5">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-5 text-white">
             A ton tour
           </h2>
-          <p className="text-gray-500 max-w-md mx-auto text-sm sm:text-base mb-8 sm:mb-10 leading-relaxed">
+          <p className="text-[#86868b] max-w-md mx-auto text-sm sm:text-base mb-8 sm:mb-10 leading-relaxed">
             Sub sur la chaine et tente ta chance a chaque stream.
           </p>
           <div className="flex flex-wrap items-center gap-3 justify-center">
             {isAuthenticated ? (
               <Link
                 to="/collection"
-                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-base sm:text-lg"
+                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#7c3aed] text-white font-semibold rounded-2xl transition-all duration-200 hover:-translate-y-0.5 text-base sm:text-lg"
               >
                 Ma collection
               </Link>
             ) : (
               <button
                 onClick={login}
-                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#772CE8] text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(145,70,255,0.3)] hover:-translate-y-0.5 text-base sm:text-lg"
+                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#9146FF] hover:bg-[#7c3aed] text-white font-semibold rounded-2xl transition-all duration-200 hover:-translate-y-0.5 text-base sm:text-lg"
               >
                 Connexion Twitch
               </button>
             )}
             <Link
               to="/leaderboard"
-              className="px-7 py-3.5 sm:px-8 sm:py-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] text-gray-300 font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 text-base sm:text-lg"
+              className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#1c1c1e] hover:bg-[#2c2c2e] text-white font-semibold rounded-2xl transition-all duration-200 hover:-translate-y-0.5 text-base sm:text-lg"
             >
               Classement
             </Link>

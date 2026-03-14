@@ -79,11 +79,10 @@ body.overlay-mode {
   font-weight: 900;
   line-height: 0.88;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #9146ff 0%, #c084fc 40%, #ff66cc 100%);
+  background: linear-gradient(160deg, #ffffff 0%, #c084fc 60%, #9146ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 60px rgba(145, 70, 255, 0.2));
 }
 
 /* ── Rarity titles – above the badge ── */
