@@ -29,7 +29,7 @@ export default function Navbar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-black/80 backdrop-blur-xl">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group">
           <span className="text-twitch">{TWITCH_ICON}</span>
@@ -43,10 +43,10 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive(l.to)
-                  ? "bg-twitch/15 text-twitch"
-                  : "text-gray-400 hover:text-gray-100 hover:bg-gray-800/50"
+                  ? "bg-white/[0.08] text-white"
+                  : "text-[#86868b] hover:text-white hover:bg-white/[0.04]"
               }`}
             >
               {l.label}
@@ -73,14 +73,14 @@ export default function Navbar() {
               {menuOpen && (
                 <>
                   <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-[#1c1c1e] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-50">
                     {navLinks.map((l) => (
                       <Link
                         key={l.to}
                         to={l.to}
                         onClick={() => setMenuOpen(false)}
-                        className={`block px-4 py-2 text-sm hover:bg-gray-800/50 md:hidden ${
-                          isActive(l.to) ? "text-twitch" : "text-gray-300 hover:text-white"
+                        className={`block px-4 py-2 text-sm hover:bg-white/[0.05] md:hidden ${
+                          isActive(l.to) ? "text-white" : "text-[#86868b] hover:text-white"
                         }`}
                       >
                         {l.label}
@@ -120,14 +120,14 @@ export default function Navbar() {
               {menuOpen && (
                 <>
                   <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-6 top-14 w-48 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-1 z-50">
+                  <div className="absolute right-6 top-14 w-48 bg-[#1c1c1e] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-50">
                     {navLinks.map((l) => (
                       <Link
                         key={l.to}
                         to={l.to}
                         onClick={() => setMenuOpen(false)}
-                        className={`block px-4 py-2 text-sm hover:bg-gray-800/50 ${
-                          isActive(l.to) ? "text-twitch" : "text-gray-300 hover:text-white"
+                        className={`block px-4 py-2 text-sm hover:bg-white/[0.05] ${
+                          isActive(l.to) ? "text-white" : "text-[#86868b] hover:text-white"
                         }`}
                       >
                         {l.label}

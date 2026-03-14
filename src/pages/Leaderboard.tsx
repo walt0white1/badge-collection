@@ -82,19 +82,11 @@ export default function Leaderboard() {
   return (
     <div className="min-h-screen overflow-x-hidden">
 
-      {/* ── Ambient glow matching the home page ── */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
-        <div className="absolute top-0 left-[20%] w-[800px] h-[500px]"
-          style={{ background: "radial-gradient(ellipse at center, rgba(145,70,255,0.12), transparent 60%)" }} />
-        <div className="absolute bottom-[20%] right-[15%] w-[600px] h-[500px]"
-          style={{ background: "radial-gradient(ellipse at center, rgba(178,102,255,0.08), transparent 55%)" }} />
-      </div>
-
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-28">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-28">
 
         {/* ━━━ HEADER ━━━ */}
         <header className="mb-6 sm:mb-10">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.92] bg-gradient-to-r from-[#9146FF] via-purple-400 to-[#ff66cc] bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.92] text-white">
             Classement
           </h1>
           <p className="mt-2 sm:mt-3 text-gray-500 text-sm sm:text-base max-w-md">
@@ -105,15 +97,15 @@ export default function Leaderboard() {
         {/* ━━━ CONTROLS BAR ━━━ */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           {/* Tabs */}
-          <div className="inline-flex bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1 gap-0.5">
+          <div className="inline-flex bg-[#1c1c1e] rounded-xl p-1 gap-0.5">
             {tabs.map(({ id, label }) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
                 className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   tab === id
-                    ? "bg-[#9146FF] text-white shadow-lg shadow-[#9146FF]/20"
-                    : "text-gray-500 hover:text-gray-300"
+                    ? "bg-[#2c2c2e] text-white"
+                    : "text-[#86868b] hover:text-white"
                 }`}
               >
                 {label}
@@ -123,15 +115,15 @@ export default function Leaderboard() {
 
           {/* Periods */}
           {tab !== "badges" && (
-            <div className="inline-flex bg-[#0f0f13] border border-white/[0.06] rounded-xl p-1 gap-0.5">
+            <div className="inline-flex bg-[#1c1c1e] rounded-xl p-1 gap-0.5">
               {periods.map(({ v, label }) => (
                 <button
                   key={v}
                   onClick={() => setPeriod(v)}
                   className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
                     period === v
-                      ? "bg-white/[0.08] text-white"
-                      : "text-gray-600 hover:text-gray-400"
+                      ? "bg-[#2c2c2e] text-white"
+                      : "text-[#86868b] hover:text-white"
                   }`}
                 >
                   {label}
@@ -150,7 +142,7 @@ export default function Leaderboard() {
               placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-56 pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#0f0f13] border border-white/[0.06] text-white placeholder-gray-700 focus:outline-none focus:border-[#9146FF]/40 focus:bg-[#0a0a0d] transition-all"
+              className="w-full sm:w-56 pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#1c1c1e] text-white placeholder-[#3a3a3c] focus:outline-none focus:bg-[#2c2c2e] transition-all"
             />
           </div>
         </div>
@@ -226,7 +218,7 @@ export default function Leaderboard() {
                 )}
 
                 {/* ── LIST ── */}
-                <div className="rounded-2xl overflow-hidden bg-[#0f0f13]" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="rounded-2xl overflow-hidden bg-[#111111]">
                   {rest.map((entry, idx) => {
                     const isTop10 = entry.rank <= 10;
                     const isTop3 = entry.rank <= 3;
@@ -365,7 +357,7 @@ export default function Leaderboard() {
                 )}
 
                 {/* ── LIST ── */}
-                <div className="rounded-2xl overflow-hidden bg-[#0f0f13]" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="rounded-2xl overflow-hidden bg-[#111111]">
                   {wizeRest.map((entry, idx) => {
                     const rank = (showWizePodium ? 3 : 0) + idx + 1;
                     const isTop10 = rank <= 10;

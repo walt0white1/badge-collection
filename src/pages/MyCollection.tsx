@@ -135,8 +135,7 @@ export default function MyCollection() {
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10">
 
       {/* ── Header ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a0a0d] p-4 sm:p-6 md:p-8">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-twitch/[0.05] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="rounded-2xl bg-[#111111] p-4 sm:p-6 md:p-8">
 
         <div className="relative flex flex-col sm:flex-row gap-6 items-start">
           <img
@@ -248,7 +247,7 @@ export default function MyCollection() {
               </>
             ) : (
               /* Empty pile */
-              <div className="w-full h-full rounded-2xl border-2 border-dashed border-white/[0.06] flex flex-col items-center justify-center gap-3">
+              <div className="w-full h-full rounded-2xl border border-[#2c2c2e] flex flex-col items-center justify-center gap-3">
                 <svg className="w-14 h-14 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                 </svg>
@@ -368,7 +367,7 @@ export default function MyCollection() {
       {/* ── Session Summary Modal ── */}
       {showSummary && sessionResults.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#0a0a0d] border border-white/[0.08] rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-[fadeIn_0.3s_ease-out]">
+          <div className="bg-[#1c1c1e] rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="text-center">
               <h3 className="text-xl font-black text-white">Pack Opening</h3>
               <p className="text-sm text-gray-500 mt-1">

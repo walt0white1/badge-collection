@@ -223,8 +223,6 @@ export default function Home() {
 
       {/* ═══ SEASON 1 — FULL-WIDTH SHOWCASE ═══ */}
       <section className="relative z-20 overflow-hidden mt-8 sm:mt-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#9146ff]/[0.03] to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
         {/* Subtle divider on mobile */}
         <div className="mx-auto w-[50%] max-w-[200px] h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent sm:hidden" />
@@ -279,7 +277,6 @@ export default function Home() {
 
       {/* ═══ CTA ═══ */}
       <section className="relative z-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_60%,rgba(145,70,255,0.06),transparent)] pointer-events-none" />
 
         <div className="relative py-14 sm:py-24 px-6 text-center">
           <p className="text-[#9146FF] text-xs font-semibold tracking-[0.25em] uppercase mb-4">
