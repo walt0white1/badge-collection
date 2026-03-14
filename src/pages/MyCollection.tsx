@@ -137,75 +137,93 @@ export default function MyCollection() {
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10">
 
       {/* ── Header ── */}
-      <div className="relative pb-8">
-        {/* Ambient glow behind avatar */}
+      <div className="relative text-center pt-4 pb-10 sm:pt-8 sm:pb-14">
+        {/* Ambient radial glow */}
         <div
-          className="absolute left-0 sm:left-2 top-2 w-24 h-24 rounded-full blur-3xl pointer-events-none"
-          style={{ background: "rgba(145,70,255,0.12)" }}
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ background: `radial-gradient(ellipse 60% 55% at 50% 20%, rgba(145,70,255,${isDark ? "0.08" : "0.06"}), transparent)` }}
         />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <img
-              src={user.twitch_profile_image}
-              alt=""
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl relative z-10"
-              style={{
-                boxShadow: isDark
-                  ? "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)"
-                  : "0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06)",
-              }}
-            />
-          </div>
+        {/* Avatar */}
+        <div className="relative inline-block mb-5">
+          <div
+            className="absolute inset-0 rounded-full blur-2xl"
+            style={{ background: "rgba(145,70,255,0.18)", transform: "scale(1.8)" }}
+          />
+          <img
+            src={user.twitch_profile_image}
+            alt=""
+            className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full z-10"
+            style={{
+              boxShadow: isDark
+                ? "0 0 0 3px rgba(145,70,255,0.2), 0 12px 40px rgba(0,0,0,0.5)"
+                : "0 0 0 3px rgba(145,70,255,0.15), 0 12px 40px rgba(0,0,0,0.12)",
+            }}
+          />
+        </div>
 
-          {/* Name + stats */}
-          <div className="flex-1 min-w-0">
-            <h1
-              className="text-3xl sm:text-4xl font-black tracking-tight"
+        {/* Name */}
+        <h1
+          className="text-3xl sm:text-5xl font-black tracking-tight"
+          style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
+        >
+          {user.twitch_display_name}
+        </h1>
+
+        {/* Stats */}
+        <div className="flex items-center justify-center gap-6 sm:gap-8 mt-4">
+          <div className="text-center">
+            <p className="text-2xl sm:text-3xl font-black tabular-nums" style={{ color: "#9146FF" }}>
+              {user.total_pts}
+            </p>
+            <p className="text-[11px] sm:text-xs mt-0.5 font-medium" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}>
+              points
+            </p>
+          </div>
+          <div
+            className="w-px h-8 sm:h-10"
+            style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}
+          />
+          <div className="text-center">
+            <p
+              className="text-2xl sm:text-3xl font-black tabular-nums"
               style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
             >
-              {user.twitch_display_name}
-            </h1>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-lg font-bold" style={{ color: "#9146FF" }}>
-                {user.total_pts} pts
-              </span>
-              <span style={{ color: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }}>·</span>
-              <span style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
-                {totalBadges} badge{totalBadges > 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-2.5 shrink-0">
-            <button
-              onClick={() => setShowShareCard(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.03]"
-              style={{
-                background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-                color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)",
-              }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Partager
-            </button>
-            <Link
-              to="/trades"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.03]"
-              style={{ background: "#9146FF" }}
-            >
-              Mes échanges
-            </Link>
+              {totalBadges}
+            </p>
+            <p className="text-[11px] sm:text-xs mt-0.5 font-medium" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}>
+              badges
+            </p>
           </div>
         </div>
 
-        {/* Subtle separator */}
+        {/* Action buttons */}
+        <div className="flex items-center justify-center gap-3 mt-7">
+          <button
+            onClick={() => setShowShareCard(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 hover:scale-[1.04]"
+            style={{
+              background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+              color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)",
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Partager
+          </button>
+          <Link
+            to="/trades"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.04]"
+            style={{ background: "#9146FF" }}
+          >
+            Mes échanges
+          </Link>
+        </div>
+
+        {/* Bottom separator */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-px"
+          className="absolute bottom-0 left-[10%] right-[10%] h-px"
           style={{ background: `linear-gradient(to right, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}, transparent)` }}
         />
       </div>
