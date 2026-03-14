@@ -242,55 +242,43 @@ export default function MyCollection() {
       </div>
 
       {/* ── Ticket Pile ── */}
-      {(tickets.length > 0 || ticketAvailable) && (
+      {remaining > 0 || ticketAvailable ? (
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
           {/* Left: stacked pile */}
           <div className="relative shrink-0 w-56 sm:w-64 aspect-[3/4]">
-            {remaining > 0 ? (
-              <>
-                {/* Background stack cards */}
-                {Array.from({ length: stackCards }).map((_, i) => {
-                  const depth = stackCards - i;
-                  return (
-                    <div
-                      key={`stack-${depth}`}
-                      className="absolute inset-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-gray-700/40 to-gray-800/40"
-                      style={{
-                        transform: `translateX(${depth * 6}px) translateY(${depth * 6}px) rotate(${depth * 1.5}deg)`,
-                        zIndex: -depth,
-                        filter: `brightness(${1 - depth * 0.12})`,
-                      }}
-                    />
-                  );
-                })}
+            {/* Background stack cards */}
+            {Array.from({ length: stackCards }).map((_, i) => {
+              const depth = stackCards - i;
+              return (
+                <div
+                  key={`stack-${depth}`}
+                  className="absolute inset-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-gray-700/40 to-gray-800/40"
+                  style={{
+                    transform: `translateX(${depth * 6}px) translateY(${depth * 6}px) rotate(${depth * 1.5}deg)`,
+                    zIndex: -depth,
+                    filter: `brightness(${1 - depth * 0.12})`,
+                  }}
+                />
+              );
+            })}
 
-                {/* Top card — interactive */}
-                {topTicket && (
-                  <div className="relative z-10">
-                    <ScratchTicket
-                      key={topTicket.id}
-                      ticket={topTicket}
-                      onScratched={handleScratched}
-                      onDismiss={handleDismiss}
-                    />
-                  </div>
-                )}
+            {/* Top card — interactive */}
+            {topTicket && (
+              <div className="relative z-10">
+                <ScratchTicket
+                  key={topTicket.id}
+                  ticket={topTicket}
+                  onScratched={handleScratched}
+                  onDismiss={handleDismiss}
+                />
+              </div>
+            )}
 
-                {/* Counter badge */}
-                {remaining > 1 && (
-                  <div className="absolute -top-2 -right-2 z-20 bg-twitch text-white text-xs font-black w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-twitch/30">
-                    &times;{remaining}
-                  </div>
-                )}
-              </>
-            ) : (
-              /* Empty pile */
-              <div className="w-full h-full rounded-2xl border border-[#2c2c2e] flex flex-col items-center justify-center gap-3">
-                <svg className="w-14 h-14 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-                <p className="text-gray-600 text-sm font-medium">Aucun ticket</p>
+            {/* Counter badge */}
+            {remaining > 1 && (
+              <div className="absolute -top-2 -right-2 z-20 bg-twitch text-white text-xs font-black w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-twitch/30">
+                &times;{remaining}
               </div>
             )}
           </div>
@@ -300,13 +288,7 @@ export default function MyCollection() {
             <div>
               <h2 className="text-2xl font-black text-white">Tickets a gratter</h2>
               <p className="text-gray-500 mt-1">
-                {remaining > 0 ? (
-                  <>
-                    <span className="text-white font-semibold">{remaining}</span> ticket{remaining > 1 ? "s" : ""} en attente
-                  </>
-                ) : (
-                  "Tous tes tickets ont ete grattes !"
-                )}
+                <span className="text-white font-semibold">{remaining}</span> ticket{remaining > 1 ? "s" : ""} en attente
                 {scratchedCount > 0 && (
                   <span className="text-gray-600 ml-2">
                     · {scratchedCount} gratte{scratchedCount > 1 ? "s" : ""}
@@ -401,7 +383,17 @@ export default function MyCollection() {
             )}
           </div>
         </div>
-      )}
+      ) : scratchedCount > 0 ? (
+        /* Compact line when all tickets are scratched */
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+          <svg className="w-5 h-5 text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+          </svg>
+          <span className="text-sm text-gray-500">
+            {scratchedCount} ticket{scratchedCount > 1 ? "s" : ""} gratte{scratchedCount > 1 ? "s" : ""}
+          </span>
+        </div>
+      ) : null}
 
       {/* ── Session Summary Modal ── */}
       {showSummary && sessionResults.length > 0 && (
