@@ -199,39 +199,6 @@ export default function MyCollection() {
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="mt-5">
-            <div
-              className="flex items-center h-1.5 rounded-full overflow-hidden"
-              style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}
-            >
-              {RARITY_ORDER.map((r) => {
-                const pct = totalBadges > 0 ? (allRarityCounts[r] / totalBadges) * 100 : 0;
-                if (pct === 0) return null;
-                return (
-                  <div
-                    key={r}
-                    className="h-full transition-all duration-500"
-                    style={{ width: `${pct}%`, backgroundColor: RARITY_COLORS[r], minWidth: "4px" }}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
-              {RARITY_ORDER.map((r) => allRarityCounts[r] > 0 && (
-                <div key={r} className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: RARITY_COLORS[r] }} />
-                  <span className="text-xs" style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
-                    <span className="font-semibold" style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.65)" }}>
-                      {allRarityCounts[r]}
-                    </span>
-                    {" "}{r.charAt(0) + r.slice(1).toLowerCase()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
