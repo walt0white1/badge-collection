@@ -24,13 +24,26 @@ declare global {
   }
 }
 
-// No component needed - TikTok uses iframe directly in the render
+// Fetch direct TikTok video URL via tikwm API
+async function getTiktokDirectUrl(videoId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`https://tikwm.com/api/?url=https://www.tiktok.com/@_/video/${videoId}`);
+    const data = await res.json();
+    if (data?.data?.play) return data.data.play;
+    if (data?.data?.wmplay) return data.data.wmplay;
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 export default function Overlay() {
   const [queue, setQueue] = useState<SubmissionWithAvatar[]>([]);
   const [current, setCurrent] = useState<SubmissionWithAvatar | null>(null);
   const [visible, setVisible] = useState(false);
+  const [tiktokUrl, setTiktokUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const tiktokVideoRef = useRef<HTMLVideoElement>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerRef = useRef<HTMLDivElement>(null);
   const processing = useRef(false);
@@ -129,13 +142,26 @@ export default function Overlay() {
     }
   }, [current, visible]);
 
-  // Play TikTok video (timer-based since no JS API)
+  // Fetch TikTok direct video URL
   useEffect(() => {
-    if (!current || current.video_type !== "tiktok" || !visible) return;
-    const duration = (current.duration_seconds || 15) * 1000;
-    const timer = setTimeout(finishCurrent, duration);
-    return () => clearTimeout(timer);
-  }, [current, visible, finishCurrent]);
+    if (!current || current.video_type !== "tiktok") {
+      setTiktokUrl(null);
+      return;
+    }
+    const videoId = current.youtube_id;
+    if (!videoId) return;
+    getTiktokDirectUrl(videoId).then((url) => {
+      setTiktokUrl(url);
+    });
+  }, [current]);
+
+  // Play TikTok video
+  useEffect(() => {
+    if (!current || current.video_type !== "tiktok" || !visible || !tiktokUrl) return;
+    if (tiktokVideoRef.current) {
+      tiktokVideoRef.current.play().catch(() => {});
+    }
+  }, [current, visible, tiktokUrl]);
 
   // Play YouTube video
   useEffect(() => {
@@ -240,13 +266,19 @@ export default function Overlay() {
                 playsInline
               />
             ) : current.video_type === "tiktok" ? (
-              <div className="w-full bg-black aspect-[9/16]">
-                <iframe
-                  src={`https://www.tiktok.com/player/v1/${current.youtube_id}?&music_info=0&description=0&rel=0&autoplay=1&loop=0`}
-                  className="w-full h-full border-0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
+              <div className="w-full bg-black aspect-[9/16] flex items-center justify-center">
+                {tiktokUrl ? (
+                  <video
+                    ref={tiktokVideoRef}
+                    src={tiktokUrl}
+                    onEnded={finishCurrent}
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
               </div>
             ) : (
               <div
