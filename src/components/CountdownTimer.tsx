@@ -20,7 +20,6 @@ function getTimeLeft(target: Date): TimeLeft {
 
 function FlipDigit({
   value,
-  prevValue,
   color,
   isDark,
 }: {
@@ -29,126 +28,27 @@ function FlipDigit({
   color: string;
   isDark: boolean;
 }) {
-  const [flipping, setFlipping] = useState(false);
-  const [displayPrev, setDisplayPrev] = useState(prevValue);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    if (value !== prevValue) {
-      setDisplayPrev(prevValue);
-      setFlipping(true);
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setFlipping(false), 300);
-    }
-    return () => clearTimeout(timeoutRef.current);
-  }, [value, prevValue]);
-
   const bg = isDark ? "#1a1a1f" : "#f0f0f3";
-  const textColor = color;
 
   return (
     <div
-      className="relative inline-flex items-center justify-center overflow-hidden"
+      className="relative inline-flex items-center justify-center"
       style={{
         width: "clamp(32px, 8vw, 52px)",
         height: "clamp(44px, 11vw, 72px)",
         borderRadius: "8px",
-        perspective: "200px",
+        background: bg,
       }}
     >
-      {/* Static top half — shows NEW value */}
-      <div
-        className="absolute inset-x-0 top-0 overflow-hidden flex items-center justify-center"
+      <span
+        className="font-black tabular-nums"
         style={{
-          height: "50%",
-          background: bg,
-          borderRadius: "8px 8px 0 0",
+          fontSize: "clamp(20px, 5vw, 34px)",
+          color,
         }}
       >
-        <span
-          className="font-black tabular-nums"
-          style={{
-            fontSize: "clamp(20px, 5vw, 34px)",
-            color: textColor,
-            transform: "translateY(25%)",
-          }}
-        >
-          {value}
-        </span>
-      </div>
-
-      {/* Static bottom half — shows NEW value */}
-      <div
-        className="absolute inset-x-0 bottom-0 overflow-hidden flex items-center justify-center"
-        style={{
-          height: "50%",
-          background: bg,
-          borderRadius: "0 0 8px 8px",
-        }}
-      >
-        <span
-          className="font-black tabular-nums"
-          style={{
-            fontSize: "clamp(20px, 5vw, 34px)",
-            color: textColor,
-            transform: "translateY(-25%)",
-          }}
-        >
-          {value}
-        </span>
-      </div>
-
-      {/* Flipping top — shows OLD value, flips down */}
-      {flipping && (
-        <div
-          className="absolute inset-x-0 top-0 overflow-hidden flex items-center justify-center flip-top-anim"
-          style={{
-            height: "50%",
-            background: bg,
-            borderRadius: "8px 8px 0 0",
-            transformOrigin: "bottom center",
-            zIndex: 3,
-            backfaceVisibility: "hidden",
-          }}
-        >
-          <span
-            className="font-black tabular-nums"
-            style={{
-              fontSize: "clamp(20px, 5vw, 34px)",
-              color: textColor,
-              transform: "translateY(25%)",
-            }}
-          >
-            {displayPrev}
-          </span>
-        </div>
-      )}
-
-      {/* Flipping bottom — shows NEW value, flips up from behind */}
-      {flipping && (
-        <div
-          className="absolute inset-x-0 bottom-0 overflow-hidden flex items-center justify-center flip-bottom-anim"
-          style={{
-            height: "50%",
-            background: bg,
-            borderRadius: "0 0 8px 8px",
-            transformOrigin: "top center",
-            zIndex: 2,
-            backfaceVisibility: "hidden",
-          }}
-        >
-          <span
-            className="font-black tabular-nums"
-            style={{
-              fontSize: "clamp(20px, 5vw, 34px)",
-              color: textColor,
-              transform: "translateY(-25%)",
-            }}
-          >
-            {value}
-          </span>
-        </div>
-      )}
+        {value}
+      </span>
     </div>
   );
 }
