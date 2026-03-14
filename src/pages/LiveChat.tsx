@@ -106,6 +106,8 @@ export default function LiveChat() {
 
     ytPlayerRef.current = new window.YT.Player(ytContainerRef.current, {
       videoId: ytId,
+      width: ytVertical ? 250 : undefined,
+      height: ytVertical ? 444 : undefined,
       playerVars: {
         controls: 1,
         modestbranding: 1,
@@ -124,7 +126,7 @@ export default function LiveChat() {
         },
       },
     });
-  }, [ytId]);
+  }, [ytId, ytVertical]);
 
   // Parse YouTube URL
   useEffect(() => {
@@ -402,12 +404,17 @@ export default function LiveChat() {
                 {/* YouTube player */}
                 <div
                   className={`rounded-xl overflow-hidden bg-black mx-auto ${
-                    ytVertical ? "max-w-[280px]" : ""
+                    ytVertical ? "w-[250px]" : ""
                   }`}
                 >
                   <div
                     ref={ytContainerRef}
                     className={ytVertical ? "aspect-[9/16]" : "aspect-video"}
+                    style={
+                      ytVertical
+                        ? { width: "250px", height: "444px" }
+                        : undefined
+                    }
                   />
                 </div>
 
