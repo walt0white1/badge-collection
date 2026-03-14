@@ -186,11 +186,6 @@ body.overlay-mode {
   opacity: 0.7 !important;
 }
 
-/* ── ArcRow timeline bar (via-white/[0.06] invisible on light bg) ── */
-[data-theme="light"] .via-white\/\[0\.06\] {
-  --tw-gradient-via-position: ;
-  --tw-gradient-stops: var(--tw-gradient-from), rgba(0,0,0,0.1) var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
-}
 
 
 @layer utilities {
