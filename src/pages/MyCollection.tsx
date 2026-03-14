@@ -34,7 +34,6 @@ export default function MyCollection() {
   const [revealingAll, setRevealingAll] = useState(false);
   const [bulkResults, setBulkResults] = useState<{ rarity: string; season: string }[]>([]);
   const [showSummary, setShowSummary] = useState(false);
-  const [rewardIdx, setRewardIdx] = useState(0);
 
   const { data: ticketAvailable, refetch: refetchTicket } = useQuery({
     queryKey: ["canClaimTicket"],
@@ -414,171 +413,140 @@ export default function MyCollection() {
                 </div>
               )}
 
-              {/* Possible rewards — carousel, matches ticket height */}
-              {(() => {
-                const rewards = [
-                  { rarity: "COMMON" as const, pct: "40%" },
-                  { rarity: "RARE" as const, pct: "30%" },
-                  { rarity: "EPIC" as const, pct: "18%" },
-                  { rarity: "LEGENDARY" as const, pct: "9%" },
-                  { rarity: "UNIQUE" as const, pct: "3%" },
-                  { type: "teaser" as const },
-                ] as const;
-                const total = rewards.length;
-                const current = rewards[rewardIdx];
-                const isTeaser = "type" in current && current.type === "teaser";
-                const rarity = !isTeaser ? (current as { rarity: typeof RARITY_ORDER[number]; pct: string }).rarity : null;
-                const pct = !isTeaser ? (current as { rarity: typeof RARITY_ORDER[number]; pct: string }).pct : null;
-                const color = rarity ? RARITY_COLORS[rarity] : "#9146FF";
-                const pts = rarity ? RARITY_POINTS[rarity] : 0;
-                const img = rarity ? getBadgeImage(rarity, "saison2") : "";
-
-                return (
-                  <div
-                    className="relative rounded-2xl overflow-hidden flex flex-col"
-                    style={{
-                      height: "clamp(280px, 56vw, 380px)",
-                      background: isDark
-                        ? `linear-gradient(160deg, rgba(255,255,255,0.02) 0%, ${color}08 50%, rgba(255,255,255,0.01) 100%)`
-                        : `linear-gradient(160deg, rgba(0,0,0,0.02) 0%, ${color}10 50%, rgba(0,0,0,0.01) 100%)`,
-                      border: `1px solid ${isTeaser ? (isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)") : color + (isDark ? "15" : "25")}`,
-                    }}
+              {/* Possible rewards — scrollable list with badge images */}
+              <div
+                className="relative rounded-2xl overflow-hidden"
+                style={{
+                  maxHeight: "clamp(280px, 56vw, 400px)",
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(145,70,255,0.03) 100%)"
+                    : "linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(145,70,255,0.04) 100%)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)"}`,
+                }}
+              >
+                <div className="px-5 pt-4 pb-2">
+                  <p
+                    className="text-xs font-bold tracking-[0.15em] uppercase"
+                    style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
                   >
-                    {/* Top accent line */}
-                    {!isTeaser && (
+                    Recompenses possibles
+                  </p>
+                </div>
+
+                {/* Scrollable content */}
+                <div
+                  className="overflow-y-auto px-4 pb-4 space-y-3 rewards-scroll"
+                  style={{ maxHeight: "calc(clamp(280px, 56vw, 400px) - 52px)" }}
+                >
+                  {([
+                    { rarity: "COMMON", pct: "40%" },
+                    { rarity: "RARE", pct: "30%" },
+                    { rarity: "EPIC", pct: "18%" },
+                    { rarity: "LEGENDARY", pct: "9%" },
+                    { rarity: "UNIQUE", pct: "3%" },
+                  ] as const).map(({ rarity, pct }) => {
+                    const color = RARITY_COLORS[rarity];
+                    const pts = RARITY_POINTS[rarity];
+                    const img = getBadgeImage(rarity, "saison2");
+                    return (
                       <div
-                        className="absolute top-0 left-[10%] right-[10%] h-px opacity-40"
-                        style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
-                      />
-                    )}
-
-                    {/* Ambient glow */}
-                    <div
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full blur-[80px] pointer-events-none transition-all duration-500"
-                      style={{ background: color, opacity: isTeaser ? 0.03 : 0.08 }}
-                    />
-
-                    {/* Header */}
-                    <div className="relative z-10 px-5 pt-4 flex items-center justify-between">
-                      <p
-                        className="text-[10px] font-bold tracking-[0.15em] uppercase"
-                        style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                        key={rarity}
+                        className="group flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01]"
+                        style={{
+                          background: isDark ? `${color}06` : `${color}08`,
+                          border: `1px solid ${color}${isDark ? "10" : "18"}`,
+                        }}
                       >
-                        Recompenses possibles
-                      </p>
-                      {/* Dots indicator */}
-                      <div className="flex items-center gap-1">
-                        {rewards.map((_, i) => (
+                        <div className="relative shrink-0">
                           <div
-                            key={i}
-                            className="w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer"
-                            onClick={() => setRewardIdx(i)}
-                            style={{
-                              background: i === rewardIdx ? color : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-                              transform: i === rewardIdx ? "scale(1.3)" : "scale(1)",
-                            }}
+                            className="absolute inset-0 rounded-full blur-xl opacity-20 group-hover:opacity-35 transition-opacity"
+                            style={{ background: color, transform: "scale(1.5)" }}
                           />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Content — single reward, big */}
-                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 transition-all duration-300">
-                      {!isTeaser && rarity ? (
-                        <>
-                          <div className="relative mb-4">
-                            <div
-                              className="absolute inset-0 rounded-full blur-3xl transition-opacity"
-                              style={{ background: color, opacity: 0.2, transform: "scale(2)" }}
-                            />
-                            <img
-                              key={rarity}
-                              src={img}
-                              alt={rarity}
-                              className="relative w-24 h-24 sm:w-28 sm:h-28 object-contain reward-fade-in"
-                              style={{ filter: `drop-shadow(0 4px 20px ${color}40)` }}
-                            />
-                          </div>
+                          <img
+                            src={img}
+                            alt={rarity}
+                            className="relative w-12 h-12 sm:w-14 sm:h-14 object-contain"
+                            style={{ filter: `drop-shadow(0 2px 8px ${color}30)` }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
                           <p
-                            className="text-xl sm:text-2xl font-black uppercase tracking-wider leading-none reward-fade-in"
-                            style={{ color, animationDelay: "50ms" }}
+                            className="text-sm sm:text-base font-black uppercase tracking-wide leading-tight"
+                            style={{ color }}
                           >
                             {rarity}
                           </p>
-                          <div className="flex items-center gap-4 mt-2 reward-fade-in" style={{ animationDelay: "100ms" }}>
-                            <span
-                              className="text-2xl sm:text-3xl font-black tabular-nums"
-                              style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)" }}
-                            >
-                              {pct}
-                            </span>
-                            <span
-                              className="text-xs"
-                              style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                            >
-                              de chance
-                            </span>
-                          </div>
                           <p
-                            className="text-sm mt-1.5 reward-fade-in"
-                            style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)", animationDelay: "150ms" }}
+                            className="text-xs mt-0.5"
+                            style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
                           >
                             +{pts} pt{pts > 1 ? "s" : ""} par badge
                           </p>
-                        </>
-                      ) : (
-                        <div className="text-center space-y-4 reward-fade-in">
+                        </div>
+                        <div className="shrink-0 text-right">
                           <p
-                            className="text-xs font-bold tracking-[0.15em] uppercase"
+                            className="text-lg sm:text-xl font-black tabular-nums leading-none"
+                            style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)" }}
+                          >
+                            {pct}
+                          </p>
+                          <p
+                            className="text-[10px] mt-0.5"
                             style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
                           >
-                            Bientot
+                            de chance
                           </p>
-                          {[
-                            { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
-                            { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
-                          ].map((r) => (
-                            <div key={r.label} className="flex items-center gap-3 opacity-50">
-                              <span className="text-2xl">{r.icon}</span>
-                              <div className="text-left">
-                                <p
-                                  className="text-sm font-semibold"
-                                  style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
-                                >
-                                  {r.label}
-                                </p>
-                                <p
-                                  className="text-xs"
-                                  style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                                >
-                                  {r.desc}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    );
+                  })}
 
-                    {/* Navigation arrow */}
-                    <div className="relative z-10 px-5 pb-4 flex items-center justify-center">
-                      <button
-                        onClick={() => setRewardIdx((rewardIdx + 1) % total)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105"
-                        style={{
-                          background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
-                        }}
-                      >
-                        <span className="text-xs font-medium">Suivant</span>
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
+                  {/* Future rewards teaser */}
+                  <div
+                    className="pt-3 mt-1 space-y-2.5"
+                    style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}
+                  >
+                    <p
+                      className="text-[10px] font-bold tracking-[0.15em] uppercase"
+                      style={{ color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
+                    >
+                      Bientot
+                    </p>
+                    {[
+                      { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
+                      { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
+                    ].map((reward) => (
+                      <div key={reward.label} className="flex items-center gap-3 opacity-40">
+                        <span className="text-base w-6 text-center">{reward.icon}</span>
+                        <div className="flex-1">
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
+                          >
+                            {reward.label}
+                          </p>
+                          <p
+                            className="text-xs"
+                            style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                          >
+                            {reward.desc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                );
-              })()}
+                </div>
+
+                {/* Scroll fade at bottom */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+                  style={{
+                    background: isDark
+                      ? "linear-gradient(to top, #0a0a0d, transparent)"
+                      : "linear-gradient(to top, #f8f8fa, transparent)",
+                  }}
+                />
+              </div>
 
               {/* Claim button */}
               {ticketAvailable && (
@@ -774,13 +742,10 @@ export default function MyCollection() {
                 0% { opacity: 0; transform: translateY(6px); }
                 100% { opacity: 1; transform: translateY(0); }
               }
-              .reward-fade-in {
-                animation: rewardFadeIn 0.3s ease-out forwards;
-              }
-              @keyframes rewardFadeIn {
-                0% { opacity: 0; transform: scale(0.95); }
-                100% { opacity: 1; transform: scale(1); }
-              }
+              .rewards-scroll::-webkit-scrollbar { width: 4px; }
+              .rewards-scroll::-webkit-scrollbar-track { background: transparent; }
+              .rewards-scroll::-webkit-scrollbar-thumb { background: rgba(145,70,255,0.2); border-radius: 4px; }
+              .rewards-scroll::-webkit-scrollbar-thumb:hover { background: rgba(145,70,255,0.4); }
             `}</style>
           </div>
         );
