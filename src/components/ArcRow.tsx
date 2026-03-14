@@ -99,14 +99,14 @@ export default function ArcRow({
                   className="group relative flex-1 overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-[1.01]"
                   style={{
                     background: owned
-                      ? `linear-gradient(135deg, ${color}${isDark ? "05" : "08"} 0%, ${color}${isDark ? "10" : "14"} 40%, ${color}${isDark ? "05" : "08"} 100%), ${isDark ? "#0a0a0d" : "#ffffff"}`
-                      : isDark ? "#09090c" : "#ebebef",
-                    border: `1px solid ${owned ? color + (isDark ? "18" : "35") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.09)"}`,
+                      ? `linear-gradient(135deg, ${color}${isDark ? "05" : "12"} 0%, ${color}${isDark ? "10" : "1a"} 40%, ${color}${isDark ? "05" : "12"} 100%), ${isDark ? "#0a0a0d" : "#ffffff"}`
+                      : isDark ? "#09090c" : "#e8e8ec",
+                    border: `1px solid ${owned ? color + (isDark ? "18" : "40") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.1)"}`,
                     boxShadow: owned
                       ? isDark
                         ? `0 0 30px -10px ${color}15, inset 0 1px 0 ${color}08`
-                        : `0 2px 12px -4px ${color}25, 0 0 0 1px ${color}20`
-                      : isDark ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
+                        : `0 4px 16px -4px ${color}30, 0 1px 4px rgba(0,0,0,0.08)`
+                      : isDark ? "none" : "0 1px 4px rgba(0,0,0,0.08)",
                   }}
                 >
                   {/* Diagonal accent lines */}
@@ -159,7 +159,7 @@ export default function ArcRow({
                         style={{
                           filter: owned
                             ? `drop-shadow(0 4px 16px ${color}30)`
-                            : isDark ? "grayscale(1) brightness(0.15)" : "grayscale(1) opacity(0.2)",
+                            : isDark ? "grayscale(1) brightness(0.15)" : "grayscale(1) opacity(0.35)",
                         }}
                       />
                     </div>
@@ -169,7 +169,7 @@ export default function ArcRow({
                       <p
                         className="text-base sm:text-xl md:text-2xl font-black tracking-tight uppercase leading-none"
                         style={{
-                          color: owned ? color : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.1)",
+                          color: owned ? color : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.18)",
                         }}
                       >
                         {r}
@@ -184,7 +184,7 @@ export default function ArcRow({
                       <span
                         className="text-2xl sm:text-3xl md:text-4xl font-black tabular-nums leading-none"
                         style={{
-                          color: owned ? (isDark ? "white" : "var(--text-primary)") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.08)",
+                          color: owned ? (isDark ? "white" : "var(--text-primary)") : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.15)",
                         }}
                       >
                         {count}
