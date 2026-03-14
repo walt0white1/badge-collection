@@ -261,13 +261,12 @@ export default function MyCollection() {
             </span>
           </div>
 
-          {/* Desktop: 3-col layout / Mobile: stacked */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16 xl:gap-20">
+          {/* Desktop: 2-col layout / Mobile: stacked */}
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-12">
 
-            {/* Col 1: Scratch card */}
+            {/* Left: Scratch card */}
             <div className="flex flex-col items-center gap-5 shrink-0">
               <div className="relative w-52 sm:w-56 aspect-[3/4]">
-                {/* Stack cards behind */}
                 {Array.from({ length: stackCards }).map((_, i) => {
                   const depth = stackCards - i;
                   return (
@@ -284,7 +283,6 @@ export default function MyCollection() {
                   );
                 })}
 
-                {/* Top card */}
                 {topTicket && (
                   <div className="relative z-10">
                     <ScratchTicket
@@ -296,7 +294,6 @@ export default function MyCollection() {
                   </div>
                 )}
 
-                {/* Counter */}
                 {remaining > 1 && (
                   <div className="absolute -top-2 -right-2 z-20 bg-[#9146FF] text-white text-[11px] font-black w-7 h-7 rounded-full flex items-center justify-center shadow-lg">
                     {remaining}
@@ -304,17 +301,12 @@ export default function MyCollection() {
                 )}
               </div>
 
-              {/* Helper text */}
               {remaining > 0 && !revealingAll && (
-                <p
-                  className="text-xs"
-                  style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
-                >
+                <p className="text-xs" style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}>
                   Gratte pour reveler ton badge
                 </p>
               )}
 
-              {/* Reveal all */}
               {remaining > 1 && !revealingAll && (
                 <button
                   onClick={handleRevealAll}
@@ -325,20 +317,15 @@ export default function MyCollection() {
                 </button>
               )}
 
-              {/* Bulk reveal */}
               {revealingAll && (
                 <div className="flex items-center gap-2.5">
                   <div className="w-3.5 h-3.5 border-2 border-[#9146FF] border-t-transparent rounded-full animate-spin" />
-                  <span
-                    className="text-sm"
-                    style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
-                  >
+                  <span className="text-sm" style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
                     {bulkResults.length}/{unscratchedTickets.length - currentIdx}
                   </span>
                 </div>
               )}
 
-              {/* Claim button — below ticket */}
               {ticketAvailable && (
                 <button
                   onClick={handleClaim}
@@ -361,67 +348,126 @@ export default function MyCollection() {
               {claimError && <p className="text-sm text-red-400">{claimError}</p>}
             </div>
 
-            {/* Col 2: Session results */}
-            <div className="w-full lg:w-48 flex flex-col items-center lg:items-stretch shrink-0">
-              {sessionResults.length > 0 && (
-                <div
-                  className="rounded-xl p-4 space-y-3"
-                  style={{
-                    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
-                    border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
-                  }}
+            {/* Right: Rewards + Session */}
+            <div className="w-full lg:w-[380px] xl:w-[420px] flex flex-col gap-8">
+
+              {/* Rewards with badge images */}
+              <div className="space-y-3">
+                <p
+                  className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+                  style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
                 >
-                  <p
-                    className="text-[10px] font-semibold tracking-[0.15em] uppercase"
-                    style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
-                  >
-                    Cette session
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {sessionResults.map((r, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 session-badge-enter"
-                        style={{ animationDelay: `${i * 50}ms` }}
-                      >
-                        <img
-                          src={getBadgeImage(r.rarity, r.season)}
-                          alt=""
-                          className="w-8 h-8 rounded-full object-cover shrink-0"
-                          style={{
-                            border: `2px solid ${RARITY_COLORS[r.rarity]}`,
-                            boxShadow: `0 0 8px ${RARITY_COLORS[r.rarity]}25`,
-                          }}
+                  Drops possibles
+                </p>
+
+                {([
+                  { rarity: "COMMON", pct: "40%" },
+                  { rarity: "RARE", pct: "30%" },
+                  { rarity: "EPIC", pct: "18%" },
+                  { rarity: "LEGENDARY", pct: "9%" },
+                  { rarity: "UNIQUE", pct: "3%" },
+                ] as const).map(({ rarity, pct }) => {
+                  const color = RARITY_COLORS[rarity];
+                  const pts = RARITY_POINTS[rarity];
+                  const img = getBadgeImage(rarity, "saison2");
+                  return (
+                    <div
+                      key={rarity}
+                      className="flex items-center gap-4 py-1.5"
+                      style={{
+                        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                      }}
+                    >
+                      <div className="relative shrink-0">
+                        <div
+                          className="absolute inset-0 rounded-full blur-lg opacity-15"
+                          style={{ background: color, transform: "scale(1.4)" }}
                         />
-                        <span
-                          className="text-xs font-bold uppercase tracking-wide"
-                          style={{ color: RARITY_COLORS[r.rarity] }}
+                        <img
+                          src={img}
+                          alt={rarity}
+                          className="relative w-10 h-10 object-contain"
+                          style={{ filter: `drop-shadow(0 2px 6px ${color}25)` }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-black uppercase tracking-wide leading-tight"
+                          style={{ color }}
                         >
-                          {r.rarity}
-                        </span>
-                        <span
-                          className="text-[10px] ml-auto tabular-nums"
+                          {rarity}
+                        </p>
+                        <p
+                          className="text-[10px] mt-0.5"
                           style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
                         >
-                          +{RARITY_POINTS[r.rarity]} pt{RARITY_POINTS[r.rarity] > 1 ? "s" : ""}
-                        </span>
+                          +{pts} pt{pts > 1 ? "s" : ""}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                  <div
-                    className="pt-2 flex items-center justify-between"
-                    style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}
-                  >
+                      <span
+                        className="text-lg font-black tabular-nums shrink-0"
+                        style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)" }}
+                      >
+                        {pct}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* Bientot */}
+                <div className="flex items-center gap-4 pt-1">
+                  {[
+                    { icon: "🎁", label: "Sub gratuit" },
+                    { icon: "⭐", label: "VIP" },
+                  ].map((r) => (
                     <span
-                      className="text-xs font-medium"
-                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                      key={r.label}
+                      className="text-[11px] font-medium opacity-25"
+                      style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.4)" }}
                     >
-                      {sessionResults.length} badge{sessionResults.length > 1 ? "s" : ""}
+                      {r.icon} {r.label}
                     </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Session results */}
+              {sessionResults.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p
+                      className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+                      style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                    >
+                      Cette session
+                    </p>
                     <span className="text-sm font-bold text-[#9146FF]">
                       +{sessionResults.reduce((s, r) => s + (RARITY_POINTS[r.rarity] || 0), 0)} pts
                     </span>
                   </div>
+
+                  {/* Badge avatars stacked horizontally */}
+                  <div className="flex flex-wrap gap-2">
+                    {sessionResults.map((r, i) => (
+                      <div
+                        key={i}
+                        className="relative session-badge-enter"
+                        style={{ animationDelay: `${i * 50}ms` }}
+                        title={`${r.rarity} +${RARITY_POINTS[r.rarity]} pts`}
+                      >
+                        <img
+                          src={getBadgeImage(r.rarity, r.season)}
+                          alt=""
+                          className="w-10 h-10 rounded-lg object-cover"
+                          style={{
+                            border: `2px solid ${RARITY_COLORS[r.rarity]}`,
+                            boxShadow: `0 0 10px ${RARITY_COLORS[r.rarity]}20`,
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
                   {remaining === 0 && (
                     <button
                       onClick={() => setShowSummary(true)}
@@ -432,80 +478,6 @@ export default function MyCollection() {
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Col 3: Possible rewards */}
-            <div className="w-full lg:w-52 flex flex-col items-center lg:items-stretch shrink-0">
-              <div className="space-y-3">
-                <p
-                  className="text-[10px] font-semibold tracking-[0.2em] uppercase"
-                  style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                >
-                  Drops possibles
-                </p>
-
-                <div className="space-y-0">
-                  {([
-                    { rarity: "COMMON", pct: "40%" },
-                    { rarity: "RARE", pct: "30%" },
-                    { rarity: "EPIC", pct: "18%" },
-                    { rarity: "LEGENDARY", pct: "9%" },
-                    { rarity: "UNIQUE", pct: "3%" },
-                  ] as const).map(({ rarity, pct }) => {
-                    const color = RARITY_COLORS[rarity];
-                    return (
-                      <div
-                        key={rarity}
-                        className="flex items-center gap-3 py-2.5"
-                        style={{
-                          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
-                        }}
-                      >
-                        <div
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ background: color, boxShadow: `0 0 6px ${color}40` }}
-                        />
-                        <span
-                          className="text-xs font-bold uppercase tracking-wide flex-1"
-                          style={{ color }}
-                        >
-                          {rarity}
-                        </span>
-                        <span
-                          className="text-xs tabular-nums font-semibold"
-                          style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)" }}
-                        >
-                          {pct}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Future rewards teaser */}
-                <div className="pt-1 space-y-2">
-                  <p
-                    className="text-[10px] font-semibold tracking-[0.2em] uppercase"
-                    style={{ color: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }}
-                  >
-                    Bientot
-                  </p>
-                  {[
-                    { icon: "🎁", label: "Sub gratuit" },
-                    { icon: "⭐", label: "VIP" },
-                  ].map((reward) => (
-                    <div key={reward.label} className="flex items-center gap-2.5 opacity-30">
-                      <span className="text-xs">{reward.icon}</span>
-                      <span
-                        className="text-[11px] font-medium"
-                        style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)" }}
-                      >
-                        {reward.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
