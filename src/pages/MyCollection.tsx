@@ -359,26 +359,27 @@ export default function MyCollection() {
 
           {claimError && <p className="text-sm text-red-400">{claimError}</p>}
 
-          {/* Session results */}
+          {/* Session results — simple dot indicators */}
           {sessionResults.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {sessionResults.map((r, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+                    className="w-2 h-2 rounded-full"
                     style={{
-                      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
+                      background: RARITY_COLORS[r.rarity],
+                      boxShadow: `0 0 6px ${RARITY_COLORS[r.rarity]}50`,
                     }}
-                  >
-                    <img src={getBadgeImage(r.rarity, r.season)} alt="" className="w-5 h-5 object-contain" />
-                    <span className="text-[10px] font-bold uppercase" style={{ color: RARITY_COLORS[r.rarity] }}>
-                      {r.rarity}
-                    </span>
-                  </div>
+                  />
                 ))}
               </div>
+              <span
+                className="text-[11px] tabular-nums"
+                style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+              >
+                {sessionResults.length} revele{sessionResults.length > 1 ? "s" : ""}
+              </span>
               {remaining === 0 && (
                 <button
                   onClick={() => setShowSummary(true)}
