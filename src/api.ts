@@ -169,8 +169,43 @@ export const submitLiveVideo = async (
     video_path: path,
     message: message.trim(),
     duration_seconds: durationSeconds,
+    video_type: "upload",
   });
   if (insertErr) throw new Error(insertErr.message);
+};
+
+export const submitYoutubeVideo = async (
+  youtubeId: string,
+  message: string,
+  startSeconds: number,
+  endSeconds: number,
+): Promise<void> => {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("auth_id", authUser.id)
+    .single();
+  if (!profile) throw new Error("Profil introuvable");
+
+  const duration = endSeconds - startSeconds;
+  if (duration < 1 || duration > 15) throw new Error("Durée entre 1 et 15 secondes");
+
+  const { error } = await supabase.from("live_submissions").insert({
+    username: profile.username,
+    video_path: "",
+    message: message.trim(),
+    duration_seconds: duration,
+    video_type: "youtube",
+    youtube_id: youtubeId,
+    start_seconds: startSeconds,
+    end_seconds: endSeconds,
+  });
+  if (error) throw new Error(error.message);
 };
 
 export const getVideoUrl = (path: string): string => {

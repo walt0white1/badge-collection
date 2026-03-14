@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "../lib/supabase";
 import { getVideoUrl, markSubmissionPlayed } from "../api";
 import type { LiveSubmission } from "../types";
@@ -16,12 +16,23 @@ async function fetchAvatar(username: string): Promise<string> {
   return data?.avatar_url || "";
 }
 
+// Declare global YT type
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: (() => void) | undefined;
+  }
+}
+
 export default function Overlay() {
   const [queue, setQueue] = useState<SubmissionWithAvatar[]>([]);
   const [current, setCurrent] = useState<SubmissionWithAvatar | null>(null);
   const [visible, setVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const ytContainerRef = useRef<HTMLDivElement>(null);
   const processing = useRef(false);
+  const ytTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Set body to transparent mode for OBS
   useEffect(() => {
@@ -29,9 +40,17 @@ export default function Overlay() {
     return () => document.body.classList.remove("overlay-mode");
   }, []);
 
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (document.getElementById("yt-iframe-api")) return;
+    const tag = document.createElement("script");
+    tag.id = "yt-iframe-api";
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  }, []);
+
   // Subscribe to new submissions via Supabase Realtime
   useEffect(() => {
-    // Load any unplayed submissions on mount
     supabase
       .from("live_submissions")
       .select("*")
@@ -71,6 +90,24 @@ export default function Overlay() {
     };
   }, []);
 
+  const finishCurrent = useCallback(() => {
+    setVisible(false);
+    setTimeout(() => {
+      if (current) {
+        markSubmissionPlayed(current.id).catch(() => {});
+      }
+      if (ytPlayerRef.current) {
+        try {
+          ytPlayerRef.current.destroy();
+        } catch {}
+        ytPlayerRef.current = null;
+      }
+      clearTimeout(ytTimerRef.current);
+      setCurrent(null);
+      processing.current = false;
+    }, 500);
+  }, [current]);
+
   // Process queue
   useEffect(() => {
     if (processing.current || current || queue.length === 0) return;
@@ -80,30 +117,69 @@ export default function Overlay() {
     setQueue((prev) => prev.slice(1));
     setCurrent(next);
 
-    // Small delay before showing
     setTimeout(() => setVisible(true), 100);
   }, [queue, current]);
 
-  const onVideoEnd = () => {
-    setVisible(false);
-    // Wait for fade-out animation
-    setTimeout(() => {
-      if (current) {
-        markSubmissionPlayed(current.id).catch(() => {});
-      }
-      setCurrent(null);
-      processing.current = false;
-    }, 500);
-  };
-
-  // Auto-play when current changes
+  // Play uploaded video
   useEffect(() => {
-    if (current && videoRef.current && visible) {
+    if (current?.video_type === "upload" && videoRef.current && visible) {
       videoRef.current.play().catch(() => {});
     }
   }, [current, visible]);
 
-  // If no video playing, show nothing (transparent for OBS)
+  // Play YouTube video
+  useEffect(() => {
+    if (!current || current.video_type !== "youtube" || !visible) return;
+    if (!current.youtube_id || !ytContainerRef.current) return;
+
+    const initPlayer = () => {
+      if (!window.YT?.Player) {
+        setTimeout(initPlayer, 200);
+        return;
+      }
+
+      // Clear previous player
+      if (ytPlayerRef.current) {
+        try {
+          ytPlayerRef.current.destroy();
+        } catch {}
+      }
+
+      ytPlayerRef.current = new window.YT.Player(ytContainerRef.current, {
+        videoId: current.youtube_id,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          start: current.start_seconds,
+          end: current.end_seconds,
+        },
+        events: {
+          onStateChange: (event: any) => {
+            // YT.PlayerState.ENDED === 0
+            if (event.data === 0) {
+              finishCurrent();
+            }
+          },
+        },
+      });
+
+      // Safety timeout in case onStateChange doesn't fire
+      const duration = (current.end_seconds - current.start_seconds + 2) * 1000;
+      ytTimerRef.current = setTimeout(finishCurrent, duration);
+    };
+
+    initPlayer();
+
+    return () => {
+      clearTimeout(ytTimerRef.current);
+    };
+  }, [current, visible, finishCurrent]);
+
   if (!current) {
     return <div className="w-screen h-screen bg-transparent" />;
   }
@@ -117,17 +193,22 @@ export default function Overlay() {
             : "opacity-0 scale-95 translate-y-4"
         }`}
       >
-        {/* Card container */}
         <div className="relative max-w-[700px] w-[90vw] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60">
-          {/* Video */}
-          <video
-            ref={videoRef}
-            src={getVideoUrl(current.video_path)}
-            onEnded={onVideoEnd}
-            className="w-full max-h-[450px] object-contain bg-black"
-            autoPlay
-            playsInline
-          />
+          {/* Video content */}
+          {current.video_type === "upload" ? (
+            <video
+              ref={videoRef}
+              src={getVideoUrl(current.video_path)}
+              onEnded={finishCurrent}
+              className="w-full max-h-[450px] object-contain bg-black"
+              autoPlay
+              playsInline
+            />
+          ) : (
+            <div className="w-full aspect-video bg-black">
+              <div ref={ytContainerRef} className="w-full h-full" />
+            </div>
+          )}
 
           {/* Message bar */}
           {current.message && (
