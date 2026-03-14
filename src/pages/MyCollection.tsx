@@ -241,155 +241,163 @@ export default function MyCollection() {
         />
       </div>
 
-      {/* ── Ticket Pile ── */}
+      {/* ── Tickets ── */}
       {remaining > 0 || ticketAvailable ? (
-        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-
-          {/* Left: stacked pile */}
-          <div className="relative shrink-0 w-56 sm:w-64 aspect-[3/4]">
-            {/* Background stack cards */}
-            {Array.from({ length: stackCards }).map((_, i) => {
-              const depth = stackCards - i;
-              return (
-                <div
-                  key={`stack-${depth}`}
-                  className="absolute inset-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-gray-700/40 to-gray-800/40"
-                  style={{
-                    transform: `translateX(${depth * 6}px) translateY(${depth * 6}px) rotate(${depth * 1.5}deg)`,
-                    zIndex: -depth,
-                    filter: `brightness(${1 - depth * 0.12})`,
-                  }}
-                />
-              );
-            })}
-
-            {/* Top card — interactive */}
-            {topTicket && (
-              <div className="relative z-10">
-                <ScratchTicket
-                  key={topTicket.id}
-                  ticket={topTicket}
-                  onScratched={handleScratched}
-                  onDismiss={handleDismiss}
-                />
-              </div>
-            )}
-
-            {/* Counter badge */}
-            {remaining > 1 && (
-              <div className="absolute -top-2 -right-2 z-20 bg-twitch text-white text-xs font-black w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-twitch/30">
-                &times;{remaining}
-              </div>
-            )}
+        <div className="text-center space-y-6">
+          {/* Title row */}
+          <div className="flex items-center justify-center gap-3">
+            <h2
+              className="text-lg sm:text-xl font-bold tracking-tight"
+              style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
+            >
+              Tickets a gratter
+            </h2>
+            <span
+              className="text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{
+                background: isDark ? "rgba(145,70,255,0.12)" : "rgba(145,70,255,0.08)",
+                color: "#9146FF",
+              }}
+            >
+              {remaining}
+            </span>
           </div>
 
-          {/* Right: info */}
-          <div className="flex-1 space-y-6 text-center lg:text-left">
-            <div>
-              <h2 className="text-2xl font-black text-white">Tickets a gratter</h2>
-              <p className="text-gray-500 mt-1">
-                <span className="text-white font-semibold">{remaining}</span> ticket{remaining > 1 ? "s" : ""} en attente
-                {scratchedCount > 0 && (
-                  <span className="text-gray-600 ml-2">
-                    · {scratchedCount} gratte{scratchedCount > 1 ? "s" : ""}
-                  </span>
-                )}
-              </p>
+          {/* Scratch card — centered, contained */}
+          <div className="flex flex-col items-center gap-5">
+            <div className="relative w-52 sm:w-56 aspect-[3/4]">
+              {/* Stack cards behind */}
+              {Array.from({ length: stackCards }).map((_, i) => {
+                const depth = stackCards - i;
+                return (
+                  <div
+                    key={`stack-${depth}`}
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      transform: `translateY(${depth * 4}px) scale(${1 - depth * 0.03})`,
+                      zIndex: -depth,
+                      background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                    }}
+                  />
+                );
+              })}
+
+              {/* Top card */}
+              {topTicket && (
+                <div className="relative z-10">
+                  <ScratchTicket
+                    key={topTicket.id}
+                    ticket={topTicket}
+                    onScratched={handleScratched}
+                    onDismiss={handleDismiss}
+                  />
+                </div>
+              )}
+
+              {/* Counter */}
+              {remaining > 1 && (
+                <div className="absolute -top-2 -right-2 z-20 bg-[#9146FF] text-white text-[11px] font-black w-7 h-7 rounded-full flex items-center justify-center shadow-lg">
+                  {remaining}
+                </div>
+              )}
             </div>
 
-            {/* Claim button */}
-            {ticketAvailable && (
-              <button
-                onClick={handleClaim}
-                disabled={claiming}
-                className="inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 hover:from-yellow-500/30 hover:to-purple-500/30 border border-yellow-500/30 text-yellow-300 font-semibold rounded-xl transition-all disabled:opacity-50"
-              >
-                {claiming ? (
-                  <div className="w-5 h-5 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                )}
-                Reclamer un ticket gratuit !
-              </button>
-            )}
-
-            {claimError && (
-              <p className="text-sm text-red-400">{claimError}</p>
-            )}
-
-            {/* Session results preview */}
-            {sessionResults.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-xs text-gray-600 uppercase tracking-wider">
-                  Obtenu{sessionResults.length > 1 ? "s" : ""} :
-                </span>
-                <div className="flex flex-wrap gap-2 lg:justify-start justify-center">
-                  {sessionResults.map((r, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06]"
-                    >
-                      <img
-                        src={getBadgeImage(r.rarity, r.season)}
-                        alt=""
-                        className="w-6 h-6 object-contain"
-                      />
-                      <span
-                        className="text-[10px] font-bold uppercase"
-                        style={{ color: RARITY_COLORS[r.rarity] }}
-                      >
-                        {r.rarity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {remaining === 0 && sessionResults.length > 0 && (
-                  <button
-                    onClick={() => setShowSummary(true)}
-                    className="text-xs text-twitch hover:text-twitch-light underline underline-offset-2 transition-colors"
-                  >
-                    Voir le recap
-                  </button>
-                )}
-              </div>
-            )}
-
+            {/* Helper text */}
             {remaining > 0 && !revealingAll && (
-              <p className="text-xs text-gray-600">
-                Gratte la couche argentee pour reveler ton badge !
+              <p
+                className="text-xs"
+                style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+              >
+                Gratte pour reveler ton badge
               </p>
             )}
 
-            {/* Reveal all button */}
+            {/* Reveal all */}
             {remaining > 1 && !revealingAll && (
               <button
                 onClick={handleRevealAll}
-                className="text-xs text-gray-600 hover:text-gray-400 underline underline-offset-2 transition-colors"
+                className="text-xs font-medium transition-colors"
+                style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
               >
-                Tout reveler d'un coup ({remaining} tickets)
+                Tout reveler ({remaining})
               </button>
             )}
 
-            {/* Bulk reveal in progress */}
+            {/* Bulk reveal */}
             {revealingAll && (
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-twitch border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-gray-400">
-                  Revelation... {bulkResults.length}/{unscratchedTickets.length - currentIdx}
+              <div className="flex items-center gap-2.5">
+                <div className="w-3.5 h-3.5 border-2 border-[#9146FF] border-t-transparent rounded-full animate-spin" />
+                <span
+                  className="text-sm"
+                  style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
+                >
+                  {bulkResults.length}/{unscratchedTickets.length - currentIdx}
                 </span>
               </div>
             )}
           </div>
+
+          {/* Claim button */}
+          {ticketAvailable && (
+            <button
+              onClick={handleClaim}
+              disabled={claiming}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(145,70,255,0.15))",
+                border: `1px solid ${isDark ? "rgba(234,179,8,0.2)" : "rgba(234,179,8,0.3)"}`,
+                color: isDark ? "#fbbf24" : "#b45309",
+              }}
+            >
+              {claiming ? (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span>+</span>
+              )}
+              Reclamer un ticket
+            </button>
+          )}
+
+          {claimError && <p className="text-sm text-red-400">{claimError}</p>}
+
+          {/* Session results */}
+          {sessionResults.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2 justify-center">
+                {sessionResults.map((r, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+                    style={{
+                      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
+                    }}
+                  >
+                    <img src={getBadgeImage(r.rarity, r.season)} alt="" className="w-5 h-5 object-contain" />
+                    <span className="text-[10px] font-bold uppercase" style={{ color: RARITY_COLORS[r.rarity] }}>
+                      {r.rarity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {remaining === 0 && (
+                <button
+                  onClick={() => setShowSummary(true)}
+                  className="text-xs font-medium text-[#9146FF] hover:underline"
+                >
+                  Voir le recap
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ) : scratchedCount > 0 ? (
-        /* Compact line when all tickets are scratched */
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
-          <svg className="w-5 h-5 text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-          </svg>
-          <span className="text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2 py-1">
+          <span
+            className="text-xs"
+            style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.25)" }}
+          >
             {scratchedCount} ticket{scratchedCount > 1 ? "s" : ""} gratte{scratchedCount > 1 ? "s" : ""}
           </span>
         </div>
