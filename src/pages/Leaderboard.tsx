@@ -228,7 +228,7 @@ export default function Leaderboard() {
                         key={entry.username}
                         to={`/user/${entry.username}`}
                         className="group relative flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-4 overflow-hidden transition-all duration-200"
-                        style={{ borderTop: idx > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                        style={{ borderTop: idx > 0 ? "1px solid var(--border)" : "none" }}
                       >
                         {/* Hover sweep */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -238,7 +238,7 @@ export default function Leaderboard() {
                         <span className="w-9 text-right shrink-0 tabular-nums font-black relative select-none"
                           style={{
                             fontSize: isTop10 ? "1.15rem" : "0.9rem",
-                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "#2a2a2a",
+                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "var(--text-faint)",
                             backgroundImage: isTop3 ? "linear-gradient(135deg, #9146FF, #e879f9)" : "none",
                             WebkitBackgroundClip: isTop3 ? "text" : "unset",
                             backgroundClip: isTop3 ? "text" : "unset",
@@ -371,7 +371,7 @@ export default function Leaderboard() {
                         key={entry.user_uid}
                         to={`/user/${entry.user_name}`}
                         className="group relative flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-4 overflow-hidden transition-all duration-200"
-                        style={{ borderTop: idx > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                        style={{ borderTop: idx > 0 ? "1px solid var(--border)" : "none" }}
                       >
                         {/* Hover sweep */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -381,7 +381,7 @@ export default function Leaderboard() {
                         <span className="w-9 text-right shrink-0 tabular-nums font-black relative select-none"
                           style={{
                             fontSize: isTop10 ? "1.15rem" : "0.9rem",
-                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "#2a2a2a",
+                            color: isTop3 ? "transparent" : isTop10 ? "#9146FF" : "var(--text-faint)",
                             backgroundImage: isTop3 ? "linear-gradient(135deg, #9146FF, #e879f9)" : "none",
                             WebkitBackgroundClip: isTop3 ? "text" : "unset",
                             backgroundClip: isTop3 ? "text" : "unset",

@@ -66,6 +66,121 @@ body.overlay-mode {
   z-index: 1;
 }
 
+/* ══════════════════════════════════════════════
+   LIGHT MODE — Tailwind utility class overrides
+   ══════════════════════════════════════════════ */
+
+/* ── Card backgrounds ── */
+[data-theme="light"] .bg-\[\#111111\],
+[data-theme="light"] .bg-\[\#0a0a0d\],
+[data-theme="light"] .bg-\[\#08080c\] {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .bg-\[\#1c1c1e\],
+[data-theme="light"] .bg-\[\#0f0f13\] {
+  background-color: #f2f2f5 !important;
+}
+
+[data-theme="light"] .bg-\[\#2c2c2e\] {
+  background-color: #e5e5ea !important;
+}
+
+/* ── Semi-transparent backgrounds ── */
+[data-theme="light"] .bg-white\/\[0\.06\],
+[data-theme="light"] .bg-white\/\[0\.04\],
+[data-theme="light"] .bg-white\/\[0\.03\] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Borders ── */
+[data-theme="light"] .border-white\/\[0\.04\],
+[data-theme="light"] .border-white\/\[0\.06\],
+[data-theme="light"] .border-white\/\[0\.08\],
+[data-theme="light"] .border-white\/\[0\.1\],
+[data-theme="light"] .border-white\/\[0\.12\] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Text colors ── */
+[data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-white\/40 {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .text-gray-200 {
+  color: #3a3a3c !important;
+}
+
+[data-theme="light"] .text-gray-400 {
+  color: #6e6e73 !important;
+}
+
+/* ── Keep white text on colored buttons ── */
+[data-theme="light"] .bg-\[\#9146FF\],
+[data-theme="light"] .bg-\[\#9146FF\] *,
+[data-theme="light"] .bg-twitch,
+[data-theme="light"] .bg-twitch *,
+[data-theme="light"] .bg-twitch-dark,
+[data-theme="light"] .bg-twitch-dark * {
+  color: white !important;
+}
+
+/* ── Hover states ── */
+[data-theme="light"] .hover\:bg-white\/\[0\.1\]:hover,
+[data-theme="light"] .hover\:bg-white\/\[0\.05\]:hover,
+[data-theme="light"] .hover\:bg-white\/\[0\.08\]:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .hover\:bg-\[\#2c2c2e\]:hover {
+  background-color: #e5e5ea !important;
+}
+
+/* ── Focus states ── */
+[data-theme="light"] .focus\:bg-\[\#2c2c2e\]:focus {
+  background-color: #e5e5ea !important;
+}
+
+/* ── Placeholders ── */
+[data-theme="light"] .placeholder-\[\#3a3a3c\]::placeholder,
+[data-theme="light"] .placeholder-gray-600::placeholder {
+  color: #86868b !important;
+}
+
+/* ── Select / input elements ── */
+[data-theme="light"] select,
+[data-theme="light"] input[type="text"] {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* ── Dropdown menus ── */
+[data-theme="light"] .shadow-2xl.rounded-xl {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ── Dividers ── */
+[data-theme="light"] .bg-white\/\[0\.1\] {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Home CTA secondary button ── */
+[data-theme="light"] .hover\:bg-\[\#2c2c2e\]:hover {
+  background-color: #e5e5ea !important;
+}
+
+/* ── Scroll indicator ── */
+[data-theme="light"] .scroll-indicator {
+  color: rgba(0, 0, 0, 0.3);
+}
+
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-twitch to-purple-400;
