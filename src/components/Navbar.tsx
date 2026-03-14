@@ -29,7 +29,7 @@ export default function Navbar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <nav className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/[0.04]">
+    <nav className="site-nav sticky top-0 z-50 bg-[#050508]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 h-14 flex items-center">
 
         {/* Logo — left */}
@@ -40,25 +40,24 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Nav — center */}
-        <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
-          {navLinks.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-200 ${
-                isActive(l.to)
-                  ? "text-white bg-white/[0.06]"
-                  : "text-white/40 hover:text-white/80 hover:bg-white/[0.03]"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
+        {/* Nav — center (animated pill) */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <ul className="nav-pill-list">
+            {navLinks.map((l) => (
+              <li key={l.to}>
+                <Link
+                  to={l.to}
+                  data-active={isActive(l.to) || undefined}
+                >
+                  <span>{l.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-3 ml-auto shrink-0">
+        <div className="flex items-center gap-3 ml-auto md:ml-0 shrink-0">
           {isAuthenticated && user ? (
             <div className="relative">
               <button

@@ -25,6 +25,73 @@ body.overlay-mode {
 }
 
 /* ══════════════════════════════════════════════
+   NAVBAR — Animated pill indicator
+   Uses CSS anchor positioning + mix-blend-mode
+   ══════════════════════════════════════════════ */
+.nav-pill-list {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  clip-path: inset(0);
+}
+
+.nav-pill-list a {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.4);
+  display: inline-block;
+  padding: 0 0.2rem;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-pill-list a span {
+  transition: background 0.12s ease-out;
+  border-radius: 100px;
+  padding: 0.35rem 0.85rem;
+  pointer-events: none;
+  display: inline-block;
+}
+
+.nav-pill-list a:is(:hover, :focus-visible):not([data-active]) span {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-pill-list a[data-active] {
+  color: #fff;
+}
+
+.nav-pill-list a[data-active] span {
+  anchor-name: --active;
+}
+
+.nav-pill-list::after {
+  content: '';
+  background: #fff;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  position: absolute;
+  z-index: 10;
+  top: anchor(--active top);
+  bottom: anchor(--active bottom);
+  left: anchor(--active left);
+  right: anchor(--active right);
+  position-anchor: --active;
+  transition: all 0.26s ease-out;
+  border-radius: 100px;
+}
+
+/* Fallback for browsers without anchor positioning */
+@supports not (anchor-name: --active) {
+  .nav-pill-list a[data-active] span {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ══════════════════════════════════════════════
    SCROLL-DRIVEN BADGE SHOWCASE
    Adapted from Star Trek character showcase
    Uses animation-timeline: scroll()
