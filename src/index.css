@@ -2,11 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════
+   THEME — CSS Custom Properties (dark / light)
+   ══════════════════════════════════════════════ */
+:root {
+  /* Dark theme (default) */
+  --bg: #050508;
+  --bg-card: #111111;
+  --bg-card-hover: #1c1c1e;
+  --bg-elevated: #1c1c1e;
+  --bg-nav: rgba(5, 5, 8, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-tertiary: #86868b;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-faint: rgba(255, 255, 255, 0.15);
+  --border: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --glow-hero: rgba(145, 70, 255, 0.08);
+  --showcase-glow: rgba(145, 70, 255, 0.2);
+  --badge-glow: rgba(145, 70, 255, 0.3);
+  --footer-border: rgba(255, 255, 255, 0.06);
+  --footer-text: rgba(255, 255, 255, 0.35);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f2;
+  --bg-elevated: #ffffff;
+  --bg-nav: rgba(245, 245, 247, 0.85);
+  --text-primary: #1d1d1f;
+  --text-secondary: #1d1d1f;
+  --text-tertiary: #6e6e73;
+  --text-muted: rgba(0, 0, 0, 0.45);
+  --text-faint: rgba(0, 0, 0, 0.1);
+  --border: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --glow-hero: rgba(145, 70, 255, 0.06);
+  --showcase-glow: rgba(145, 70, 255, 0.08);
+  --badge-glow: rgba(145, 70, 255, 0.12);
+  --footer-border: rgba(0, 0, 0, 0.06);
+  --footer-text: rgba(0, 0, 0, 0.35);
+  color-scheme: light;
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background: #050508;
+  background: var(--bg);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 body.overlay-mode {
@@ -25,6 +73,128 @@ body.overlay-mode {
 }
 
 /* ══════════════════════════════════════════════
+   THEME TOGGLE — Animated sun/moon button
+   ══════════════════════════════════════════════ */
+.theme-toggle {
+  --size: 32px;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.15);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Sun body */
+.theme-toggle__sun {
+  fill: rgba(255, 255, 255, 0.7);
+  transform-origin: 50% 50%;
+  transition: fill 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+}
+
+[data-theme="light"] .theme-toggle__sun {
+  fill: #f59e0b;
+  transform: scale(1);
+}
+
+/* Sun rays */
+.theme-toggle__ray {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transform-origin: 50% 50%;
+  transition: stroke 0.4s ease, opacity 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+[data-theme="light"] .theme-toggle__ray {
+  stroke: #f59e0b;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Moon crescent mask — overlaps the sun to create crescent in dark mode */
+.theme-toggle__moon {
+  fill: var(--bg);
+  transform-origin: 62px 40px;
+  transition: fill 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  transform: translateX(0) translateY(0);
+}
+
+[data-theme="light"] .theme-toggle__moon {
+  fill: var(--bg);
+  transform: translateX(18px) translateY(-6px);
+  opacity: 0;
+}
+
+/* Stars */
+.theme-toggle__star {
+  fill: rgba(255, 255, 255, 0.55);
+  transform-origin: center;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle__star--1 { transition-delay: 0.05s; }
+.theme-toggle__star--2 { transition-delay: 0.1s; }
+.theme-toggle__star--3 { transition-delay: 0.15s; }
+.theme-toggle__star--4 { transition-delay: 0.08s; }
+.theme-toggle__star--5 { transition-delay: 0.12s; }
+
+[data-theme="light"] .theme-toggle__star {
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* Clouds */
+.theme-toggle__cloud circle {
+  fill: rgba(255, 255, 255, 0.08);
+  transition: fill 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+[data-theme="light"] .theme-toggle__cloud circle {
+  fill: #e5e7eb;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.theme-toggle__cloud--1 circle { transition-delay: 0.1s; }
+.theme-toggle__cloud--2 circle { transition-delay: 0.18s; }
+
+/* Twinkle animation for stars in dark mode */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.2; }
+}
+
+:root:not([data-theme="light"]) .theme-toggle__star--1 { animation: twinkle 3s ease-in-out infinite; }
+:root:not([data-theme="light"]) .theme-toggle__star--2 { animation: twinkle 3s ease-in-out infinite 0.6s; }
+:root:not([data-theme="light"]) .theme-toggle__star--3 { animation: twinkle 3s ease-in-out infinite 1.2s; }
+:root:not([data-theme="light"]) .theme-toggle__star--4 { animation: twinkle 3s ease-in-out infinite 0.9s; }
+:root:not([data-theme="light"]) .theme-toggle__star--5 { animation: twinkle 3s ease-in-out infinite 1.8s; }
+
+/* ══════════════════════════════════════════════
    NAVBAR — Animated pill indicator
    Uses CSS anchor positioning + mix-blend-mode
    ══════════════════════════════════════════════ */
@@ -40,7 +210,7 @@ body.overlay-mode {
 
 .nav-pill-list a {
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
   display: inline-block;
   padding: 0 0.2rem;
   font-size: 13px;
@@ -61,7 +231,7 @@ body.overlay-mode {
 }
 
 .nav-pill-list a[data-active] {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .nav-pill-list a[data-active] span {
@@ -120,7 +290,8 @@ body.overlay-mode {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 50% at 50% 30%, rgba(145, 70, 255, 0.08), transparent 70%);
+  background: radial-gradient(ellipse 80% 50% at 50% 30%, var(--glow-hero), transparent 70%);
+  transition: background 0.4s ease;
 }
 
 /* ── Showcase scroll area ── */
@@ -243,19 +414,19 @@ body.overlay-mode {
 }
 
 .rarity-sep {
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--text-faint);
   font-size: 0.8rem;
 }
 
 .rarity-drop {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .rarity-desc {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-tertiary);
   line-height: 1.4;
 }
 
@@ -370,7 +541,7 @@ body.overlay-mode {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--text-faint);
   z-index: 20;
   display: none;
   animation: scroll-bob 2s ease-in-out infinite, scroll-indicator-hide 1ms linear both;
@@ -557,17 +728,17 @@ body.overlay-mode {
   justify-content: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   margin-bottom: 0.45rem;
 }
 
 .mobile-sep {
-  color: rgba(255, 255, 255, 0.18);
+  color: var(--text-faint);
 }
 
 .mobile-rarity-info p {
   font-size: 0.76rem;
-  color: rgba(255, 255, 255, 0.28);
+  color: var(--text-tertiary);
   line-height: 1.55;
 }
 

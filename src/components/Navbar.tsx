@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 const TWITCH_ICON = (
   <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] fill-current">
@@ -29,7 +30,7 @@ export default function Navbar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <nav className="site-nav sticky top-0 z-50 bg-[#050508]/80 backdrop-blur-2xl border-b border-white/[0.04]">
+    <nav className="site-nav sticky top-0 z-50 backdrop-blur-2xl border-b" style={{ background: 'var(--bg-nav)', borderColor: 'var(--border)' }}>
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 h-14 flex items-center">
 
         {/* Logo — left */}
@@ -58,6 +59,7 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3 ml-auto md:ml-0 shrink-0">
+          <ThemeToggle />
           {isAuthenticated && user ? (
             <div className="relative">
               <button
