@@ -127,6 +127,14 @@ export default function Overlay() {
     }
   }, [current, visible]);
 
+  // Play TikTok video (timer-based since no JS API)
+  useEffect(() => {
+    if (!current || current.video_type !== "tiktok" || !visible) return;
+    const duration = (current.duration_seconds || 15) * 1000;
+    const timer = setTimeout(finishCurrent, duration);
+    return () => clearTimeout(timer);
+  }, [current, visible, finishCurrent]);
+
   // Play YouTube video
   useEffect(() => {
     if (!current || current.video_type !== "youtube" || !visible) return;
@@ -229,6 +237,15 @@ export default function Overlay() {
                 autoPlay
                 playsInline
               />
+            ) : current.video_type === "tiktok" ? (
+              <div className="w-full bg-black aspect-[9/16]">
+                <iframe
+                  src={`https://www.tiktok.com/embed/v2/${current.youtube_id}?lang=fr&autoplay=1`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
             ) : (
               <div
                 className={`w-full bg-black ${

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { submitLiveVideo, submitYoutubeVideo, getVideoUrl } from "../api";
+import { submitLiveVideo, submitYoutubeVideo, submitTiktokVideo, getVideoUrl } from "../api";
 import { supabase } from "../lib/supabase";
 import type { LiveSubmission } from "../types";
 
@@ -27,6 +27,16 @@ function isYoutubeShort(url: string): boolean {
   return /youtube\.com\/shorts\//.test(url);
 }
 
+function extractTiktokId(url: string): string | null {
+  // Full URL: https://www.tiktok.com/@user/video/7123456789012345678
+  const fullMatch = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+  if (fullMatch) return fullMatch[1];
+  // Photo format: https://www.tiktok.com/@user/photo/7123456789012345678
+  const photoMatch = url.match(/tiktok\.com\/@[^/]+\/photo\/(\d+)/);
+  if (photoMatch) return photoMatch[1];
+  return null;
+}
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
@@ -35,7 +45,11 @@ function formatTime(seconds: number): string {
 
 export default function LiveChat() {
   const { user, isAuthenticated, login } = useAuth();
-  const [mode, setMode] = useState<"upload" | "youtube">("youtube");
+  const [mode, setMode] = useState<"upload" | "youtube" | "tiktok">("youtube");
+
+  // TikTok state
+  const [tkUrl, setTkUrl] = useState("");
+  const [tkId, setTkId] = useState<string | null>(null);
 
   // Upload state
   const [file, setFile] = useState<File | null>(null);
@@ -235,6 +249,13 @@ export default function LiveChat() {
       if (mode === "upload") {
         if (!file) return;
         await submitLiveVideo(file, message, duration);
+      } else if (mode === "tiktok") {
+        if (!tkId) {
+          setError("Lien TikTok invalide");
+          setSending(false);
+          return;
+        }
+        await submitTiktokVideo(tkId, message, 15);
       } else {
         if (!ytId) {
           setError("Lien YouTube invalide");
@@ -263,6 +284,8 @@ export default function LiveChat() {
       setYtId(null);
       setYtStart(null);
       setYtEnd(null);
+      setTkUrl("");
+      setTkId(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'envoi");
@@ -296,8 +319,8 @@ export default function LiveChat() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-black mb-2">Live Chat</h1>
-        <p className="text-gray-400 text-sm">
+        <h1 className="text-4xl font-black mb-2">Live Chat</h1>
+        <p className="text-gray-400 text-base">
           Envoie une vidéo + un message qui s'afficheront en direct sur le
           stream
         </p>
@@ -310,33 +333,87 @@ export default function LiveChat() {
             setMode("youtube");
             setError("");
           }}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex-1 py-3 rounded-lg text-base font-medium transition-colors ${
             mode === "youtube"
               ? "bg-red-500/20 text-red-400"
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
-          Lien YouTube
+          YouTube
+        </button>
+        <button
+          onClick={() => {
+            setMode("tiktok");
+            setError("");
+          }}
+          className={`flex-1 py-3 rounded-lg text-base font-medium transition-colors ${
+            mode === "tiktok"
+              ? "bg-cyan-500/20 text-cyan-400"
+              : "text-gray-400 hover:text-gray-200"
+          }`}
+        >
+          TikTok
         </button>
         <button
           onClick={() => {
             setMode("upload");
             setError("");
           }}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex-1 py-3 rounded-lg text-base font-medium transition-colors ${
             mode === "upload"
               ? "bg-twitch/20 text-twitch"
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
-          Upload video
+          Upload
         </button>
       </div>
 
       <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 space-y-5">
-        {mode === "upload" ? (
+        {mode === "tiktok" ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-base font-medium text-gray-300 mb-2">
+                Lien TikTok
+              </label>
+              <input
+                type="text"
+                value={tkUrl}
+                onChange={(e) => {
+                  setTkUrl(e.target.value);
+                  setTkId(extractTiktokId(e.target.value));
+                  setError("");
+                }}
+                placeholder="https://www.tiktok.com/@user/video/..."
+                className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+              />
+            </div>
+
+            {tkId && (
+              <div className="space-y-3">
+                <div className="rounded-xl overflow-hidden bg-black mx-auto w-[325px]">
+                  <iframe
+                    src={`https://www.tiktok.com/embed/v2/${tkId}?lang=fr`}
+                    className="w-[325px] h-[578px] border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <p className="text-center text-gray-400 text-sm">
+                  La video sera diffusee en format vertical (15 sec)
+                </p>
+              </div>
+            )}
+
+            {tkUrl && !tkId && (
+              <p className="text-red-400 text-sm">
+                Lien TikTok invalide. Utilise le lien complet (pas le lien raccourci vm.tiktok.com).
+              </p>
+            )}
+          </div>
+        ) : mode === "upload" ? (
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-base font-medium text-gray-300 mb-2">
               Ta video (15 sec max)
             </label>
             {!preview ? (
@@ -558,6 +635,7 @@ export default function LiveChat() {
           disabled={
             (mode === "upload" && !file) ||
             (mode === "youtube" && !ytId) ||
+            (mode === "tiktok" && !tkId) ||
             sending
           }
           className="w-full py-3.5 bg-twitch hover:bg-twitch-dark disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
@@ -591,6 +669,10 @@ export default function LiveChat() {
                     alt=""
                     className="w-20 h-14 rounded-lg object-cover"
                   />
+                ) : s.video_type === "tiktok" ? (
+                  <div className="w-20 h-14 rounded-lg bg-gray-800 flex items-center justify-center text-2xl">
+                    🎵
+                  </div>
                 ) : (
                   <video
                     src={getVideoUrl(s.video_path)}
@@ -603,7 +685,7 @@ export default function LiveChat() {
                     {s.message || "(pas de message)"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {s.video_type === "youtube" ? "YouTube" : "Upload"} —{" "}
+                    {s.video_type === "youtube" ? "YouTube" : s.video_type === "tiktok" ? "TikTok" : "Upload"} —{" "}
                     {new Date(s.created_at).toLocaleString("fr-FR")}
                   </p>
                 </div>

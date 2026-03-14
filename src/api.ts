@@ -210,6 +210,39 @@ export const submitYoutubeVideo = async (
   if (error) throw new Error(error.message);
 };
 
+export const submitTiktokVideo = async (
+  tiktokId: string,
+  message: string,
+  durationSeconds: number = 15,
+): Promise<void> => {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("auth_id", authUser.id)
+    .single();
+  if (!profile) throw new Error("Profil introuvable");
+
+  if (durationSeconds < 1 || durationSeconds > 15) throw new Error("Durée entre 1 et 15 secondes");
+
+  const { error } = await supabase.from("live_submissions").insert({
+    username: profile.username,
+    video_path: "",
+    message: message.trim(),
+    duration_seconds: durationSeconds,
+    video_type: "tiktok",
+    youtube_id: tiktokId,
+    start_seconds: 0,
+    end_seconds: durationSeconds,
+    is_vertical: true,
+  });
+  if (error) throw new Error(error.message);
+};
+
 export const getVideoUrl = (path: string): string => {
   const { data } = supabase.storage.from("live-videos").getPublicUrl(path);
   return data.publicUrl;

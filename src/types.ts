@@ -86,7 +86,7 @@ export interface LiveSubmission {
   duration_seconds: number;
   played: boolean;
   created_at: string;
-  video_type: "upload" | "youtube";
+  video_type: "upload" | "youtube" | "tiktok";
   youtube_id: string | null;
   start_seconds: number;
   end_seconds: number;
