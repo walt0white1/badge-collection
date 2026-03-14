@@ -381,7 +381,8 @@ body.overlay-mode {
     background: rgba(255, 255, 255, 0.08);
   }
   [data-theme="light"] .nav-pill-list a[data-active] span {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(145, 70, 255, 0.12);
+    box-shadow: 0 0 0 1px rgba(145, 70, 255, 0.2);
   }
 }
 
@@ -404,13 +405,18 @@ body.overlay-mode {
   background: rgba(0, 0, 0, 0.06) !important;
 }
 
-/* Pill (::after) uses mix-blend-mode: difference — works on light too (produces dark pill).
-   But bump text-muted so nav labels are readable */
+/* Pill ::after — use purple tint instead of difference blend in light mode */
+[data-theme="light"] .nav-pill-list::after {
+  background: rgba(145, 70, 255, 0.12);
+  mix-blend-mode: normal;
+  box-shadow: 0 0 0 1px rgba(145, 70, 255, 0.2);
+}
+
 [data-theme="light"] .nav-pill-list a {
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.45);
 }
 [data-theme="light"] .nav-pill-list a[data-active] {
-  color: var(--text-primary);
+  color: #9146FF;
 }
 
 /* ══════════════════════════════════════════════
