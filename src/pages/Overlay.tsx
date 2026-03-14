@@ -242,7 +242,7 @@ export default function Overlay() {
 
           {/* Message - below video */}
           {current.message && (
-            <p className="text-white text-2xl font-semibold text-center max-w-[90vw] drop-shadow-lg">
+            <p className="text-white text-4xl font-semibold text-center max-w-[90vw] drop-shadow-lg">
               {current.message}
             </p>
           )}
