@@ -37,34 +37,53 @@ function extractTiktokIdSync(url: string): string | null {
   return null;
 }
 
-function isTiktokShortUrl(url: string): boolean {
-  return /vm\.tiktok\.com|tiktok\.com\/t\//.test(url);
+function isTiktokUrl(url: string): boolean {
+  return /tiktok\.com/.test(url);
 }
 
-async function resolveTiktokId(url: string): Promise<string | null> {
-  // Try direct extraction first
-  const direct = extractTiktokIdSync(url);
-  if (direct) return direct;
+interface TiktokInfo {
+  id: string;
+  title: string;
+  author: string;
+  thumbnail: string;
+}
 
-  // For shortened URLs, use TikTok oEmbed API
-  if (isTiktokShortUrl(url)) {
-    try {
-      const res = await fetch(
-        `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      // The html field contains a link with the full URL
-      const htmlMatch = data.html?.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
-      if (htmlMatch) return htmlMatch[1];
-      // Also try thumbnail_url which contains the video ID
-      const thumbMatch = data.thumbnail_url?.match(/\/(\d{15,})[\/-]/);
-      if (thumbMatch) return thumbMatch[1];
-    } catch {
-      return null;
+async function resolveTiktok(url: string): Promise<TiktokInfo | null> {
+  // Try direct extraction first
+  const directId = extractTiktokIdSync(url);
+
+  try {
+    // Use oEmbed API for all TikTok URLs (full + short)
+    const tiktokUrl = directId
+      ? `https://www.tiktok.com/@_/video/${directId}`
+      : url;
+    const res = await fetch(
+      `https://www.tiktok.com/oembed?url=${encodeURIComponent(tiktokUrl)}`
+    );
+    if (!res.ok) return directId ? { id: directId, title: "", author: "", thumbnail: "" } : null;
+    const data = await res.json();
+
+    // Extract video ID from html if we don't have it yet
+    let videoId = directId;
+    if (!videoId) {
+      const htmlMatch = data.html?.match(/tiktok\.com\/@[^"]+\/video\/(\d+)/);
+      if (htmlMatch) videoId = htmlMatch[1];
+      if (!videoId) {
+        const thumbMatch = data.thumbnail_url?.match(/\/(\d{15,})[\/-]/);
+        if (thumbMatch) videoId = thumbMatch[1];
+      }
     }
+    if (!videoId) return null;
+
+    return {
+      id: videoId,
+      title: data.title || "",
+      author: data.author_name || "",
+      thumbnail: data.thumbnail_url || "",
+    };
+  } catch {
+    return directId ? { id: directId, title: "", author: "", thumbnail: "" } : null;
   }
-  return null;
 }
 
 function formatTime(seconds: number): string {
@@ -79,7 +98,7 @@ export default function LiveChat() {
 
   // TikTok state
   const [tkUrl, setTkUrl] = useState("");
-  const [tkId, setTkId] = useState<string | null>(null);
+  const [tkInfo, setTkInfo] = useState<TiktokInfo | null>(null);
   const [tkLoading, setTkLoading] = useState(false);
 
   // Upload state
@@ -281,12 +300,12 @@ export default function LiveChat() {
         if (!file) return;
         await submitLiveVideo(file, message, duration);
       } else if (mode === "tiktok") {
-        if (!tkId) {
+        if (!tkInfo) {
           setError("Lien TikTok invalide");
           setSending(false);
           return;
         }
-        await submitTiktokVideo(tkId, message, 15);
+        await submitTiktokVideo(tkInfo.id, message, 15);
       } else {
         if (!ytId) {
           setError("Lien YouTube invalide");
@@ -316,7 +335,7 @@ export default function LiveChat() {
       setYtStart(null);
       setYtEnd(null);
       setTkUrl("");
-      setTkId(null);
+      setTkInfo(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'envoi");
@@ -414,22 +433,14 @@ export default function LiveChat() {
                   const val = e.target.value;
                   setTkUrl(val);
                   setError("");
-                  setTkId(null);
+                  setTkInfo(null);
 
                   if (!val.trim()) return;
 
-                  // Try sync first (full URL)
-                  const syncId = extractTiktokIdSync(val);
-                  if (syncId) {
-                    setTkId(syncId);
-                    return;
-                  }
-
-                  // Try async (shortened URL)
-                  if (isTiktokShortUrl(val)) {
+                  if (isTiktokUrl(val)) {
                     setTkLoading(true);
-                    const resolved = await resolveTiktokId(val);
-                    setTkId(resolved);
+                    const info = await resolveTiktok(val);
+                    setTkInfo(info);
                     setTkLoading(false);
                   }
                 }}
@@ -438,30 +449,41 @@ export default function LiveChat() {
               />
             </div>
 
-            {tkId && (
-              <div className="space-y-3">
-                <div className="rounded-xl overflow-hidden bg-black mx-auto w-[325px]">
-                  <iframe
-                    src={`https://www.tiktok.com/embed/v2/${tkId}?lang=fr`}
-                    className="w-[325px] h-[578px] border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                <p className="text-center text-gray-400 text-sm">
-                  La video sera diffusee en format vertical (15 sec)
-                </p>
-              </div>
-            )}
-
             {tkLoading && (
-              <div className="flex items-center gap-2 text-cyan-400 text-sm">
+              <div className="flex items-center gap-2 justify-center text-cyan-400 text-sm py-6">
                 <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
                 Resolution du lien...
               </div>
             )}
 
-            {tkUrl && !tkId && !tkLoading && (
+            {tkInfo && (
+              <div className="bg-gray-800/40 rounded-xl p-4 flex gap-4 items-center">
+                {tkInfo.thumbnail && (
+                  <img
+                    src={tkInfo.thumbnail}
+                    alt=""
+                    className="w-24 h-32 rounded-lg object-cover flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-cyan-400 text-sm font-semibold">TikTok</span>
+                    <span className="text-green-400 text-xs bg-green-400/10 px-2 py-0.5 rounded-full">Pret</span>
+                  </div>
+                  {tkInfo.author && (
+                    <p className="text-white font-medium text-sm">@{tkInfo.author}</p>
+                  )}
+                  {tkInfo.title && (
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">{tkInfo.title}</p>
+                  )}
+                  <p className="text-gray-500 text-xs mt-2">
+                    Format vertical — 15 sec sur le stream
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {tkUrl && !tkInfo && !tkLoading && (
               <p className="text-red-400 text-sm">
                 Lien TikTok invalide. Colle un lien TikTok valide.
               </p>
@@ -691,7 +713,7 @@ export default function LiveChat() {
           disabled={
             (mode === "upload" && !file) ||
             (mode === "youtube" && !ytId) ||
-            (mode === "tiktok" && !tkId) ||
+            (mode === "tiktok" && !tkInfo) ||
             sending
           }
           className="w-full py-3.5 bg-twitch hover:bg-twitch-dark disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
