@@ -3,8 +3,15 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalStats } from "../api";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../context/ThemeContext";
 import { RARITY_COLORS, RARITY_POINTS, RARITY_ORDER } from "../types";
 import { getBadgeImage } from "../badgeImages";
+
+// COMMON (#d9d9d9) is invisible on white bg — use a darker shade in light mode
+const RARITY_COLORS_LIGHT: Record<string, string> = {
+  ...RARITY_COLORS,
+  COMMON: "#888888",
+};
 
 const BADGE_INFO: Record<string, { name: string; desc: string; drop: string }> = {
   COMMON: {
@@ -35,6 +42,8 @@ const BADGE_INFO: Record<string, { name: string; desc: string; drop: string }> =
 };
 
 function MobileShowcase() {
+  const { isDark } = useTheme();
+  const colors = isDark ? RARITY_COLORS : RARITY_COLORS_LIGHT;
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
   const touchX = useRef(0);
@@ -68,7 +77,7 @@ function MobileShowcase() {
   }, [idx]);
 
   const rarity = RARITY_ORDER[idx];
-  const color = RARITY_COLORS[rarity];
+  const color = colors[rarity];
   const info = BADGE_INFO[rarity];
   const pts = RARITY_POINTS[rarity];
 
@@ -147,6 +156,8 @@ function MobileShowcase() {
 
 export default function Home() {
   const { isAuthenticated, login } = useAuth();
+  const { isDark } = useTheme();
+  const colors = isDark ? RARITY_COLORS : RARITY_COLORS_LIGHT;
   const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: fetchGlobalStats });
 
   return (
@@ -182,7 +193,7 @@ export default function Home() {
         <div className="rarity-infos">
           {RARITY_ORDER.map((r) => {
             const info = BADGE_INFO[r];
-            const color = RARITY_COLORS[r];
+            const color = colors[r];
             const pts = RARITY_POINTS[r];
             return (
               <div key={r} className="rarity-info-slide">
@@ -256,13 +267,13 @@ export default function Home() {
                       src={getBadgeImage(r, "saison1")}
                       alt={`S1 ${r}`}
                       className="w-24 sm:w-32 md:w-40 lg:w-44 aspect-square object-contain transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-3"
-                      style={{ filter: `drop-shadow(0 0 30px ${RARITY_COLORS[r]}15)` }}
+                      style={{ filter: `drop-shadow(0 0 30px ${colors[r]}15)` }}
                       draggable={false}
                     />
                   </div>
                   <p
                     className="mt-2 text-[9px] sm:text-[11px] font-black tracking-[0.15em] uppercase transition-opacity duration-300 opacity-40 group-hover:opacity-100"
-                    style={{ color: RARITY_COLORS[r] }}
+                    style={{ color: colors[r] }}
                   >
                     {r}
                   </p>

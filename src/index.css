@@ -37,7 +37,7 @@
   --text-secondary: #1d1d1f;
   --text-tertiary: #6e6e73;
   --text-muted: rgba(0, 0, 0, 0.45);
-  --text-faint: rgba(0, 0, 0, 0.1);
+  --text-faint: rgba(0, 0, 0, 0.35);
   --border: rgba(0, 0, 0, 0.06);
   --border-subtle: rgba(0, 0, 0, 0.08);
   --glow-hero: rgba(145, 70, 255, 0.06);
@@ -180,6 +180,12 @@ body.overlay-mode {
 [data-theme="light"] .scroll-indicator {
   color: rgba(0, 0, 0, 0.3);
 }
+
+/* ── Opacity fixes (low-opacity elements too faint on white) ── */
+[data-theme="light"] .opacity-40 {
+  opacity: 0.7 !important;
+}
+
 
 @layer utilities {
   .text-gradient {
@@ -871,7 +877,7 @@ body.overlay-mode {
   height: 6px;
   width: 6px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--text-faint);
   border: none;
   cursor: pointer;
   padding: 0;
