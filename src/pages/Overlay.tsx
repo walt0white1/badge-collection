@@ -194,9 +194,9 @@ export default function Overlay() {
         }`}
       >
         <div
-          className={`relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60 ${
+          className={`relative rounded-2xl shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60 ${
             current.is_vertical
-              ? "w-[280px] max-h-[90vh]"
+              ? "w-[300px]"
               : "max-w-[700px] w-[90vw]"
           }`}
         >
@@ -206,14 +206,14 @@ export default function Overlay() {
               ref={videoRef}
               src={getVideoUrl(current.video_path)}
               onEnded={finishCurrent}
-              className="w-full max-h-[450px] object-contain bg-black"
+              className="w-full max-h-[450px] object-contain bg-black rounded-t-2xl"
               autoPlay
               playsInline
             />
           ) : (
             <div
-              className={`w-full bg-black ${
-                current.is_vertical ? "aspect-[9/16]" : "aspect-video"
+              className={`w-full bg-black overflow-hidden rounded-t-2xl ${
+                current.is_vertical ? "aspect-[9/16] max-h-[70vh]" : "aspect-video"
               }`}
             >
               <div ref={ytContainerRef} className="w-full h-full" />
@@ -223,7 +223,7 @@ export default function Overlay() {
           {/* Message bar */}
           {current.message && (
             <div
-              className={`bg-gray-900/95 border-t border-gray-800/60 ${
+              className={`bg-gray-900/95 border-t border-gray-800/60 rounded-b-2xl ${
                 current.is_vertical ? "px-4 py-3" : "px-6 py-5"
               }`}
             >
