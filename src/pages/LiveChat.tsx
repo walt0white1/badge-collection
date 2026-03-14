@@ -27,13 +27,43 @@ function isYoutubeShort(url: string): boolean {
   return /youtube\.com\/shorts\//.test(url);
 }
 
-function extractTiktokId(url: string): string | null {
+function extractTiktokIdSync(url: string): string | null {
   // Full URL: https://www.tiktok.com/@user/video/7123456789012345678
   const fullMatch = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
   if (fullMatch) return fullMatch[1];
   // Photo format: https://www.tiktok.com/@user/photo/7123456789012345678
   const photoMatch = url.match(/tiktok\.com\/@[^/]+\/photo\/(\d+)/);
   if (photoMatch) return photoMatch[1];
+  return null;
+}
+
+function isTiktokShortUrl(url: string): boolean {
+  return /vm\.tiktok\.com|tiktok\.com\/t\//.test(url);
+}
+
+async function resolveTiktokId(url: string): Promise<string | null> {
+  // Try direct extraction first
+  const direct = extractTiktokIdSync(url);
+  if (direct) return direct;
+
+  // For shortened URLs, use TikTok oEmbed API
+  if (isTiktokShortUrl(url)) {
+    try {
+      const res = await fetch(
+        `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      // The html field contains a link with the full URL
+      const htmlMatch = data.html?.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+      if (htmlMatch) return htmlMatch[1];
+      // Also try thumbnail_url which contains the video ID
+      const thumbMatch = data.thumbnail_url?.match(/\/(\d{15,})[\/-]/);
+      if (thumbMatch) return thumbMatch[1];
+    } catch {
+      return null;
+    }
+  }
   return null;
 }
 
@@ -50,6 +80,7 @@ export default function LiveChat() {
   // TikTok state
   const [tkUrl, setTkUrl] = useState("");
   const [tkId, setTkId] = useState<string | null>(null);
+  const [tkLoading, setTkLoading] = useState(false);
 
   // Upload state
   const [file, setFile] = useState<File | null>(null);
@@ -379,12 +410,30 @@ export default function LiveChat() {
               <input
                 type="text"
                 value={tkUrl}
-                onChange={(e) => {
-                  setTkUrl(e.target.value);
-                  setTkId(extractTiktokId(e.target.value));
+                onChange={async (e) => {
+                  const val = e.target.value;
+                  setTkUrl(val);
                   setError("");
+                  setTkId(null);
+
+                  if (!val.trim()) return;
+
+                  // Try sync first (full URL)
+                  const syncId = extractTiktokIdSync(val);
+                  if (syncId) {
+                    setTkId(syncId);
+                    return;
+                  }
+
+                  // Try async (shortened URL)
+                  if (isTiktokShortUrl(val)) {
+                    setTkLoading(true);
+                    const resolved = await resolveTiktokId(val);
+                    setTkId(resolved);
+                    setTkLoading(false);
+                  }
                 }}
-                placeholder="https://www.tiktok.com/@user/video/..."
+                placeholder="https://www.tiktok.com/@user/video/... ou vm.tiktok.com/..."
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
               />
             </div>
@@ -405,9 +454,16 @@ export default function LiveChat() {
               </div>
             )}
 
-            {tkUrl && !tkId && (
+            {tkLoading && (
+              <div className="flex items-center gap-2 text-cyan-400 text-sm">
+                <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                Resolution du lien...
+              </div>
+            )}
+
+            {tkUrl && !tkId && !tkLoading && (
               <p className="text-red-400 text-sm">
-                Lien TikTok invalide. Utilise le lien complet (pas le lien raccourci vm.tiktok.com).
+                Lien TikTok invalide. Colle un lien TikTok valide.
               </p>
             )}
           </div>
