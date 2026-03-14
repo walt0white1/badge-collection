@@ -77,6 +77,12 @@ body {
 
 body.overlay-mode {
   background: transparent !important;
+  overflow: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body.overlay-mode::-webkit-scrollbar {
+  display: none !important;
 }
 
 #root {

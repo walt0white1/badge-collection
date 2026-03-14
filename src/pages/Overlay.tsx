@@ -24,21 +24,17 @@ declare global {
   }
 }
 
-function TiktokOverlay({ videoId }: { videoId: string }) {
-  const [thumb, setThumb] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
+function TiktokOverlay({ metaJson }: { metaJson: string }) {
+  let thumb = "";
+  let title = "";
+  let author = "";
 
-  useEffect(() => {
-    fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(`https://www.tiktok.com/@_/video/${videoId}`)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setThumb(data.thumbnail_url || "");
-        setTitle(data.title || "");
-        setAuthor(data.author_name || "");
-      })
-      .catch(() => {});
-  }, [videoId]);
+  try {
+    const meta = JSON.parse(metaJson);
+    thumb = meta.thumbnail || "";
+    title = meta.title || "";
+    author = meta.author || "";
+  } catch {}
 
   return (
     <div className="w-full h-full relative">
@@ -46,7 +42,9 @@ function TiktokOverlay({ videoId }: { videoId: string }) {
         <img src={thumb} alt="" className="w-full h-full object-cover" />
       ) : (
         <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-          <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+          <svg viewBox="0 0 24 24" className="w-16 h-16 fill-cyan-400">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.81a8.23 8.23 0 004.76 1.5V6.88a4.85 4.85 0 01-1-.19z"/>
+          </svg>
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -278,7 +276,7 @@ export default function Overlay() {
               />
             ) : current.video_type === "tiktok" ? (
               <div className="w-full bg-black aspect-[9/16] relative flex items-center justify-center">
-                <TiktokOverlay videoId={current.youtube_id || ""} />
+                <TiktokOverlay metaJson={current.video_path || "{}"} />
               </div>
             ) : (
               <div

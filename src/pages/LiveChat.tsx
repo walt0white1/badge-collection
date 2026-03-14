@@ -305,7 +305,7 @@ export default function LiveChat() {
           setSending(false);
           return;
         }
-        await submitTiktokVideo(tkInfo.id, message, 15);
+        await submitTiktokVideo(tkInfo.id, message, 15, tkInfo.thumbnail, tkInfo.author, tkInfo.title);
       } else {
         if (!ytId) {
           setError("Lien YouTube invalide");

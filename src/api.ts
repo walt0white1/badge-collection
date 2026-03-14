@@ -214,6 +214,9 @@ export const submitTiktokVideo = async (
   tiktokId: string,
   message: string,
   durationSeconds: number = 15,
+  thumbnailUrl: string = "",
+  author: string = "",
+  title: string = "",
 ): Promise<void> => {
   const {
     data: { user: authUser },
@@ -229,9 +232,12 @@ export const submitTiktokVideo = async (
 
   if (durationSeconds < 1 || durationSeconds > 15) throw new Error("Durée entre 1 et 15 secondes");
 
+  // Store thumbnail in video_path so overlay doesn't need to fetch from tiktok.com
+  const tiktokMeta = JSON.stringify({ thumbnail: thumbnailUrl, author, title });
+
   const { error } = await supabase.from("live_submissions").insert({
     username: profile.username,
-    video_path: "",
+    video_path: tiktokMeta,
     message: message.trim(),
     duration_seconds: durationSeconds,
     video_type: "tiktok",
