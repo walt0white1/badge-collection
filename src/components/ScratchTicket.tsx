@@ -29,6 +29,8 @@ export default function ScratchTicket({ ticket, onScratched, onDismiss }: Props)
   const [scratchParticles, setScratchParticles] = useState<ScratchDust[]>([]);
   const isDrawing = useRef(false);
   const hasRevealed = useRef(false);
+  const hasDismissed = useRef(false);
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const moveCount = useRef(0);
   const dustId = useRef(0);
@@ -210,9 +212,18 @@ export default function ScratchTicket({ ticket, onScratched, onDismiss }: Props)
   }, [ticket.id, onScratched]);
 
   const handleDismiss = useCallback(() => {
+    if (hasDismissed.current) return;
+    hasDismissed.current = true;
     setDismissing(true);
-    setTimeout(() => onDismiss(), 400);
+    dismissTimer.current = setTimeout(() => onDismiss(), 400);
   }, [onDismiss]);
+
+  // Cleanup timer on unmount to prevent ghost calls
+  useEffect(() => {
+    return () => {
+      if (dismissTimer.current) clearTimeout(dismissTimer.current);
+    };
+  }, []);
 
   const handleMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
