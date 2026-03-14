@@ -34,7 +34,6 @@ export default function MyCollection() {
   const [revealingAll, setRevealingAll] = useState(false);
   const [bulkResults, setBulkResults] = useState<{ rarity: string; season: string }[]>([]);
   const [showSummary, setShowSummary] = useState(false);
-  const [rewardsExpanded, setRewardsExpanded] = useState(false);
 
   const { data: ticketAvailable, refetch: refetchTicket } = useQuery({
     queryKey: ["canClaimTicket"],
@@ -263,7 +262,7 @@ export default function MyCollection() {
           </div>
 
           {/* Desktop: 3-col layout / Mobile: stacked */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-10">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16 xl:gap-20">
 
             {/* Col 1: Scratch card */}
             <div className="flex flex-col items-center gap-5 shrink-0">
@@ -363,7 +362,7 @@ export default function MyCollection() {
             </div>
 
             {/* Col 2: Session results */}
-            <div className="w-full lg:w-56 flex flex-col items-center lg:items-stretch shrink-0">
+            <div className="w-full lg:w-48 flex flex-col items-center lg:items-stretch shrink-0">
               {sessionResults.length > 0 && (
                 <div
                   className="rounded-xl p-4 space-y-3"
@@ -436,127 +435,77 @@ export default function MyCollection() {
             </div>
 
             {/* Col 3: Possible rewards */}
-            <div className="w-full lg:w-64 flex flex-col items-center lg:items-stretch shrink-0">
-              {(() => {
-                const allRewards = [
-                  { rarity: "COMMON", pct: "40%" },
-                  { rarity: "RARE", pct: "30%" },
-                  { rarity: "EPIC", pct: "18%" },
-                  { rarity: "LEGENDARY", pct: "9%" },
-                  { rarity: "UNIQUE", pct: "3%" },
-                ] as const;
-                const visible = rewardsExpanded ? allRewards : allRewards.slice(0, 3);
-                const hiddenCount = allRewards.length - 3;
+            <div className="w-full lg:w-52 flex flex-col items-center lg:items-stretch shrink-0">
+              <div className="space-y-3">
+                <p
+                  className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+                  style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                >
+                  Drops possibles
+                </p>
 
-                return (
-                  <div className="space-y-1.5">
-                    <p
-                      className="text-[10px] font-bold tracking-[0.15em] uppercase px-1 mb-2"
-                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
-                    >
-                      Recompenses possibles
-                    </p>
-
-                    {visible.map(({ rarity, pct }) => {
-                      const color = RARITY_COLORS[rarity];
-                      const pts = RARITY_POINTS[rarity];
-                      const img = getBadgeImage(rarity, "saison2");
-                      return (
-                        <div
-                          key={rarity}
-                          className="flex items-center gap-3 py-2 px-1"
-                          style={{
-                            borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
-                          }}
-                        >
-                          <div className="relative shrink-0">
-                            <div
-                              className="absolute inset-0 rounded-full blur-xl opacity-15"
-                              style={{ background: color, transform: "scale(1.5)" }}
-                            />
-                            <img
-                              src={img}
-                              alt={rarity}
-                              className="relative w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                              style={{ filter: `drop-shadow(0 2px 6px ${color}30)` }}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className="text-xs sm:text-sm font-black uppercase tracking-wide leading-tight"
-                              style={{ color }}
-                            >
-                              {rarity}
-                            </p>
-                            <p
-                              className="text-[10px] mt-0.5"
-                              style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
-                            >
-                              +{pts} pt{pts > 1 ? "s" : ""}
-                            </p>
-                          </div>
-                          <span
-                            className="text-base sm:text-lg font-black tabular-nums shrink-0"
-                            style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)" }}
-                          >
-                            {pct}
-                          </span>
-                        </div>
-                      );
-                    })}
-
-                    <button
-                      onClick={() => setRewardsExpanded(!rewardsExpanded)}
-                      className="flex items-center gap-1.5 px-1 py-1.5 text-[10px] font-medium transition-colors"
-                      style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                    >
-                      {rewardsExpanded ? "Voir moins" : `+${hiddenCount} autres`}
-                      <svg
-                        className="w-2.5 h-2.5 transition-transform duration-200"
-                        style={{ transform: rewardsExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                <div className="space-y-0">
+                  {([
+                    { rarity: "COMMON", pct: "40%" },
+                    { rarity: "RARE", pct: "30%" },
+                    { rarity: "EPIC", pct: "18%" },
+                    { rarity: "LEGENDARY", pct: "9%" },
+                    { rarity: "UNIQUE", pct: "3%" },
+                  ] as const).map(({ rarity, pct }) => {
+                    const color = RARITY_COLORS[rarity];
+                    return (
+                      <div
+                        key={rarity}
+                        className="flex items-center gap-3 py-2.5"
+                        style={{
+                          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                        }}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {rewardsExpanded && (
-                      <div className="pt-1 space-y-2">
-                        <p
-                          className="text-[10px] font-bold tracking-[0.15em] uppercase px-1"
-                          style={{ color: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }}
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ background: color, boxShadow: `0 0 6px ${color}40` }}
+                        />
+                        <span
+                          className="text-xs font-bold uppercase tracking-wide flex-1"
+                          style={{ color }}
                         >
-                          Bientot
-                        </p>
-                        {[
-                          { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
-                          { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
-                        ].map((reward) => (
-                          <div key={reward.label} className="flex items-center gap-2.5 px-1 opacity-35">
-                            <span className="text-sm">{reward.icon}</span>
-                            <div className="flex-1">
-                              <p
-                                className="text-xs font-medium"
-                                style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
-                              >
-                                {reward.label}
-                              </p>
-                              <p
-                                className="text-[10px]"
-                                style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
-                              >
-                                {reward.desc}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          {rarity}
+                        </span>
+                        <span
+                          className="text-xs tabular-nums font-semibold"
+                          style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)" }}
+                        >
+                          {pct}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                );
-              })()}
+                    );
+                  })}
+                </div>
+
+                {/* Future rewards teaser */}
+                <div className="pt-1 space-y-2">
+                  <p
+                    className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+                    style={{ color: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }}
+                  >
+                    Bientot
+                  </p>
+                  {[
+                    { icon: "🎁", label: "Sub gratuit" },
+                    { icon: "⭐", label: "VIP" },
+                  ].map((reward) => (
+                    <div key={reward.label} className="flex items-center gap-2.5 opacity-30">
+                      <span className="text-xs">{reward.icon}</span>
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)" }}
+                      >
+                        {reward.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
