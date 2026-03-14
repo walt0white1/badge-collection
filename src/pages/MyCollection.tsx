@@ -262,10 +262,10 @@ export default function MyCollection() {
             </span>
           </div>
 
-          {/* Desktop: 2-col layout / Mobile: stacked */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16">
+          {/* Desktop: 3-col layout / Mobile: stacked */}
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-10">
 
-            {/* Left: Scratch card */}
+            {/* Col 1: Scratch card */}
             <div className="flex flex-col items-center gap-5 shrink-0">
               <div className="relative w-52 sm:w-56 aspect-[3/4]">
                 {/* Stack cards behind */}
@@ -338,12 +338,32 @@ export default function MyCollection() {
                   </span>
                 </div>
               )}
+
+              {/* Claim button — below ticket */}
+              {ticketAvailable && (
+                <button
+                  onClick={handleClaim}
+                  disabled={claiming}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 hover:scale-[1.03]"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(145,70,255,0.15))",
+                    border: `1px solid ${isDark ? "rgba(234,179,8,0.2)" : "rgba(234,179,8,0.3)"}`,
+                    color: isDark ? "#fbbf24" : "#b45309",
+                  }}
+                >
+                  {claiming ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span>+</span>
+                  )}
+                  Reclamer un ticket
+                </button>
+              )}
+              {claimError && <p className="text-sm text-red-400">{claimError}</p>}
             </div>
 
-            {/* Right: Info + Session panel */}
-            <div className="w-full lg:w-[420px] flex flex-col items-center lg:items-stretch gap-6">
-
-              {/* Session results — appears when scratching */}
+            {/* Col 2: Session results */}
+            <div className="w-full lg:w-56 flex flex-col items-center lg:items-stretch shrink-0">
               {sessionResults.length > 0 && (
                 <div
                   className="rounded-xl p-4 space-y-3"
@@ -413,8 +433,10 @@ export default function MyCollection() {
                   )}
                 </div>
               )}
+            </div>
 
-              {/* Possible rewards — collapsible list */}
+            {/* Col 3: Possible rewards */}
+            <div className="w-full lg:w-64 flex flex-col items-center lg:items-stretch shrink-0">
               {(() => {
                 const allRewards = [
                   { rarity: "COMMON", pct: "40%" },
@@ -427,10 +449,10 @@ export default function MyCollection() {
                 const hiddenCount = allRewards.length - 3;
 
                 return (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <p
-                      className="text-xs font-bold tracking-[0.15em] uppercase px-1"
-                      style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
+                      className="text-[10px] font-bold tracking-[0.15em] uppercase px-1 mb-2"
+                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
                     >
                       Recompenses possibles
                     </p>
@@ -442,7 +464,7 @@ export default function MyCollection() {
                       return (
                         <div
                           key={rarity}
-                          className="flex items-center gap-4 py-2.5 px-1"
+                          className="flex items-center gap-3 py-2 px-1"
                           style={{
                             borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
                           }}
@@ -455,51 +477,42 @@ export default function MyCollection() {
                             <img
                               src={img}
                               alt={rarity}
-                              className="relative w-12 h-12 sm:w-14 sm:h-14 object-contain"
-                              style={{ filter: `drop-shadow(0 2px 8px ${color}30)` }}
+                              className="relative w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                              style={{ filter: `drop-shadow(0 2px 6px ${color}30)` }}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p
-                              className="text-sm sm:text-base font-black uppercase tracking-wide leading-tight"
+                              className="text-xs sm:text-sm font-black uppercase tracking-wide leading-tight"
                               style={{ color }}
                             >
                               {rarity}
                             </p>
                             <p
-                              className="text-xs mt-0.5"
-                              style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-                            >
-                              +{pts} pt{pts > 1 ? "s" : ""} par badge
-                            </p>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p
-                              className="text-lg sm:text-xl font-black tabular-nums leading-none"
-                              style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)" }}
-                            >
-                              {pct}
-                            </p>
-                            <p
                               className="text-[10px] mt-0.5"
                               style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
                             >
-                              de chance
+                              +{pts} pt{pts > 1 ? "s" : ""}
                             </p>
                           </div>
+                          <span
+                            className="text-base sm:text-lg font-black tabular-nums shrink-0"
+                            style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)" }}
+                          >
+                            {pct}
+                          </span>
                         </div>
                       );
                     })}
 
-                    {/* Expand / Collapse toggle */}
                     <button
                       onClick={() => setRewardsExpanded(!rewardsExpanded)}
-                      className="flex items-center gap-1.5 px-1 py-1.5 text-xs font-medium transition-colors"
-                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                      className="flex items-center gap-1.5 px-1 py-1.5 text-[10px] font-medium transition-colors"
+                      style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
                     >
                       {rewardsExpanded ? "Voir moins" : `+${hiddenCount} autres`}
                       <svg
-                        className="w-3 h-3 transition-transform duration-200"
+                        className="w-2.5 h-2.5 transition-transform duration-200"
                         style={{ transform: rewardsExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
                         fill="none"
                         stroke="currentColor"
@@ -509,12 +522,11 @@ export default function MyCollection() {
                       </svg>
                     </button>
 
-                    {/* Future rewards teaser — only when expanded */}
                     {rewardsExpanded && (
-                      <div className="pt-2 space-y-2.5">
+                      <div className="pt-1 space-y-2">
                         <p
                           className="text-[10px] font-bold tracking-[0.15em] uppercase px-1"
-                          style={{ color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
+                          style={{ color: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }}
                         >
                           Bientot
                         </p>
@@ -522,18 +534,18 @@ export default function MyCollection() {
                           { icon: "🎁", label: "Sub gratuit", desc: "1 mois offert" },
                           { icon: "⭐", label: "VIP", desc: "Acces VIP sur la chaine" },
                         ].map((reward) => (
-                          <div key={reward.label} className="flex items-center gap-3 px-1 opacity-40">
-                            <span className="text-base w-6 text-center">{reward.icon}</span>
+                          <div key={reward.label} className="flex items-center gap-2.5 px-1 opacity-35">
+                            <span className="text-sm">{reward.icon}</span>
                             <div className="flex-1">
                               <p
-                                className="text-sm font-medium"
-                                style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)" }}
+                                className="text-xs font-medium"
+                                style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
                               >
                                 {reward.label}
                               </p>
                               <p
-                                className="text-xs"
-                                style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
+                                className="text-[10px]"
+                                style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}
                               >
                                 {reward.desc}
                               </p>
@@ -545,29 +557,6 @@ export default function MyCollection() {
                   </div>
                 );
               })()}
-
-              {/* Claim button */}
-              {ticketAvailable && (
-                <button
-                  onClick={handleClaim}
-                  disabled={claiming}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 hover:scale-[1.03]"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(145,70,255,0.15))",
-                    border: `1px solid ${isDark ? "rgba(234,179,8,0.2)" : "rgba(234,179,8,0.3)"}`,
-                    color: isDark ? "#fbbf24" : "#b45309",
-                  }}
-                >
-                  {claiming ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span>+</span>
-                  )}
-                  Reclamer un ticket
-                </button>
-              )}
-
-              {claimError && <p className="text-sm text-red-400">{claimError}</p>}
             </div>
           </div>
         </div>
