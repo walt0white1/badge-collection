@@ -402,105 +402,192 @@ export default function MyCollection() {
       ) : null}
 
       {/* ── Session Summary Modal ── */}
-      {showSummary && sessionResults.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#1c1c1e] rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-[fadeIn_0.3s_ease-out]">
-            <div className="text-center">
-              <h3 className="text-xl font-black text-white">Pack Opening</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                {sessionResults.length} badge{sessionResults.length > 1 ? "s" : ""} revele{sessionResults.length > 1 ? "s" : ""}
-              </p>
-            </div>
+      {showSummary && sessionResults.length > 0 && (() => {
+        const totalPtsGained = sessionResults.reduce((sum, r) => sum + (RARITY_POINTS[r.rarity] || 0), 0);
+        // Group by rarity for a cleaner display
+        const grouped = sessionResults.reduce<Record<string, { count: number; season: string }>>((acc, r) => {
+          const key = `${r.rarity}-${r.season}`;
+          if (!acc[key]) acc[key] = { count: 0, season: r.season };
+          acc[key].count++;
+          return acc;
+        }, {});
+        // Sort by rarity tier (highest first)
+        const sortedGroups = Object.entries(grouped).sort((a, b) => {
+          const aIdx = RARITY_ORDER.indexOf(a[0].split("-")[0]);
+          const bIdx = RARITY_ORDER.indexOf(b[0].split("-")[0]);
+          return bIdx - aIdx;
+        });
+        // Best pull
+        const bestPull = [...sessionResults].sort((a, b) =>
+          RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity)
+        )[0];
 
-            <div className="flex flex-wrap justify-center gap-3">
-              {sessionResults.map((r, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/[0.06] animate-[badgePopIn_0.4s_ease-out_forwards]"
-                  style={{ animationDelay: `${i * 80}ms`, opacity: 0 }}
-                >
-                  <img
-                    src={getBadgeImage(r.rarity, r.season)}
-                    alt={r.rarity}
-                    className="w-16 h-16 object-contain"
-                    style={{ filter: `drop-shadow(0 0 10px ${RARITY_COLORS[r.rarity]}60)` }}
-                  />
-                  <span className="text-[10px] font-bold uppercase" style={{ color: RARITY_COLORS[r.rarity] }}>
-                    {r.rarity}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Points total */}
-            <div className="text-center space-y-1">
-              <span className="text-twitch font-black text-2xl">
-                +{sessionResults.reduce((sum, r) => sum + (RARITY_POINTS[r.rarity] || 0), 0)} pts
-              </span>
-              <p className="text-xs text-gray-600">ajoutes a ta collection</p>
-            </div>
-
-            <button
-              onClick={() => {
-                setShowSummary(false);
-                setBulkResults([]);
-                setSessionResults([]);
-                setCurrentIdx(0);
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: isDark ? "rgba(0,0,0,0.8)" : "rgba(0,0,0,0.5)", backdropFilter: "blur(12px)" }}
+          >
+            <div
+              className="relative rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden summary-modal-enter"
+              style={{
+                background: isDark
+                  ? "linear-gradient(180deg, #141416 0%, #0c0c0e 100%)"
+                  : "linear-gradient(180deg, #ffffff 0%, #f8f8fa 100%)",
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}`,
+                boxShadow: isDark
+                  ? "0 24px 80px rgba(0,0,0,0.6)"
+                  : "0 24px 80px rgba(0,0,0,0.15)",
               }}
-              className="w-full py-3 bg-twitch/20 hover:bg-twitch/30 border border-twitch/30 text-twitch text-sm font-semibold rounded-xl transition-colors"
             >
-              Fermer
-            </button>
-          </div>
+              {/* Ambient glow from best rarity */}
+              <div
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] rounded-full blur-[100px] pointer-events-none"
+                style={{ background: RARITY_COLORS[bestPull.rarity], opacity: isDark ? 0.08 : 0.05 }}
+              />
 
-          <style>{`
-            @keyframes fadeIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-            @keyframes badgePopIn { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
-          `}</style>
-        </div>
-      )}
+              <div className="relative z-10 px-6 sm:px-8 pt-8 pb-6 space-y-6">
+                {/* Header */}
+                <div className="text-center space-y-1">
+                  <p
+                    className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase"
+                    style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                  >
+                    {sessionResults.length} badge{sessionResults.length > 1 ? "s" : ""} revele{sessionResults.length > 1 ? "s" : ""}
+                  </p>
+                  <p
+                    className="text-3xl sm:text-4xl font-black tracking-tight"
+                    style={{ color: "#9146FF" }}
+                  >
+                    +{totalPtsGained}
+                    <span
+                      className="text-base sm:text-lg font-bold ml-1"
+                      style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                    >
+                      pts
+                    </span>
+                  </p>
+                </div>
+
+                {/* Badge list — grouped */}
+                <div className="space-y-2">
+                  {sortedGroups.map(([key, { count, season: s }], i) => {
+                    const rarity = key.split("-")[0];
+                    const color = RARITY_COLORS[rarity];
+                    const pts = RARITY_POINTS[rarity];
+                    return (
+                      <div
+                        key={key}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl summary-row-enter"
+                        style={{
+                          background: isDark ? `${color}08` : `${color}06`,
+                          border: `1px solid ${color}${isDark ? "12" : "18"}`,
+                          animationDelay: `${i * 60 + 100}ms`,
+                        }}
+                      >
+                        <img
+                          src={getBadgeImage(rarity, s)}
+                          alt={rarity}
+                          className="w-10 h-10 sm:w-12 sm:h-12 object-contain shrink-0"
+                          style={{ filter: `drop-shadow(0 2px 8px ${color}30)` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className="text-xs sm:text-sm font-bold uppercase tracking-wide"
+                            style={{ color }}
+                          >
+                            {rarity}
+                          </p>
+                          <p
+                            className="text-[10px] sm:text-xs"
+                            style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                          >
+                            {pts * count} pts
+                          </p>
+                        </div>
+                        <span
+                          className="text-lg sm:text-xl font-black tabular-nums"
+                          style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
+                        >
+                          x{count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Close */}
+                <button
+                  onClick={() => {
+                    setShowSummary(false);
+                    setBulkResults([]);
+                    setSessionResults([]);
+                    setCurrentIdx(0);
+                  }}
+                  className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02]"
+                  style={{
+                    background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+                    color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)",
+                  }}
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+
+            <style>{`
+              .summary-modal-enter {
+                animation: summaryIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+              }
+              .summary-row-enter {
+                opacity: 0;
+                animation: rowSlideIn 0.3s ease-out forwards;
+              }
+              @keyframes summaryIn {
+                0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+              }
+              @keyframes rowSlideIn {
+                0% { opacity: 0; transform: translateX(-8px); }
+                100% { opacity: 1; transform: translateX(0); }
+              }
+            `}</style>
+          </div>
+        );
+      })()}
 
       {/* ── Arcs ── */}
-      <div className="relative">
-        {/* Vertical line connecting arcs — desktop only */}
-        <div
-          className="hidden lg:block absolute left-[22px] top-0 bottom-0 w-px pointer-events-none"
-          style={{ background: `linear-gradient(to bottom, transparent, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.2)"}, transparent)` }}
-        />
+      <div className="space-y-10">
+        {seasons.map((season, idx) => {
+          const currentList = user.badges[season] || [];
+          const counts = countBadges(currentList);
+          const seasonPts = currentList.reduce(
+            (sum, b) => sum + (RARITY_POINTS[b.toUpperCase()] || 0),
+            0,
+          );
+          const arc = ARC_CONFIG[season] || {
+            name: season.replace("saison", "Saison "),
+            subtitle: "",
+            status: "archive" as const,
+          };
 
-        <div className="space-y-10">
-          {seasons.map((season, idx) => {
-            const currentList = user.badges[season] || [];
-            const counts = countBadges(currentList);
-            const seasonPts = currentList.reduce(
-              (sum, b) => sum + (RARITY_POINTS[b.toUpperCase()] || 0),
-              0,
-            );
-            const arc = ARC_CONFIG[season] || {
-              name: season.replace("saison", "Saison "),
-              subtitle: "",
-              status: "archive" as const,
-            };
-
-            return (
-              <div key={season}>
-                <ArcRow
-                  season={season}
-                  counts={counts}
-                  arc={arc}
-                  totalBadges={currentList.length}
-                  totalPts={seasonPts}
+          return (
+            <div key={season}>
+              <ArcRow
+                season={season}
+                counts={counts}
+                arc={arc}
+                totalBadges={currentList.length}
+                totalPts={seasonPts}
+              />
+              {idx < seasons.length - 1 && (
+                <div
+                  className="mx-auto w-[60%] max-w-[400px] h-px mt-10"
+                  style={{ background: `linear-gradient(to right, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.1)"}, transparent)` }}
                 />
-                {idx < seasons.length - 1 && (
-                  <div
-                    className="lg:hidden mx-auto w-[60%] max-w-[400px] h-px mt-10"
-                    style={{ background: `linear-gradient(to right, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.15)"}, transparent)` }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {seasons.length === 0 && tickets.length === 0 && (
