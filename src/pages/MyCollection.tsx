@@ -96,17 +96,15 @@ export default function MyCollection() {
   const handleDismiss = useCallback(() => {
     setCurrentIdx((prev) => {
       const nextIdx = prev + 1;
-      // If that was the last ticket, show the session summary
       if (nextIdx >= unscratchedTickets.length) {
-        // Small delay so the dismiss animation finishes first
+        // All tickets done — refresh data and show summary
         setTimeout(() => setShowSummary(true), 450);
+        queryClient.invalidateQueries({ queryKey: ["myTickets"] });
+        refetchTicket();
+        refresh();
       }
       return nextIdx;
     });
-    // Refresh data now that user dismissed the reveal
-    queryClient.invalidateQueries({ queryKey: ["myTickets"] });
-    refetchTicket();
-    refresh();
   }, [queryClient, refetchTicket, refresh, unscratchedTickets.length]);
 
   const handleRevealAll = useCallback(async () => {
