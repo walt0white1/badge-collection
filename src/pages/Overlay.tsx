@@ -193,120 +193,58 @@ export default function Overlay() {
             : "opacity-0 scale-95 translate-y-4"
         }`}
       >
-        <div
-          className={`relative rounded-2xl shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60 ${
-            current.is_vertical
-              ? "w-[300px]"
-              : "max-w-[700px] w-[90vw]"
-          }`}
-        >
-          {/* Video content */}
-          {current.video_type === "upload" ? (
-            <video
-              ref={videoRef}
-              src={getVideoUrl(current.video_path)}
-              onEnded={finishCurrent}
-              className="w-full max-h-[450px] object-contain bg-black rounded-t-2xl"
-              autoPlay
-              playsInline
-            />
-          ) : (
-            <div
-              className={`w-full bg-black overflow-hidden rounded-t-2xl ${
-                current.is_vertical ? "aspect-[9/16] max-h-[70vh]" : "aspect-video"
-              }`}
-            >
-              <div ref={ytContainerRef} className="w-full h-full" />
-            </div>
-          )}
-
-          {/* Message bar */}
-          {current.message && (
-            <div
-              className={`bg-gray-900/95 border-t border-gray-800/60 rounded-b-2xl ${
-                current.is_vertical ? "px-4 py-3" : "px-6 py-5"
-              }`}
-            >
-              <div
-                className={
-                  current.is_vertical
-                    ? "flex flex-col items-center text-center gap-2"
-                    : "flex items-center gap-5"
-                }
-              >
-                {current.avatar_url ? (
-                  <img
-                    src={current.avatar_url}
-                    alt={current.username}
-                    className={`shrink-0 rounded-full ring-2 ring-twitch/50 ${
-                      current.is_vertical ? "w-10 h-10" : "w-14 h-14"
-                    }`}
-                  />
-                ) : (
-                  <div
-                    className={`shrink-0 rounded-full bg-twitch/20 flex items-center justify-center text-twitch font-bold ${
-                      current.is_vertical
-                        ? "w-10 h-10 text-base"
-                        : "w-14 h-14 text-2xl"
-                    }`}
-                  >
-                    {current.username[0].toUpperCase()}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p
-                    className={`text-twitch font-bold ${
-                      current.is_vertical ? "text-sm" : "text-base"
-                    }`}
-                  >
-                    {current.username}
-                  </p>
-                  <p
-                    className={`text-white font-semibold leading-tight ${
-                      current.is_vertical ? "text-base" : "text-2xl"
-                    }`}
-                  >
-                    {current.message}
-                  </p>
-                </div>
+        <div className="flex flex-col items-center gap-3">
+          {/* User info - above video */}
+          <div className="flex items-center gap-3">
+            {current.avatar_url ? (
+              <img
+                src={current.avatar_url}
+                alt={current.username}
+                className="w-10 h-10 rounded-full ring-2 ring-twitch/50"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-twitch/20 flex items-center justify-center text-twitch text-base font-bold">
+                {current.username[0].toUpperCase()}
               </div>
-            </div>
-          )}
+            )}
+            <span className="text-twitch text-lg font-bold drop-shadow-lg">
+              {current.username}
+            </span>
+          </div>
 
-          {/* Username tag if no message */}
-          {!current.message && (
-            <div
-              className={`absolute bg-black/80 backdrop-blur-sm rounded-full flex items-center gap-3 ${
-                current.is_vertical
-                  ? "bottom-3 left-3 px-3 py-1.5"
-                  : "bottom-4 left-4 px-5 py-2.5"
-              }`}
-            >
-              {current.avatar_url ? (
-                <img
-                  src={current.avatar_url}
-                  alt={current.username}
-                  className={`rounded-full ring-2 ring-twitch/50 ${
-                    current.is_vertical ? "w-6 h-6" : "w-8 h-8"
-                  }`}
-                />
-              ) : (
-                <div
-                  className={`rounded-full bg-twitch/20 flex items-center justify-center text-twitch font-bold ${
-                    current.is_vertical ? "w-6 h-6 text-xs" : "w-8 h-8 text-sm"
-                  }`}
-                >
-                  {current.username[0].toUpperCase()}
-                </div>
-              )}
-              <span
-                className={`text-twitch font-bold ${
-                  current.is_vertical ? "text-sm" : "text-lg"
+          {/* Video */}
+          <div
+            className={`rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ${
+              current.is_vertical
+                ? "w-[300px]"
+                : "max-w-[700px] w-[90vw]"
+            }`}
+          >
+            {current.video_type === "upload" ? (
+              <video
+                ref={videoRef}
+                src={getVideoUrl(current.video_path)}
+                onEnded={finishCurrent}
+                className="w-full max-h-[450px] object-contain bg-black"
+                autoPlay
+                playsInline
+              />
+            ) : (
+              <div
+                className={`w-full bg-black ${
+                  current.is_vertical ? "aspect-[9/16]" : "aspect-video"
                 }`}
               >
-                {current.username}
-              </span>
-            </div>
+                <div ref={ytContainerRef} className="w-full h-full" />
+              </div>
+            )}
+          </div>
+
+          {/* Message - below video */}
+          {current.message && (
+            <p className="text-white text-2xl font-semibold text-center max-w-[90vw] drop-shadow-lg">
+              {current.message}
+            </p>
           )}
         </div>
       </div>
