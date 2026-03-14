@@ -35,8 +35,8 @@ export default function Navbar() {
 
         {/* Logo — left */}
         <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-          <span className="text-white/70 group-hover:text-[#9146FF] transition-colors duration-300">{TWITCH_ICON}</span>
-          <span className="font-bold text-[15px] tracking-tight text-white">
+          <span className="nav-logo-icon group-hover:text-[#9146FF] transition-colors duration-300">{TWITCH_ICON}</span>
+          <span className="font-bold text-[15px] tracking-tight nav-logo-text">
             el_matte0
           </span>
         </Link>

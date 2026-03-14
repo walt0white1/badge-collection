@@ -380,6 +380,37 @@ body.overlay-mode {
   .nav-pill-list a[data-active] span {
     background: rgba(255, 255, 255, 0.08);
   }
+  [data-theme="light"] .nav-pill-list a[data-active] span {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ── Nav logo ── */
+.nav-logo-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+.nav-logo-text {
+  color: #ffffff;
+}
+[data-theme="light"] .nav-logo-icon {
+  color: rgba(0, 0, 0, 0.5);
+}
+[data-theme="light"] .nav-logo-text {
+  color: #1d1d1f;
+}
+
+/* ── Light mode nav overrides ── */
+[data-theme="light"] .nav-pill-list a:is(:hover, :focus-visible):not([data-active]) span {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Pill (::after) uses mix-blend-mode: difference — works on light too (produces dark pill).
+   But bump text-muted so nav labels are readable */
+[data-theme="light"] .nav-pill-list a {
+  color: rgba(0, 0, 0, 0.5);
+}
+[data-theme="light"] .nav-pill-list a[data-active] {
+  color: var(--text-primary);
 }
 
 /* ══════════════════════════════════════════════
