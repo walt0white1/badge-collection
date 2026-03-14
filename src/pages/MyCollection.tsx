@@ -63,6 +63,10 @@ export default function MyCollection() {
     for (const b of list) allRarityCounts[b.toUpperCase()] = (allRarityCounts[b.toUpperCase()] || 0) + 1;
   }
 
+  // Best rarity owned
+  const topRarity = [...RARITY_ORDER].reverse().find((r) => allRarityCounts[r] > 0) || null;
+  const topRarityColor = topRarity ? RARITY_COLORS[topRarity] : null;
+
   const unscratchedTickets = tickets.filter((t) => !t.scratched);
   const scratchedCount = tickets.filter((t) => t.scratched).length;
   const remaining = unscratchedTickets.length - currentIdx;
@@ -138,17 +142,23 @@ export default function MyCollection() {
 
       {/* ── Header ── */}
       <div className="relative text-center pt-4 pb-10 sm:pt-8 sm:pb-14">
-        {/* Ambient radial glow */}
-        <div
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{ background: `radial-gradient(ellipse 60% 55% at 50% 20%, rgba(145,70,255,${isDark ? "0.08" : "0.06"}), transparent)` }}
-        />
+        {/* Layered ambient glow */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute left-1/2 -translate-x-1/2 top-0 w-[500px] h-[300px] rounded-full blur-[100px] opacity-[0.07]"
+            style={{ background: topRarityColor || "#9146FF" }}
+          />
+          <div
+            className="absolute left-1/2 -translate-x-1/2 top-8 w-[200px] h-[200px] rounded-full blur-[60px] opacity-[0.12]"
+            style={{ background: "#9146FF" }}
+          />
+        </div>
 
         {/* Avatar */}
         <div className="relative inline-block mb-5">
           <div
-            className="absolute inset-0 rounded-full blur-2xl"
-            style={{ background: "rgba(145,70,255,0.18)", transform: "scale(1.8)" }}
+            className="absolute inset-0 rounded-full blur-3xl opacity-20"
+            style={{ background: "#9146FF", transform: "scale(2.2)" }}
           />
           <img
             src={user.twitch_profile_image}
@@ -156,8 +166,8 @@ export default function MyCollection() {
             className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full z-10"
             style={{
               boxShadow: isDark
-                ? "0 0 0 3px rgba(145,70,255,0.2), 0 12px 40px rgba(0,0,0,0.5)"
-                : "0 0 0 3px rgba(145,70,255,0.15), 0 12px 40px rgba(0,0,0,0.12)",
+                ? "0 0 0 2px rgba(145,70,255,0.3), 0 0 40px rgba(145,70,255,0.15), 0 16px 48px rgba(0,0,0,0.5)"
+                : "0 0 0 2px rgba(145,70,255,0.2), 0 0 40px rgba(145,70,255,0.08), 0 16px 48px rgba(0,0,0,0.1)",
             }}
           />
         </div>
@@ -170,31 +180,34 @@ export default function MyCollection() {
           {user.twitch_display_name}
         </h1>
 
-        {/* Stats */}
-        <div className="flex items-center justify-center gap-6 sm:gap-8 mt-4">
-          <div className="text-center">
-            <p className="text-2xl sm:text-3xl font-black tabular-nums" style={{ color: "#9146FF" }}>
-              {user.total_pts}
-            </p>
-            <p className="text-[11px] sm:text-xs mt-0.5 font-medium" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}>
-              points
-            </p>
-          </div>
-          <div
-            className="w-px h-8 sm:h-10"
-            style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}
-          />
-          <div className="text-center">
-            <p
-              className="text-2xl sm:text-3xl font-black tabular-nums"
-              style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
-            >
-              {totalBadges}
-            </p>
-            <p className="text-[11px] sm:text-xs mt-0.5 font-medium" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}>
-              badges
-            </p>
-          </div>
+        {/* Stats row */}
+        <div className="flex items-center justify-center gap-5 sm:gap-7 mt-5">
+          {[
+            { value: user.total_pts, label: "points", color: "#9146FF" },
+            { value: totalBadges, label: "badges", color: isDark ? "#f5f5f7" : "#1d1d1f" },
+            { value: seasons.length, label: seasons.length > 1 ? "saisons" : "saison", color: isDark ? "#f5f5f7" : "#1d1d1f" },
+            ...(topRarity ? [{ value: topRarity.charAt(0) + topRarity.slice(1).toLowerCase(), label: "meilleure", color: topRarityColor! }] : []),
+          ].map((stat, i, arr) => (
+            <div key={stat.label} className="flex items-center gap-5 sm:gap-7">
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-black tabular-nums leading-tight" style={{ color: stat.color }}>
+                  {stat.value}
+                </p>
+                <p
+                  className="text-[10px] sm:text-[11px] mt-0.5 font-medium uppercase tracking-wider"
+                  style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+                >
+                  {stat.label}
+                </p>
+              </div>
+              {i < arr.length - 1 && (
+                <div
+                  className="w-px h-7 sm:h-8"
+                  style={{ background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)" }}
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Action buttons */}
