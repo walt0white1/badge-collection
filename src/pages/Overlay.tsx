@@ -222,24 +222,50 @@ export default function Overlay() {
 
           {/* Message bar */}
           {current.message && (
-            <div className="px-6 py-5 bg-gray-900/95 border-t border-gray-800/60">
-              <div className="flex items-center gap-5">
+            <div
+              className={`bg-gray-900/95 border-t border-gray-800/60 ${
+                current.is_vertical ? "px-4 py-3" : "px-6 py-5"
+              }`}
+            >
+              <div
+                className={
+                  current.is_vertical
+                    ? "flex flex-col items-center text-center gap-2"
+                    : "flex items-center gap-5"
+                }
+              >
                 {current.avatar_url ? (
                   <img
                     src={current.avatar_url}
                     alt={current.username}
-                    className="shrink-0 w-14 h-14 rounded-full ring-2 ring-twitch/50"
+                    className={`shrink-0 rounded-full ring-2 ring-twitch/50 ${
+                      current.is_vertical ? "w-10 h-10" : "w-14 h-14"
+                    }`}
                   />
                 ) : (
-                  <div className="shrink-0 w-14 h-14 rounded-full bg-twitch/20 flex items-center justify-center text-twitch text-2xl font-bold">
+                  <div
+                    className={`shrink-0 rounded-full bg-twitch/20 flex items-center justify-center text-twitch font-bold ${
+                      current.is_vertical
+                        ? "w-10 h-10 text-base"
+                        : "w-14 h-14 text-2xl"
+                    }`}
+                  >
                     {current.username[0].toUpperCase()}
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-twitch text-base font-bold">
+                  <p
+                    className={`text-twitch font-bold ${
+                      current.is_vertical ? "text-sm" : "text-base"
+                    }`}
+                  >
                     {current.username}
                   </p>
-                  <p className="text-white text-2xl font-semibold leading-tight">
+                  <p
+                    className={`text-white font-semibold leading-tight ${
+                      current.is_vertical ? "text-base" : "text-2xl"
+                    }`}
+                  >
                     {current.message}
                   </p>
                 </div>
@@ -249,19 +275,35 @@ export default function Overlay() {
 
           {/* Username tag if no message */}
           {!current.message && (
-            <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm px-5 py-2.5 rounded-full flex items-center gap-3">
+            <div
+              className={`absolute bg-black/80 backdrop-blur-sm rounded-full flex items-center gap-3 ${
+                current.is_vertical
+                  ? "bottom-3 left-3 px-3 py-1.5"
+                  : "bottom-4 left-4 px-5 py-2.5"
+              }`}
+            >
               {current.avatar_url ? (
                 <img
                   src={current.avatar_url}
                   alt={current.username}
-                  className="w-8 h-8 rounded-full ring-2 ring-twitch/50"
+                  className={`rounded-full ring-2 ring-twitch/50 ${
+                    current.is_vertical ? "w-6 h-6" : "w-8 h-8"
+                  }`}
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-twitch/20 flex items-center justify-center text-twitch text-sm font-bold">
+                <div
+                  className={`rounded-full bg-twitch/20 flex items-center justify-center text-twitch font-bold ${
+                    current.is_vertical ? "w-6 h-6 text-xs" : "w-8 h-8 text-sm"
+                  }`}
+                >
                   {current.username[0].toUpperCase()}
                 </div>
               )}
-              <span className="text-twitch text-lg font-bold">
+              <span
+                className={`text-twitch font-bold ${
+                  current.is_vertical ? "text-sm" : "text-lg"
+                }`}
+              >
                 {current.username}
               </span>
             </div>
