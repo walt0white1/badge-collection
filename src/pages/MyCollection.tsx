@@ -359,36 +359,14 @@ export default function MyCollection() {
 
           {claimError && <p className="text-sm text-red-400">{claimError}</p>}
 
-          {/* Session results — simple dot indicators */}
-          {sessionResults.length > 0 && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                {sessionResults.map((r, i) => (
-                  <div
-                    key={i}
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                      background: RARITY_COLORS[r.rarity],
-                      boxShadow: `0 0 6px ${RARITY_COLORS[r.rarity]}50`,
-                    }}
-                  />
-                ))}
-              </div>
-              <span
-                className="text-[11px] tabular-nums"
-                style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)" }}
-              >
-                {sessionResults.length} revele{sessionResults.length > 1 ? "s" : ""}
-              </span>
-              {remaining === 0 && (
-                <button
-                  onClick={() => setShowSummary(true)}
-                  className="text-xs font-medium text-[#9146FF] hover:underline"
-                >
-                  Voir le recap
-                </button>
-              )}
-            </div>
+          {/* Show recap link when all done */}
+          {sessionResults.length > 0 && remaining === 0 && (
+            <button
+              onClick={() => setShowSummary(true)}
+              className="text-xs font-medium text-[#9146FF] hover:underline"
+            >
+              Voir le recap
+            </button>
           )}
         </div>
       ) : scratchedCount > 0 ? (
