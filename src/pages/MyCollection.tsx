@@ -359,14 +359,38 @@ export default function MyCollection() {
 
           {claimError && <p className="text-sm text-red-400">{claimError}</p>}
 
-          {/* Show recap link when all done */}
-          {sessionResults.length > 0 && remaining === 0 && (
-            <button
-              onClick={() => setShowSummary(true)}
-              className="text-xs font-medium text-[#9146FF] hover:underline"
-            >
-              Voir le recap
-            </button>
+          {/* Session results — overlapping badge avatars */}
+          {sessionResults.length > 0 && (
+            <div className="flex flex-col items-center gap-3">
+              <div
+                className="flex items-center justify-center cursor-pointer group"
+                onClick={remaining === 0 ? () => setShowSummary(true) : undefined}
+              >
+                {sessionResults.map((r, i) => (
+                  <img
+                    key={i}
+                    src={getBadgeImage(r.rarity, r.season)}
+                    alt=""
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 transition-transform group-hover:translate-y-[-2px]"
+                    style={{
+                      marginLeft: i > 0 ? "-8px" : 0,
+                      zIndex: sessionResults.length - i,
+                      border: `2px solid ${RARITY_COLORS[r.rarity]}`,
+                      boxShadow: `0 0 8px ${RARITY_COLORS[r.rarity]}30`,
+                      background: isDark ? "#0a0a0d" : "#f5f5f7",
+                    }}
+                  />
+                ))}
+              </div>
+              {remaining === 0 && (
+                <button
+                  onClick={() => setShowSummary(true)}
+                  className="text-xs font-medium text-[#9146FF] hover:underline"
+                >
+                  Voir le recap
+                </button>
+              )}
+            </div>
           )}
         </div>
       ) : scratchedCount > 0 ? (
