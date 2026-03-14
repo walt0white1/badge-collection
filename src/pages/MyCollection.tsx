@@ -412,14 +412,15 @@ export default function MyCollection() {
           return acc;
         }, {});
         // Sort by rarity tier (highest first)
+        type Rarity = typeof RARITY_ORDER[number];
         const sortedGroups = Object.entries(grouped).sort((a, b) => {
-          const aIdx = RARITY_ORDER.indexOf(a[0].split("-")[0]);
-          const bIdx = RARITY_ORDER.indexOf(b[0].split("-")[0]);
+          const aIdx = RARITY_ORDER.indexOf(a[0].split("-")[0] as Rarity);
+          const bIdx = RARITY_ORDER.indexOf(b[0].split("-")[0] as Rarity);
           return bIdx - aIdx;
         });
         // Best pull
         const bestPull = [...sessionResults].sort((a, b) =>
-          RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity)
+          RARITY_ORDER.indexOf(b.rarity as Rarity) - RARITY_ORDER.indexOf(a.rarity as Rarity)
         )[0];
 
         return (
@@ -471,7 +472,7 @@ export default function MyCollection() {
                 {/* Badge list — grouped */}
                 <div className="space-y-2">
                   {sortedGroups.map(([key, { count, season: s }], i) => {
-                    const rarity = key.split("-")[0];
+                    const rarity = key.split("-")[0] as typeof RARITY_ORDER[number];
                     const color = RARITY_COLORS[rarity];
                     const pts = RARITY_POINTS[rarity];
                     return (
