@@ -63,7 +63,7 @@ export default function ArcRow({
         {/* Vertical timeline bar (left side) */}
         <div
           className="absolute left-5 sm:left-7 top-0 bottom-0 w-[3px] rounded-full"
-          style={{ background: `linear-gradient(to bottom, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.12)"}, transparent)` }}
+          style={{ background: `linear-gradient(to bottom, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.25)"}, transparent)` }}
         />
 
         <div className="flex flex-col gap-3 sm:gap-4">
