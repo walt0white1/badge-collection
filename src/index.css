@@ -7,6 +7,14 @@ body {
   background: #050508;
 }
 
+body.overlay-mode {
+  background: transparent !important;
+}
+
+body.overlay-mode::before {
+  display: none !important;
+}
+
 body::before {
   content: "";
   position: fixed;

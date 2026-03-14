@@ -10,6 +10,12 @@ export default function Overlay() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const processing = useRef(false);
 
+  // Set body to transparent mode for OBS
+  useEffect(() => {
+    document.body.classList.add("overlay-mode");
+    return () => document.body.classList.remove("overlay-mode");
+  }, []);
+
   // Subscribe to new submissions via Supabase Realtime
   useEffect(() => {
     // Load any unplayed submissions on mount
