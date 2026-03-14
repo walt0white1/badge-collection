@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flip clock animations */
+@keyframes flipTop {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-90deg); }
+}
+@keyframes flipBottom {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+.flip-top-anim {
+  animation: flipTop 0.3s ease-in forwards;
+}
+.flip-bottom-anim {
+  animation: flipBottom 0.3s ease-out forwards;
+  animation-delay: 0.15s;
+  transform: rotateX(90deg);
+}
+
 /* ══════════════════════════════════════════════
    THEME — CSS Custom Properties (dark / light)
    ══════════════════════════════════════════════ */

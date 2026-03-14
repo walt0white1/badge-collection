@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalStats } from "../api";
@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
 import { RARITY_COLORS, RARITY_POINTS, RARITY_ORDER } from "../types";
 import { getBadgeImage } from "../badgeImages";
+import CountdownTimer from "../components/CountdownTimer";
 
 // COMMON (#d9d9d9) is invisible on white bg — use a darker shade in light mode
 const RARITY_COLORS_LIGHT: Record<string, string> = {
@@ -159,6 +160,7 @@ export default function Home() {
   const { isDark } = useTheme();
   const colors = isDark ? RARITY_COLORS : RARITY_COLORS_LIGHT;
   const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: fetchGlobalStats });
+  const season3Date = useMemo(() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; }, []);
 
   return (
     <div className="showcase-page">
@@ -284,6 +286,45 @@ export default function Home() {
         </div>
 
         <div className="mx-auto w-[80%] max-w-[600px] h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      </section>
+
+      {/* ═══ COUNTDOWN — NEXT COLLECTION ═══ */}
+      <section className="relative z-20 overflow-hidden">
+        <div className="relative py-14 sm:py-24 px-6 text-center">
+          {/* Ambient glow */}
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] rounded-full blur-[120px] pointer-events-none"
+            style={{ background: "#9146FF", opacity: isDark ? 0.06 : 0.04 }}
+          />
+
+          <p
+            className="text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase mb-3 sm:mb-5"
+            style={{ color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}
+          >
+            Prochaine collection
+          </p>
+          <h2
+            className="text-3xl sm:text-5xl font-black tracking-tight mb-2 sm:mb-3"
+            style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}
+          >
+            Saison <span className="text-[#9146FF]">3</span>
+          </h2>
+          <p
+            className="text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-8 sm:mb-12"
+            style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)" }}
+          >
+            De nouveaux badges arrivent. Prepare-toi.
+          </p>
+
+          <div className="flex justify-center">
+            <CountdownTimer target={season3Date} />
+          </div>
+        </div>
+
+        <div
+          className="mx-auto w-[80%] max-w-[600px] h-px"
+          style={{ background: `linear-gradient(to right, transparent, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}, transparent)` }}
+        />
       </section>
 
       {/* ═══ CTA ═══ */}
