@@ -179,6 +179,7 @@ export const submitYoutubeVideo = async (
   message: string,
   startSeconds: number,
   endSeconds: number,
+  isVertical: boolean = false,
 ): Promise<void> => {
   const {
     data: { user: authUser },
@@ -204,6 +205,7 @@ export const submitYoutubeVideo = async (
     youtube_id: youtubeId,
     start_seconds: startSeconds,
     end_seconds: endSeconds,
+    is_vertical: isVertical,
   });
   if (error) throw new Error(error.message);
 };

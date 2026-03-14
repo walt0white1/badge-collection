@@ -90,6 +90,7 @@ export interface LiveSubmission {
   youtube_id: string | null;
   start_seconds: number;
   end_seconds: number;
+  is_vertical: boolean;
 }
 
 export const RARITY_COLORS: Record<string, string> = {

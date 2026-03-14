@@ -193,7 +193,13 @@ export default function Overlay() {
             : "opacity-0 scale-95 translate-y-4"
         }`}
       >
-        <div className="relative max-w-[700px] w-[90vw] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60">
+        <div
+          className={`relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-gray-950 border border-gray-800/60 ${
+            current.is_vertical
+              ? "w-[280px] max-h-[90vh]"
+              : "max-w-[700px] w-[90vw]"
+          }`}
+        >
           {/* Video content */}
           {current.video_type === "upload" ? (
             <video
@@ -205,7 +211,11 @@ export default function Overlay() {
               playsInline
             />
           ) : (
-            <div className="w-full aspect-video bg-black">
+            <div
+              className={`w-full bg-black ${
+                current.is_vertical ? "aspect-[9/16]" : "aspect-video"
+              }`}
+            >
               <div ref={ytContainerRef} className="w-full h-full" />
             </div>
           )}

@@ -1,8 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { submitLiveVideo, submitYoutubeVideo, getVideoUrl } from "../api";
 import { supabase } from "../lib/supabase";
 import type { LiveSubmission } from "../types";
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: (() => void) | undefined;
+  }
+}
 
 function extractYoutubeId(url: string): string | null {
   const patterns = [
@@ -14,6 +21,10 @@ function extractYoutubeId(url: string): string | null {
     if (m) return m[1];
   }
   return null;
+}
+
+function isYoutubeShort(url: string): boolean {
+  return /youtube\.com\/shorts\//.test(url);
 }
 
 function formatTime(seconds: number): string {
@@ -35,8 +46,14 @@ export default function LiveChat() {
   // YouTube state
   const [ytUrl, setYtUrl] = useState("");
   const [ytId, setYtId] = useState<string | null>(null);
-  const [ytStart, setYtStart] = useState(0);
-  const [ytEnd, setYtEnd] = useState(15);
+  const [ytVertical, setYtVertical] = useState(false);
+  const [ytStart, setYtStart] = useState<number | null>(null);
+  const [ytEnd, setYtEnd] = useState<number | null>(null);
+  const [ytDuration, setYtDuration] = useState(0);
+  const [ytCurrentTime, setYtCurrentTime] = useState(0);
+  const ytPlayerRef = useRef<any>(null);
+  const ytContainerRef = useRef<HTMLDivElement>(null);
+  const ytTimerRef = useRef<ReturnType<typeof setInterval>>();
 
   // Shared state
   const [message, setMessage] = useState("");
@@ -47,6 +64,15 @@ export default function LiveChat() {
   const [recentSubmissions, setRecentSubmissions] = useState<LiveSubmission[]>(
     [],
   );
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (document.getElementById("yt-iframe-api")) return;
+    const tag = document.createElement("script");
+    tag.id = "yt-iframe-api";
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  }, []);
 
   // Load recent submissions
   useEffect(() => {
@@ -62,20 +88,111 @@ export default function LiveChat() {
       });
   }, [isAuthenticated, user, sent]);
 
+  // Initialize YouTube player when ID changes
+  const initYtPlayer = useCallback(() => {
+    if (!ytId || !ytContainerRef.current) return;
+    if (!window.YT?.Player) {
+      setTimeout(initYtPlayer, 300);
+      return;
+    }
+
+    // Destroy previous
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.destroy();
+      } catch {}
+    }
+    clearInterval(ytTimerRef.current);
+
+    ytPlayerRef.current = new window.YT.Player(ytContainerRef.current, {
+      videoId: ytId,
+      playerVars: {
+        controls: 1,
+        modestbranding: 1,
+        rel: 0,
+      },
+      events: {
+        onReady: (e: any) => {
+          const dur = e.target.getDuration() || 0;
+          setYtDuration(dur);
+          // Track current time
+          ytTimerRef.current = setInterval(() => {
+            if (ytPlayerRef.current?.getCurrentTime) {
+              setYtCurrentTime(Math.floor(ytPlayerRef.current.getCurrentTime()));
+            }
+          }, 250);
+        },
+      },
+    });
+  }, [ytId]);
+
   // Parse YouTube URL
   useEffect(() => {
     if (!ytUrl) {
       setYtId(null);
+      setYtVertical(false);
       return;
     }
     const id = extractYoutubeId(ytUrl);
-    setYtId(id);
-    if (id) {
-      setYtStart(0);
-      setYtEnd(15);
+    if (id !== ytId) {
+      setYtId(id);
+      setYtVertical(isYoutubeShort(ytUrl));
+      setYtStart(null);
+      setYtEnd(null);
       setError("");
     }
   }, [ytUrl]);
+
+  // Init player when ytId changes
+  useEffect(() => {
+    if (ytId) {
+      // Small delay for DOM to be ready
+      setTimeout(initYtPlayer, 100);
+    }
+    return () => {
+      clearInterval(ytTimerRef.current);
+    };
+  }, [ytId, initYtPlayer]);
+
+  const markStart = () => {
+    const t = ytCurrentTime;
+    setYtStart(t);
+    // Auto-set end if not set or if end is before new start
+    if (ytEnd === null || ytEnd <= t) {
+      setYtEnd(Math.min(t + 10, ytDuration));
+    }
+    // Clamp end to max 15s from start
+    if (ytEnd !== null && ytEnd - t > 15) {
+      setYtEnd(t + 15);
+    }
+  };
+
+  const markEnd = () => {
+    const t = ytCurrentTime;
+    if (ytStart === null) {
+      setYtStart(Math.max(0, t - 10));
+    }
+    if (ytStart !== null && t - ytStart > 15) {
+      setError("15 secondes maximum !");
+      return;
+    }
+    if (ytStart !== null && t <= ytStart) {
+      setError("La fin doit etre apres le debut");
+      return;
+    }
+    setYtEnd(t);
+    setError("");
+  };
+
+  const previewSelection = () => {
+    if (ytPlayerRef.current && ytStart !== null) {
+      ytPlayerRef.current.seekTo(ytStart, true);
+      ytPlayerRef.current.playVideo();
+    }
+  };
+
+  const selectedDuration =
+    ytStart !== null && ytEnd !== null ? ytEnd - ytStart : 0;
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -122,17 +239,19 @@ export default function LiveChat() {
           setSending(false);
           return;
         }
-        if (ytEnd - ytStart < 1) {
-          setError("La durée doit être d'au moins 1 seconde");
+        const start = ytStart ?? 0;
+        const end = ytEnd ?? Math.min(15, ytDuration);
+        if (end - start < 1) {
+          setError("Selectionne au moins 1 seconde");
           setSending(false);
           return;
         }
-        if (ytEnd - ytStart > 15) {
+        if (end - start > 15) {
           setError("15 secondes maximum");
           setSending(false);
           return;
         }
-        await submitYoutubeVideo(ytId, message, ytStart, ytEnd);
+        await submitYoutubeVideo(ytId, message, start, end, ytVertical);
       }
       setSent(true);
       setFile(null);
@@ -140,6 +259,8 @@ export default function LiveChat() {
       setPreview("");
       setYtUrl("");
       setYtId(null);
+      setYtStart(null);
+      setYtEnd(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'envoi");
@@ -193,7 +314,7 @@ export default function LiveChat() {
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
-          🔗 Lien YouTube
+          Lien YouTube
         </button>
         <button
           onClick={() => {
@@ -206,17 +327,15 @@ export default function LiveChat() {
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
-          📁 Upload vidéo
+          Upload video
         </button>
       </div>
 
-      {/* Upload form */}
       <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 space-y-5">
         {mode === "upload" ? (
-          /* File upload */
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Ta vidéo (15 sec max)
+              Ta video (15 sec max)
             </label>
             {!preview ? (
               <button
@@ -227,7 +346,7 @@ export default function LiveChat() {
                   🎥
                 </div>
                 <p className="text-gray-400 text-sm">
-                  Clique pour choisir une vidéo
+                  Clique pour choisir une video
                 </p>
                 <p className="text-gray-600 text-xs mt-1">
                   MP4, WebM ou MOV — 50 Mo max
@@ -264,7 +383,6 @@ export default function LiveChat() {
             />
           </div>
         ) : (
-          /* YouTube link */
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -279,81 +397,113 @@ export default function LiveChat() {
               />
             </div>
 
-            {/* YouTube preview */}
             {ytId && (
               <div className="space-y-4">
-                <div className="rounded-xl overflow-hidden bg-black">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${ytId}?start=${ytStart}&end=${ytEnd}`}
-                    className="w-full aspect-video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
+                {/* YouTube player */}
+                <div
+                  className={`rounded-xl overflow-hidden bg-black mx-auto ${
+                    ytVertical ? "max-w-[280px]" : ""
+                  }`}
+                >
+                  <div
+                    ref={ytContainerRef}
+                    className={ytVertical ? "aspect-[9/16]" : "aspect-video"}
                   />
                 </div>
 
-                {/* Time selector */}
-                <div className="bg-gray-800/30 rounded-xl p-4 space-y-3">
+                {/* Mark start/end controls */}
+                <div className="bg-gray-800/30 rounded-xl p-4 space-y-4">
                   <p className="text-sm font-medium text-gray-300">
-                    Choisis l'extrait (15 sec max)
+                    Choisis l'extrait a envoyer (15 sec max)
                   </p>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">
-                        Debut (secondes)
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={0}
-                          value={ytStart}
-                          onChange={(e) => {
-                            const v = Math.max(0, Number(e.target.value));
-                            setYtStart(v);
-                            if (ytEnd <= v) setYtEnd(v + 1);
-                            if (ytEnd - v > 15) setYtEnd(v + 15);
-                          }}
-                          className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500/50"
-                        />
-                        <span className="text-gray-500 text-xs whitespace-nowrap">
-                          {formatTime(ytStart)}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">
-                        Fin (secondes)
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={ytStart + 1}
-                          value={ytEnd}
-                          onChange={(e) => {
-                            const v = Math.max(
-                              ytStart + 1,
-                              Number(e.target.value),
-                            );
-                            if (v - ytStart > 15) return;
-                            setYtEnd(v);
-                          }}
-                          className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500/50"
-                        />
-                        <span className="text-gray-500 text-xs whitespace-nowrap">
-                          {formatTime(ytEnd)}
-                        </span>
-                      </div>
-                    </div>
+                  {/* Current time indicator */}
+                  <div className="text-center">
+                    <span className="text-gray-500 text-xs">Position actuelle</span>
+                    <p className="text-white text-lg font-mono font-bold">
+                      {formatTime(ytCurrentTime)}
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500">
-                      Duree : {ytEnd - ytStart}s
-                    </span>
-                    {ytEnd - ytStart > 15 && (
-                      <span className="text-red-400">15 sec max !</span>
-                    )}
+                  {/* Mark buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={markStart}
+                      className="py-3 rounded-xl text-sm font-semibold transition-colors bg-green-500/15 text-green-400 hover:bg-green-500/25 border border-green-500/20"
+                    >
+                      Debut ici
+                      {ytStart !== null && (
+                        <span className="block text-xs font-mono mt-0.5 opacity-70">
+                          {formatTime(ytStart)}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={markEnd}
+                      className="py-3 rounded-xl text-sm font-semibold transition-colors bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/20"
+                    >
+                      Fin ici
+                      {ytEnd !== null && (
+                        <span className="block text-xs font-mono mt-0.5 opacity-70">
+                          {formatTime(ytEnd)}
+                        </span>
+                      )}
+                    </button>
                   </div>
+
+                  {/* Selection visual bar */}
+                  {ytDuration > 0 && (
+                    <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden">
+                      {/* Current position */}
+                      <div
+                        className="absolute top-0 bottom-0 w-0.5 bg-white z-10"
+                        style={{
+                          left: `${(ytCurrentTime / ytDuration) * 100}%`,
+                        }}
+                      />
+                      {/* Selected range */}
+                      {ytStart !== null && ytEnd !== null && (
+                        <div
+                          className="absolute top-0 bottom-0 bg-twitch/40 rounded-full"
+                          style={{
+                            left: `${(ytStart / ytDuration) * 100}%`,
+                            width: `${((ytEnd - ytStart) / ytDuration) * 100}%`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Selection info + preview */}
+                  {ytStart !== null && ytEnd !== null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-sm">
+                        {formatTime(ytStart)} → {formatTime(ytEnd)}{" "}
+                        <span
+                          className={`font-bold ${
+                            selectedDuration > 15
+                              ? "text-red-400"
+                              : "text-twitch"
+                          }`}
+                        >
+                          ({Math.round(selectedDuration)}s)
+                        </span>
+                      </span>
+                      <button
+                        onClick={previewSelection}
+                        className="px-4 py-1.5 bg-twitch/15 text-twitch text-sm font-medium rounded-lg hover:bg-twitch/25 transition-colors"
+                      >
+                        Previsualiser
+                      </button>
+                    </div>
+                  )}
+
+                  {ytStart === null && ytEnd === null && (
+                    <p className="text-gray-500 text-xs text-center">
+                      Joue la video, puis clique "Debut ici" et "Fin ici" pour
+                      choisir l'extrait
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -384,21 +534,18 @@ export default function LiveChat() {
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 text-sm">
             {error}
           </div>
         )}
 
-        {/* Success */}
         {sent && (
           <div className="bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl px-4 py-3 text-sm">
-            Vidéo envoyée ! Elle va s'afficher sur le stream.
+            Video envoyee ! Elle va s'afficher sur le stream.
           </div>
         )}
 
-        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={
@@ -460,7 +607,7 @@ export default function LiveChat() {
                       : "bg-yellow-500/10 text-yellow-400"
                   }`}
                 >
-                  {s.played ? "Diffusé" : "En attente"}
+                  {s.played ? "Diffuse" : "En attente"}
                 </div>
               </div>
             ))}
