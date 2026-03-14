@@ -24,42 +24,7 @@ declare global {
   }
 }
 
-function TiktokOverlay({ metaJson }: { metaJson: string }) {
-  let thumb = "";
-  let title = "";
-  let author = "";
-
-  try {
-    const meta = JSON.parse(metaJson);
-    thumb = meta.thumbnail || "";
-    title = meta.title || "";
-    author = meta.author || "";
-  } catch {}
-
-  return (
-    <div className="w-full h-full relative">
-      {thumb ? (
-        <img src={thumb} alt="" className="w-full h-full object-cover" />
-      ) : (
-        <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="w-16 h-16 fill-cyan-400">
-            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.81a8.23 8.23 0 004.76 1.5V6.88a4.85 4.85 0 01-1-.19z"/>
-          </svg>
-        </div>
-      )}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-        {author && <p className="text-white font-bold text-lg">@{author}</p>}
-        {title && <p className="text-gray-200 text-sm line-clamp-2">{title}</p>}
-        <div className="flex items-center gap-1.5 mt-2">
-          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-cyan-400">
-            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.81a8.23 8.23 0 004.76 1.5V6.88a4.85 4.85 0 01-1-.19z"/>
-          </svg>
-          <span className="text-cyan-400 text-xs font-medium">TikTok</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+// No component needed - TikTok uses iframe directly in the render
 
 export default function Overlay() {
   const [queue, setQueue] = useState<SubmissionWithAvatar[]>([]);
@@ -275,8 +240,13 @@ export default function Overlay() {
                 playsInline
               />
             ) : current.video_type === "tiktok" ? (
-              <div className="w-full bg-black aspect-[9/16] relative flex items-center justify-center">
-                <TiktokOverlay metaJson={current.video_path || "{}"} />
+              <div className="w-full bg-black aspect-[9/16]">
+                <iframe
+                  src={`https://www.tiktok.com/player/v1/${current.youtube_id}?&music_info=0&description=0&rel=0&autoplay=1&loop=0`}
+                  className="w-full h-full border-0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
               </div>
             ) : (
               <div
